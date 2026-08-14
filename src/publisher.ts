@@ -54,6 +54,7 @@ export interface PublishResult {
   version: number;
   gallery: string;
   hash: string;
+  url?: string;
 }
 
 export interface Publisher {

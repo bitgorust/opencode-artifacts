@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { renderArtifact, renderRawHtml } from "./render.ts";
 import { FilePublisher, slugify } from "./publisher.ts";
+import { GitHubPagesPublisher } from "./github-pages.ts";
 import { formatFindings, scanSensitive } from "./guard.ts";
 import { serveArtifacts } from "./serve.ts";
 import { openFile } from "./open.ts";
@@ -15,7 +16,8 @@ function usage(): never {
   opencode-artifacts serve [--dir <artifacts-dir>] [--port <n>]
   opencode-artifacts restore <slug> --version <n> [--dir <artifacts-dir>]
   opencode-artifacts latest [--dir <artifacts-dir>] [--open]
-  opencode-artifacts state <slug> [--dir <artifacts-dir>]`);
+  opencode-artifacts state <slug> [--dir <artifacts-dir>]
+  opencode-artifacts deploy --repo <owner/name> [--dir <artifacts-dir>] [--branch <name>]`);
   process.exit(2);
 }
 
@@ -122,8 +124,7 @@ async function latestCommand(args: string[]): Promise<void> {
   console.log(path);
 }
 
-async function stateCommand(args: string[]): Promise<void> {
-  const [slug] = positional(args, ["--dir"]);
+async function stateCommand(args: string[]): Promise<void> {  const [slug] = positional(args, ["--dir"]);
   const dir = optionValue(args, "--dir") ?? DEFAULT_DIR;
   if (!slug) usage();
   try {
@@ -132,6 +133,24 @@ async function stateCommand(args: string[]): Promise<void> {
     console.error(`no saved state for artifact '${slug}'`);
     process.exit(1);
   }
+}
+
+async function deployCommand(args: string[]): Promise<void> {
+  const repo = optionValue(args, "--repo");
+  const dir = resolve(optionValue(args, "--dir") ?? DEFAULT_DIR);
+  const branch = optionValue(args, "--branch") ?? "main";
+  if (!repo || !repo.includes("/")) usage();
+
+  const cloneDir = join(
+    process.env["HOME"] ?? ".",
+    ".cache",
+    "opencode-artifacts",
+    "ghpages",
+    repo.replace("/", "__"),
+  );
+  const publisher = new GitHubPagesPublisher(dir, { repo, branch, cloneDir });
+  const baseUrl = await publisher.sync("deploy artifacts");
+  console.log(baseUrl);
 }
 
 async function main(argv: string[]): Promise<void> {
@@ -147,6 +166,8 @@ async function main(argv: string[]): Promise<void> {
       return latestCommand(rest);
     case "state":
       return stateCommand(rest);
+    case "deploy":
+      return deployCommand(rest);
     default:
       usage();
   }

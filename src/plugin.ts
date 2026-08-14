@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import { homedir } from "node:os";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tool, type Plugin } from "@opencode-ai/plugin";
 import {
@@ -8,9 +9,14 @@ import {
   type RenderedArtifact,
 } from "./render.ts";
 import { FilePublisher, slugify, StaleArtifactError } from "./publisher.ts";
+import { GitHubPagesPublisher } from "./github-pages.ts";
 import { formatFindings, scanSensitive } from "./guard.ts";
 import { readCollection, writeCollection } from "./serve.ts";
 import { openFile } from "./open.ts";
+
+function ghPagesCloneDir(repo: string): string {
+  return join(homedir(), ".cache", "opencode-artifacts", "ghpages", repo.replace("/", "__"));
+}
 
 export const ArtifactsPlugin: Plugin = async () => {
   return {
@@ -58,6 +64,14 @@ export const ArtifactsPlugin: Plugin = async () => {
             .describe(
               "Named read-only shell commands the served page may poll via opencodeArtifacts.data(name) (raw-HTML pages)",
             ),
+          deploy: tool.schema
+            .boolean()
+            .optional()
+            .describe("Also push the artifact to a public GitHub Pages site (requires repo)"),
+          repo: tool.schema
+            .string()
+            .optional()
+            .describe("GitHub Pages target as owner/name; created public if missing"),
         },
         async execute(args, ctx) {
           try {
@@ -80,7 +94,16 @@ export const ArtifactsPlugin: Plugin = async () => {
               metadata: { title, slug },
             });
 
-            const publisher = new FilePublisher(join(ctx.worktree, ".opencode", "artifacts"));
+            const localDir = join(ctx.worktree, ".opencode", "artifacts");
+            const publisher = args.deploy
+              ? (() => {
+                  if (!args.repo) throw new Error("deploy requires the repo argument (owner/name)");
+                  return new GitHubPagesPublisher(localDir, {
+                    repo: args.repo,
+                    cloneDir: ghPagesCloneDir(args.repo),
+                  });
+                })()
+              : new FilePublisher(localDir);
             const result = await publisher.publish({
               slug,
               html: rendered.html,
@@ -111,7 +134,7 @@ export const ArtifactsPlugin: Plugin = async () => {
                 hash: result.hash,
               },
             });
-            return `Artifact published to ${result.path} (gallery: ${result.gallery}, hash: ${result.hash})`;
+            return `Artifact published to ${result.path}${result.url ? ` — live at ${result.url}` : ""} (gallery: ${result.gallery}, hash: ${result.hash})`;
           } catch (err) {
             if (err instanceof ArtifactTooLargeError) {
               return `Artifact too large: ${err.message}`;

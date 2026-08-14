@@ -136,10 +136,27 @@ npm test        # node --test, no framework
 npm run build   # tsc -> dist/
 ```
 
+## Cost-free public sharing (GitHub Pages)
+
+Publish to a public GitHub Pages site — git history doubles as version history and audit log:
+
+```bash
+opencode-artifacts deploy --repo <you>/artifacts            # one-off sync of the local gallery
+# or per publish, in OpenCode: artifact_publish with deploy: true, repo: "<you>/artifacts"
+```
+
+The repo is created (public) on first use, Pages is enabled automatically, and local state
+(`.state`/`.db`/`.datasources`) is never uploaded. Every deploy is a commit
+(`publish <slug> v<N>`), so the repo's log is the audit trail. Live demo:
+`https://bitgorust.github.io/artifacts/` (see `docs/evidence/live-*.png`).
+
+For authenticated/org sharing, the next step is the same publisher shape against Cloudflare
+Pages + Workers + KV + Access (all free tier) — tracked in the roadmap.
+
 ## Roadmap
 
-- `HostedPublisher` — auth + org sharing links (the one structural gap vs Claude Code Artifacts)
-- Mermaid blocks, syntax highlighting, PDF export
+- `HostedPublisher` (authenticated tier): Cloudflare Pages + Workers + KV + Access
+- Syntax highlighting, PDF export
 
 ## Parity with Claude Code Artifacts
 
