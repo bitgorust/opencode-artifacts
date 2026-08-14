@@ -13,7 +13,8 @@ function usage(): never {
   opencode-artifacts render <input.md> [-o <out.html>] [--open] [--title <t>] [--format markdown|html] [--version]
   opencode-artifacts serve [--dir <artifacts-dir>] [--port <n>]
   opencode-artifacts restore <slug> --version <n> [--dir <artifacts-dir>]
-  opencode-artifacts latest [--dir <artifacts-dir>] [--open]`);
+  opencode-artifacts latest [--dir <artifacts-dir>] [--open]
+  opencode-artifacts state <slug> [--dir <artifacts-dir>]`);
   process.exit(2);
 }
 
@@ -112,6 +113,18 @@ async function latestCommand(args: string[]): Promise<void> {
   console.log(path);
 }
 
+async function stateCommand(args: string[]): Promise<void> {
+  const [slug] = positional(args, ["--dir"]);
+  const dir = optionValue(args, "--dir") ?? DEFAULT_DIR;
+  if (!slug) usage();
+  try {
+    process.stdout.write(await readFile(join(resolve(dir), ".state", `${slug}.json`), "utf8"));
+  } catch {
+    console.error(`no saved state for artifact '${slug}'`);
+    process.exit(1);
+  }
+}
+
 async function main(argv: string[]): Promise<void> {
   const [command, ...rest] = argv;
   switch (command) {
@@ -123,6 +136,8 @@ async function main(argv: string[]): Promise<void> {
       return restoreCommand(rest);
     case "latest":
       return latestCommand(rest);
+    case "state":
+      return stateCommand(rest);
     default:
       usage();
   }

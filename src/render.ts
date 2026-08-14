@@ -143,6 +143,20 @@ li.task input{margin-right:.45rem;accent-color:var(--accent)}
 .copy-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-size:.85rem;font-weight:600;cursor:pointer}
 .copy-btn:hover{filter:brightness(1.08)}
 .copy-note{font-size:.8rem;color:var(--good)}
+pre.mermaid{background:var(--card-bg);border:1px solid var(--line);border-radius:10px;padding:1rem;text-align:center}
+.section-card pre.mermaid{background:var(--page-bg)}
+.decisions{margin:1.25rem 0}
+.decisions-title{font-weight:700;font-size:1.05rem;margin-bottom:.75rem}
+.decision{margin:0 0 1rem}
+.decision-question{font-weight:600;margin-bottom:.5rem}
+.decision-options{display:flex;flex-direction:column;gap:.5rem}
+.decision-opt{display:flex;flex-direction:column;gap:.15rem;text-align:left;background:var(--card-bg);border:1px solid var(--line);border-radius:10px;padding:.7rem 1rem;font-size:.92rem;color:var(--ink);cursor:pointer}
+.section-card .decision-opt{background:var(--page-bg)}
+.decision-opt:hover{border-color:var(--accent)}
+.decision-opt.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.decision-opt.selected .decision-label{font-weight:650;color:var(--accent)}
+.decision-note{font-size:.82rem;color:var(--ink-2)}
+.decisions-hint{font-size:.78rem;color:var(--ink-3);margin-top:.5rem}
 .progress{margin:1.25rem 0}
 .progress-label{font-size:.85rem;font-weight:600;margin-bottom:.4rem}
 .progress-track{height:.55rem;border-radius:999px;background:var(--code-bg);overflow:hidden}
@@ -187,28 +201,75 @@ const BOOT = `(function () {
       fail(err && err.message ? err.message : String(err));
     }
   });
+  var mermaidEls = document.querySelectorAll("pre.mermaid");
+  if (window.mermaid && mermaidEls.length > 0) {
+    var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    window.mermaid.initialize({ startOnLoad: false, theme: dark ? "dark" : "neutral" });
+    Promise.resolve(window.mermaid.run({ nodes: mermaidEls })).catch(function (err) {
+      mermaidEls.forEach(function (el) {
+        if (el.querySelector("svg")) return;
+        el.textContent = "";
+        var box = document.createElement("div");
+        box.className = "chart-error";
+        box.textContent = "Diagram failed to render: " + (err && err.message ? err.message : String(err));
+        el.appendChild(box);
+      });
+    });
+  }
+  function feedback(note, msg) {
+    if (!note) return;
+    note.textContent = msg;
+    setTimeout(function () { note.textContent = ""; }, 1600);
+  }
   document.addEventListener("click", function (ev) {
     var btn = ev.target && ev.target.closest ? ev.target.closest(".copy-btn") : null;
-    if (!btn) return;
-    var tpl = document.getElementById(btn.getAttribute("data-copy-target"));
-    var wrap = btn.parentNode;
-    var note = wrap ? wrap.querySelector(".copy-note") : null;
-    if (!tpl) return;
-    var text = (tpl.content ? tpl.content.textContent : tpl.textContent) || "";
-    function feedback(msg) {
-      if (!note) return;
-      note.textContent = msg;
-      setTimeout(function () { note.textContent = ""; }, 1600);
+    if (btn) {
+      var tpl = document.getElementById(btn.getAttribute("data-copy-target"));
+      var wrap = btn.parentNode;
+      var note = wrap ? wrap.querySelector(".copy-note") : null;
+      if (!tpl) return;
+      var text = (tpl.content ? tpl.content.textContent : tpl.textContent) || "";
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(
+          function () { feedback(note, "Copied"); },
+          function () { feedback(note, "Copy blocked - select manually"); },
+        );
+      } else {
+        feedback(note, "Clipboard unavailable");
+      }
+      return;
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(
-        function () { feedback("Copied"); },
-        function () { feedback("Copy blocked - select manually"); },
-      );
-    } else {
-      feedback("Clipboard unavailable");
+    var opt = ev.target && ev.target.closest ? ev.target.closest(".decision-opt") : null;
+    if (!opt) return;
+    var q = opt.getAttribute("data-question");
+    var o = opt.getAttribute("data-option");
+    var group = opt.parentNode;
+    if (group) {
+      var peers = group.querySelectorAll(".decision-opt");
+      for (var i = 0; i < peers.length; i++) peers[i].classList.remove("selected");
+    }
+    opt.classList.add("selected");
+    var stateKey = "artifact-decisions:" + location.pathname;
+    var state = {};
+    try { state = JSON.parse(localStorage.getItem(stateKey) || "{}"); } catch (e) {}
+    state[q] = o;
+    try { localStorage.setItem(stateKey, JSON.stringify(state)); } catch (e) {}
+    if (window.__ARTIFACT_STATE_URL__) {
+      var slug = decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html$/, "");
+      fetch(window.__ARTIFACT_STATE_URL__ + "/" + encodeURIComponent(slug), {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ answers: state }),
+      }).catch(function () {});
     }
   });
+  try {
+    var saved = JSON.parse(localStorage.getItem("artifact-decisions:" + location.pathname) || "{}");
+    Object.keys(saved).forEach(function (q) {
+      var el = document.querySelector('.decision-opt[data-question="' + q + '"][data-option="' + saved[q] + '"]');
+      if (el) el.classList.add("selected");
+    });
+  } catch (e) {}
 })();`;
 
 const ALERT_TONES: Record<string, string> = {
@@ -291,6 +352,7 @@ interface AssembleInput {
   bodyHtml: string;
   resolved: ResolvedChart[];
   needsBoot: boolean;
+  needsMermaid: boolean;
   maxBytes: number;
 }
 
@@ -328,7 +390,10 @@ function assemblePage(input: AssembleInput): string {
       if (runtimes.has(name)) parts.push(`<script>${runtimeBundle(name)}</script>`);
     }
   }
-  if (input.resolved.length > 0 || input.needsBoot) {
+  if (input.needsMermaid) {
+    parts.push(`<script>${runtimeBundle("mermaid")}</script>`);
+  }
+  if (input.resolved.length > 0 || input.needsBoot || input.needsMermaid) {
     parts.push(`<script>${BOOT}</script>`);
   }
 
@@ -346,10 +411,12 @@ export function renderArtifact(markdown: string, options: RenderOptions = {}): R
 
   let bodyHtml = doc.bodyHtml;
   let needsBoot = false;
+  let needsMermaid = false;
   doc.components.forEach((block, index) => {
     const placeholder = `<div class="component" data-component-index="${index}"></div>`;
     bodyHtml = bodyHtml.replace(placeholder, renderComponent(block.kind, block.json, `component-${index}`));
-    if (block.kind === "copy") needsBoot = true;
+    if (block.kind === "copy" || block.kind === "decisions") needsBoot = true;
+    if (block.kind === "mermaid") needsMermaid = true;
   });
   bodyHtml = wrapSections(enhanceBodyHtml(bodyHtml));
 
@@ -359,6 +426,7 @@ export function renderArtifact(markdown: string, options: RenderOptions = {}): R
     bodyHtml,
     resolved: resolveCharts(doc.charts),
     needsBoot,
+    needsMermaid,
     maxBytes: options.maxBytes ?? DEFAULT_MAX_BYTES,
   });
   return { html, meta: doc.meta, chartCount: doc.charts.length };
@@ -375,6 +443,7 @@ export function renderRawHtml(
     bodyHtml,
     resolved: [],
     needsBoot: false,
+    needsMermaid: false,
     maxBytes: options.maxBytes ?? DEFAULT_MAX_BYTES,
   });
   return { html, meta, chartCount: 0 };

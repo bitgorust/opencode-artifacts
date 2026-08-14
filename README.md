@@ -105,7 +105,10 @@ live-reload EventSource); the files on disk keep `connect-src 'none'`.
   - ```` ```progress ```` — progress bar: `{label?, done, total}`
   - ```` ```diff ```` — annotated unified diff (lines starting `## note:` become annotations)
   - ```` ```copy ```` — copy-to-clipboard button: `{label?, text}` (fixed JS; text rides in a `<template>`, newlines preserved)
+  - ```` ```mermaid ```` — diagram source (graph/sequence/ER/...), rendered live with the inline mermaid runtime
+  - ```` ```decisions ```` — workshop decision rows: `{title?, questions: [{id, question, options: [{id, label, note?}]}]}`. Selections persist to localStorage; under `serve` they also POST to the server, and the session reads them back with the `artifact_state` tool or `opencode-artifacts state <slug>`.
 - **Interactive controls without custom JS**: vega-lite `params` with `bind` render as native sliders/dropdowns and re-render the chart live; echarts `dataZoom`/toolbox options work as-is. See `examples/patterns/tune-controls.md`.
+- **Stale-version guard**: `artifact_publish` results include a content `hash`; pass it back as `expectedHash` on update and the publish is refused if someone changed the artifact in between.
 - **Markdown extras**: GitHub alerts (`> [!NOTE]` / `[!TIP]` / `[!IMPORTANT]` / `[!WARNING]` / `[!CAUTION]`), task lists (`- [x]`), auto heading anchors, and `##` sections become white cards.
 - **Broken specs don't break the page** — the slot shows an inline error box instead.
 - **Everything else** is standard Markdown (tables, code blocks, links, images as data URIs).

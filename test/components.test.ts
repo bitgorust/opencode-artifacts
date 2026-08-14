@@ -140,3 +140,41 @@ test("a copy-only page still ships the boot script but no chart runtimes", () =>
   assert.ok(!html.includes("runtime:vega"));
   assert.ok(!html.includes("window.__ARTIFACT_CHARTS__=["));
 });
+
+test("mermaid fence becomes an escaped pre and inlines the mermaid runtime", () => {
+  const { html } = renderArtifact("```mermaid\ngraph TD\n  A-->B\n```\n");
+  assert.match(html, /<pre class="mermaid">graph TD\n  A--&gt;B<\/pre>/);
+  assert.ok(html.includes("runtime:mermaid"));
+  assert.ok(html.includes("mermaid.initialize"));
+  assert.ok(!html.includes("runtime:vega"));
+
+  const plain = renderArtifact("no diagrams here\n").html;
+  assert.ok(!plain.includes("runtime:mermaid"));
+});
+
+test("mermaid fence rejects empty source", () => {
+  assert.match(renderComponent("mermaid", "  \n"), /chart-error/);
+});
+
+test("decisions renders option rows with question/option data attributes", () => {
+  const html = renderComponent(
+    "decisions",
+    JSON.stringify({
+      title: "Open decisions",
+      questions: [
+        {
+          id: "layout",
+          question: "Which layout?",
+          options: [
+            { id: "tabs", label: "Two-column tabs", note: "deep-linkable" },
+            { id: "dense", label: "Dense table" },
+          ],
+        },
+      ],
+    }),
+  );
+  assert.match(html, /decisions-title">Open decisions</);
+  assert.match(html, /decision-opt" data-question="layout" data-option="tabs"/);
+  assert.match(html, /decision-note">deep-linkable</);
+  assert.match(html, /decision-opt" data-question="layout" data-option="dense"/);
+});

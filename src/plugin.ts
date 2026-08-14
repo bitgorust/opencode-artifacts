@@ -1,4 +1,5 @@
 import { join } from "node:path";
+import { readFile } from "node:fs/promises";
 import { tool, type Plugin } from "@opencode-ai/plugin";
 import {
   ArtifactTooLargeError,
@@ -6,7 +7,7 @@ import {
   renderRawHtml,
   type RenderedArtifact,
 } from "./render.ts";
-import { FilePublisher, slugify } from "./publisher.ts";
+import { FilePublisher, slugify, StaleArtifactError } from "./publisher.ts";
 import { openFile } from "./open.ts";
 
 export const ArtifactsPlugin: Plugin = async () => {
@@ -33,6 +34,12 @@ export const ArtifactsPlugin: Plugin = async () => {
             .enum(["markdown", "html"])
             .optional()
             .describe("'html' embeds the input as raw trusted HTML instead of rendering Markdown"),
+          expectedHash: tool.schema
+            .string()
+            .optional()
+            .describe(
+              "Hash from a previous publish result; publishing fails with a conflict if the artifact changed since",
+            ),
         },
         async execute(args, ctx) {
           try {
@@ -58,6 +65,7 @@ export const ArtifactsPlugin: Plugin = async () => {
               icon: rendered.meta.icon,
               charts: rendered.chartCount,
               version: args.version ?? false,
+              expectedHash: args.expectedHash,
             });
             if (args.open) openFile(result.path);
             ctx.metadata({
@@ -67,14 +75,39 @@ export const ArtifactsPlugin: Plugin = async () => {
                 version: result.version,
                 gallery: result.gallery,
                 charts: rendered.chartCount,
+                hash: result.hash,
               },
             });
-            return `Artifact published to ${result.path} (gallery: ${result.gallery})`;
+            return `Artifact published to ${result.path} (gallery: ${result.gallery}, hash: ${result.hash})`;
           } catch (err) {
             if (err instanceof ArtifactTooLargeError) {
               return `Artifact too large: ${err.message}`;
             }
+            if (err instanceof StaleArtifactError) {
+              return `Publish refused: ${err.message}. Re-read the current page and re-apply your edits, then publish again with the new hash.`;
+            }
             throw err;
+          }
+        },
+      }),
+      artifact_state: tool({
+        description:
+          "Read the saved decision/state of an artifact published in this worktree (answers a reader gave on the served page, e.g. workshop decisions).",
+        args: {
+          slug: tool.schema.string().describe("Artifact slug (the filename without .html)"),
+        },
+        async execute(args, ctx) {
+          const statePath = join(
+            ctx.worktree,
+            ".opencode",
+            "artifacts",
+            ".state",
+            `${args.slug}.json`,
+          );
+          try {
+            return await readFile(statePath, "utf8");
+          } catch {
+            return `No saved state for artifact '${args.slug}'.`;
           }
         },
       }),

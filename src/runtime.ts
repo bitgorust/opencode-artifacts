@@ -2,12 +2,13 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join, sep } from "node:path";
 
-export type RuntimeName = "vega" | "vega-embed" | "echarts";
+export type RuntimeName = "vega" | "vega-embed" | "echarts" | "mermaid";
 
 const BUNDLES: Record<RuntimeName, { pkg: string; file: string }> = {
   vega: { pkg: "vega", file: "build/vega.min.js" },
   "vega-embed": { pkg: "vega-embed", file: "build/vega-embed.min.js" },
   echarts: { pkg: "echarts", file: "dist/echarts.min.js" },
+  mermaid: { pkg: "mermaid", file: "dist/mermaid.min.js" },
 };
 
 const require = createRequire(import.meta.url);

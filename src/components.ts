@@ -8,7 +8,9 @@ export type ComponentKind =
   | "callout"
   | "progress"
   | "diff"
-  | "copy";
+  | "copy"
+  | "mermaid"
+  | "decisions";
 
 export const COMPONENT_KINDS: ReadonlySet<string> = new Set([
   "stats",
@@ -19,6 +21,8 @@ export const COMPONENT_KINDS: ReadonlySet<string> = new Set([
   "progress",
   "diff",
   "copy",
+  "mermaid",
+  "decisions",
 ]);
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
@@ -185,8 +189,7 @@ function renderDiff(source: string): string {
   return `<div class="diff">${rows.join("")}</div>`;
 }
 
-function renderCopy(spec: unknown, id: string | undefined): string {
-  const item = asRecord(spec);
+function renderCopy(spec: unknown, id: string | undefined): string {  const item = asRecord(spec);
   if (!item) return errorBox("copy", "expected a JSON object");
   const text = str(item, "text");
   if (text === undefined) return errorBox("copy", "missing 'text'");
@@ -199,8 +202,62 @@ function renderCopy(spec: unknown, id: string | undefined): string {
   ].join("");
 }
 
+function renderMermaid(source: string): string {
+  const trimmed = source.trim();
+  if (trimmed === "") return errorBox("mermaid", "empty diagram source");
+  return `<pre class="mermaid">${escapeHtmlText(trimmed)}</pre>`;
+}
+
+function renderDecisions(spec: unknown): string {
+  const item = asRecord(spec);
+  if (!item) return errorBox("decisions", "expected a JSON object");
+  const questions = item["questions"];
+  if (!Array.isArray(questions)) return errorBox("decisions", "missing 'questions' array");
+
+  const blocks = questions.map((entry) => {
+    const question = asRecord(entry);
+    if (!question) return errorBox("decisions", "questions must be objects");
+    const qid = str(question, "id") ?? "q";
+    const text = str(question, "question") ?? "";
+    const options = Array.isArray(question["options"]) ? question["options"] : [];
+    const buttons = options
+      .map((optEntry) => {
+        const opt = asRecord(optEntry);
+        if (!opt) return "";
+        const oid = str(opt, "id") ?? "opt";
+        const label = str(opt, "label") ?? "";
+        const note = str(opt, "note");
+        return [
+          `<button type="button" class="decision-opt" data-question="${escapeHtmlText(qid)}" data-option="${escapeHtmlText(oid)}">`,
+          `<span class="decision-label">${escapeHtmlText(label)}</span>`,
+          note !== undefined
+            ? `<span class="decision-note">${escapeHtmlText(note)}</span>`
+            : "",
+          "</button>",
+        ].join("");
+      })
+      .join("");
+    return [
+      '<div class="decision">',
+      `<div class="decision-question">${escapeHtmlText(text)}</div>`,
+      `<div class="decision-options" role="group">${buttons}</div>`,
+      "</div>",
+    ].join("");
+  });
+
+  const title = str(item, "title");
+  return [
+    '<div class="decisions">',
+    title !== undefined ? `<div class="decisions-title">${escapeHtmlText(title)}</div>` : "",
+    blocks.join(""),
+    '<div class="decisions-hint">Selections are saved on this page; when served, they persist for the session to read back.</div>',
+    "</div>",
+  ].join("");
+}
+
 export function renderComponent(kind: ComponentKind, json: string, id?: string): string {
   if (kind === "diff") return renderDiff(json);
+  if (kind === "mermaid") return renderMermaid(json);
   let spec: unknown;
   try {
     spec = JSON.parse(json);
@@ -222,5 +279,7 @@ export function renderComponent(kind: ComponentKind, json: string, id?: string):
       return renderProgress(spec);
     case "copy":
       return renderCopy(spec, id);
+    case "decisions":
+      return renderDecisions(spec);
   }
 }

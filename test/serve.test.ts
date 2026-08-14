@@ -75,3 +75,32 @@ test("sends an SSE reload event when an html file changes", async () => {
     controller.abort();
   });
 });
+
+test("state endpoint round-trips posted answers and rejects bad slugs", async () => {
+  await withServer({ "a.html": "x" }, async (url) => {
+    const bad = await fetch(`${url}/__state/..%2Fevil`, { method: "POST", body: "{}" });
+    assert.equal(bad.status, 400);
+
+    const posted = await fetch(`${url}/__state/plan-review`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ question: "layout", option: "tabs" }),
+    });
+    assert.equal(posted.status, 200);
+
+    const read = await fetch(`${url}/__state/plan-review`);
+    const body = (await read.json()) as { answers: Record<string, string> };
+    assert.equal(body.answers.layout, "tabs");
+
+    const replaced = await fetch(`${url}/__state/plan-review`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ answers: { layout: "tabs", density: "no" } }),
+    });
+    assert.equal(replaced.status, 200);
+    const reread = (await (await fetch(`${url}/__state/plan-review`)).json()) as {
+      answers: Record<string, string>;
+    };
+    assert.deepEqual(reread.answers, { layout: "tabs", density: "no" });
+  });
+});

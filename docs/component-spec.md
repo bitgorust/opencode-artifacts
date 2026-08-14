@@ -101,6 +101,24 @@ No custom component needed: vega-lite `params` with `bind` render as native slid
 re-render the chart live through vega's signal graph (CSP-safe under `ast: true`); echarts
 `dataZoom` / toolbox options work as-is. Anything beyond chart-bound controls → raw HTML mode.
 
+### ```mermaid — diagrams (added v0.5)
+Raw mermaid source (not JSON) in the fence; rendered client-side by the inlined mermaid runtime
+(only when used), themed via `prefers-color-scheme`. Render failures degrade to the error box.
+
+### ```decisions — workshop decision rows (added v0.5)
+```json
+{ "title": "Open decisions", "questions": [{ "id": "layout", "question": "...", "options": [{ "id": "tabs", "label": "...", "note": "..." }] }] }
+```
+Clicking an option marks it selected, persists to localStorage, and — when the page is served
+by `opencode-artifacts serve` — POSTs the full answers map to `/__state/<slug>` (stored at
+`.state/<slug>.json`). The session reads answers back via the `artifact_state` plugin tool or
+`opencode-artifacts state <slug>`. This is the local analog of Claude Code's workshop
+`read_decisions` loop.
+
+### Stale-version guard (added v0.5)
+Every publish records a 12-char content hash in the manifest and returns it. Callers pass it
+back as `expectedHash`; a mismatch throws `StaleArtifactError` and nothing is written.
+
 ## Markdown-level additions
 
 - GitHub alerts: `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`, `> [!IMPORTANT]`, `> [!CAUTION]`
