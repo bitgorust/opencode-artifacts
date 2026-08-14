@@ -2,6 +2,9 @@ import { createServer, type ServerResponse, type IncomingMessage } from "node:ht
 import { watch } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { extname, join, normalize, resolve, sep } from "node:path";
+import { NAME_RE, prepareServedHtml } from "./served-html.ts";
+
+export { NAME_RE } from "./served-html.ts";
 
 export interface ServeOptions {
   dir: string;
@@ -15,11 +18,8 @@ export interface ServedArtifacts {
   close(): Promise<void>;
 }
 
-const LIVE_RELOAD_SNIPPET = `<script>window.__ARTIFACT_STATE_URL__="/__state";window.__ARTIFACT_COMMENTS_URL__="/__comments";(function(){try{var es=new EventSource("/__sse");es.addEventListener("reload",function(){location.reload()});}catch(e){}})();function oaSlug(){return decodeURIComponent(location.pathname.split("/").pop()||"").replace(/\\.html$/,"");}function oaJson(r){return r.json();}window.opencodeArtifacts={db:{get:function(col,id){return fetch("/__db/"+oaSlug()+"/"+col+"/"+id).then(function(r){return r.status===404?null:oaJson(r);});},list:function(col,query){var qs=query?("?"+new URLSearchParams(query).toString()):"";return fetch("/__db/"+oaSlug()+"/"+col+qs).then(oaJson);},set:function(col,id,doc){return fetch("/__db/"+oaSlug()+"/"+col+"/"+id,{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify(doc)}).then(oaJson);},remove:function(col,id){return fetch("/__db/"+oaSlug()+"/"+col+"/"+id,{method:"DELETE"}).then(function(r){return r.ok;});}},data:function(name){return fetch("/__data/"+oaSlug()+"/"+name).then(oaJson);}};</script>`;
-
 const MAX_STATE_BODY_BYTES = 64 * 1024;
 const MAX_DB_DOC_BYTES = 256 * 1024;
-const NAME_RE = /^[a-z0-9-]+$/;
 const STATE_SLUG_RE = NAME_RE;
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -430,15 +430,7 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
         const type = CONTENT_TYPES[extname(filePath)] ?? "application/octet-stream";
         let payload: Buffer | string = body;
         if (liveReload && extname(filePath) === ".html") {
-          const text = body.toString("utf8");
-          // Live reload needs EventSource; relax connect-src to 'self' for the
-          // served copy only. On-disk artifacts keep connect-src 'none'.
-          const relaxed = text.replace("connect-src 'none'", "connect-src 'self'");
-          const at = relaxed.lastIndexOf("</body>");
-          payload =
-            at === -1
-              ? relaxed + LIVE_RELOAD_SNIPPET
-              : relaxed.slice(0, at) + LIVE_RELOAD_SNIPPET + relaxed.slice(at);
+          payload = prepareServedHtml(body.toString("utf8"));
         }
         res.writeHead(200, { "content-type": type });
         res.end(payload);

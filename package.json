@@ -1,6 +1,6 @@
 {
   "name": "opencode-artifacts",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Publish OpenCode session output as self-contained, interactive HTML artifact pages.",
   "license": "MIT",
   "type": "module",

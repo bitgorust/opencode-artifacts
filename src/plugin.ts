@@ -10,12 +10,17 @@ import {
 } from "./render.ts";
 import { FilePublisher, slugify, StaleArtifactError } from "./publisher.ts";
 import { GitHubPagesPublisher } from "./github-pages.ts";
+import { CloudflarePublisher } from "./cloudflare-publisher.ts";
 import { formatFindings, scanSensitive } from "./guard.ts";
 import { readCollection, writeCollection } from "./serve.ts";
 import { openFile } from "./open.ts";
 
 function ghPagesCloneDir(repo: string): string {
   return join(homedir(), ".cache", "opencode-artifacts", "ghpages", repo.replace("/", "__"));
+}
+
+function cfStagingDir(workerName: string): string {
+  return join(homedir(), ".cache", "opencode-artifacts", "cloudflare", workerName);
 }
 
 export const ArtifactsPlugin: Plugin = async () => {
@@ -67,11 +72,19 @@ export const ArtifactsPlugin: Plugin = async () => {
           deploy: tool.schema
             .boolean()
             .optional()
-            .describe("Also push the artifact to a public GitHub Pages site (requires repo)"),
+            .describe("Also push the artifact to a hosted site (requires repo or workerName)"),
           repo: tool.schema
             .string()
             .optional()
             .describe("GitHub Pages target as owner/name; created public if missing"),
+          target: tool.schema
+            .enum(["github", "cloudflare"])
+            .optional()
+            .describe("Deploy target; defaults to github when repo is set"),
+          workerName: tool.schema
+            .string()
+            .optional()
+            .describe("Cloudflare Worker name (target cloudflare)"),
         },
         async execute(args, ctx) {
           try {
@@ -95,15 +108,25 @@ export const ArtifactsPlugin: Plugin = async () => {
             });
 
             const localDir = join(ctx.worktree, ".opencode", "artifacts");
-            const publisher = args.deploy
-              ? (() => {
-                  if (!args.repo) throw new Error("deploy requires the repo argument (owner/name)");
-                  return new GitHubPagesPublisher(localDir, {
-                    repo: args.repo,
-                    cloneDir: ghPagesCloneDir(args.repo),
-                  });
-                })()
-              : new FilePublisher(localDir);
+            const publisher = (() => {
+              if (!args.deploy) return new FilePublisher(localDir);
+              const target = args.target ?? (args.repo ? "github" : undefined);
+              if (target === "github" && args.repo) {
+                return new GitHubPagesPublisher(localDir, {
+                  repo: args.repo,
+                  cloneDir: ghPagesCloneDir(args.repo),
+                });
+              }
+              if (target === "cloudflare" && args.workerName) {
+                return new CloudflarePublisher(localDir, {
+                  workerName: args.workerName,
+                  stagingDir: cfStagingDir(args.workerName),
+                });
+              }
+              throw new Error(
+                "deploy requires repo (github) or target: 'cloudflare' with workerName",
+              );
+            })();
             const result = await publisher.publish({
               slug,
               html: rendered.html,

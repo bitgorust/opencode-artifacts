@@ -150,12 +150,20 @@ The repo is created (public) on first use, Pages is enabled automatically, and l
 (`publish <slug> v<N>`), so the repo's log is the audit trail. Live demo:
 `https://bitgorust.github.io/artifacts/` (see `docs/evidence/live-*.png`).
 
-For authenticated/org sharing, the next step is the same publisher shape against Cloudflare
-Pages + Workers + KV + Access (all free tier) — tracked in the roadmap.
+For authenticated/org sharing on the free tier, deploy to Cloudflare Workers + KV and put
+Cloudflare Access in front (≤ 50 users free):
+
+```bash
+wrangler login   # one-time
+opencode-artifacts deploy --target cloudflare --name my-artifacts
+```
+
+Decisions, comments, and the mini-DB work on the hosted worker (KV-backed); shell
+datasources stay local-only. Full guide: `docs/hosted-cloudflare.md`.
 
 ## Roadmap
 
-- `HostedPublisher` (authenticated tier): Cloudflare Pages + Workers + KV + Access
+- Comment authorship via Access identity headers
 - Syntax highlighting, PDF export
 
 ## Parity with Claude Code Artifacts

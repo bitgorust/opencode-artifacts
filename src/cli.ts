@@ -4,6 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import { renderArtifact, renderRawHtml } from "./render.ts";
 import { FilePublisher, slugify } from "./publisher.ts";
 import { GitHubPagesPublisher } from "./github-pages.ts";
+import { CloudflarePublisher } from "./cloudflare-publisher.ts";
 import { formatFindings, scanSensitive } from "./guard.ts";
 import { serveArtifacts } from "./serve.ts";
 import { openFile } from "./open.ts";
@@ -17,7 +18,8 @@ function usage(): never {
   opencode-artifacts restore <slug> --version <n> [--dir <artifacts-dir>]
   opencode-artifacts latest [--dir <artifacts-dir>] [--open]
   opencode-artifacts state <slug> [--dir <artifacts-dir>]
-  opencode-artifacts deploy --repo <owner/name> [--dir <artifacts-dir>] [--branch <name>]`);
+  opencode-artifacts deploy --repo <owner/name> [--dir <artifacts-dir>] [--branch <name>]
+  opencode-artifacts deploy --target cloudflare --name <worker> [--dir <artifacts-dir>]`);
   process.exit(2);
 }
 
@@ -136,18 +138,26 @@ async function stateCommand(args: string[]): Promise<void> {  const [slug] = pos
 }
 
 async function deployCommand(args: string[]): Promise<void> {
-  const repo = optionValue(args, "--repo");
+  const target = optionValue(args, "--target") ?? "github";
   const dir = resolve(optionValue(args, "--dir") ?? DEFAULT_DIR);
+  const home = process.env["HOME"] ?? ".";
+
+  if (target === "cloudflare") {
+    const name = optionValue(args, "--name");
+    if (!name) usage();
+    const publisher = new CloudflarePublisher(dir, {
+      workerName: name,
+      stagingDir: join(home, ".cache", "opencode-artifacts", "cloudflare", name),
+    });
+    const url = await publisher.deploy();
+    console.log(url ?? "deployed (workers.dev url not found in output)");
+    return;
+  }
+
+  const repo = optionValue(args, "--repo");
   const branch = optionValue(args, "--branch") ?? "main";
   if (!repo || !repo.includes("/")) usage();
-
-  const cloneDir = join(
-    process.env["HOME"] ?? ".",
-    ".cache",
-    "opencode-artifacts",
-    "ghpages",
-    repo.replace("/", "__"),
-  );
+  const cloneDir = join(home, ".cache", "opencode-artifacts", "ghpages", repo.replace("/", "__"));
   const publisher = new GitHubPagesPublisher(dir, { repo, branch, cloneDir });
   const baseUrl = await publisher.sync("deploy artifacts");
   console.log(baseUrl);

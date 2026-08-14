@@ -6,7 +6,7 @@ import { FilePublisher, type PublishInput, type PublishResult, type Publisher } 
 
 export type Runner = (command: string, args: string[], cwd?: string) => Promise<string>;
 
-const runProcess: Runner = async (command, args, cwd) => {
+export const runProcess: Runner = async (command, args, cwd) => {
   const { stdout } = await promisify(execFile)(command, args, {
     cwd,
     timeout: 120000,
@@ -30,7 +30,7 @@ export function pagesBaseUrl(repo: string): string {
 
 const SKIP_ENTRIES = new Set([".git", ".state", ".db", ".datasources"]);
 
-async function copyArtifacts(fromDir: string, toDir: string): Promise<void> {
+export async function copyArtifacts(fromDir: string, toDir: string): Promise<void> {
   await mkdir(toDir, { recursive: true });
   for (const entry of await readdir(fromDir, { withFileTypes: true })) {
     if (SKIP_ENTRIES.has(entry.name)) continue;
