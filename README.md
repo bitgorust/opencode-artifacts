@@ -25,7 +25,17 @@ Add to your `opencode.json`:
 
 ```json
 {
+  "$schema": "https://opencode.ai/config.json",
   "plugin": ["opencode-artifacts"]
+}
+```
+
+OpenCode installs npm plugins (and their dependencies) automatically at startup. Non-registry
+specs work too — for a local checkout (after `npm install && npm run build`):
+
+```json
+{
+  "plugin": ["file:///absolute/path/to/opencode-artifacts"]
 }
 ```
 

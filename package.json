@@ -4,6 +4,21 @@
   "description": "Publish OpenCode session output as self-contained, interactive HTML artifact pages.",
   "license": "MIT",
   "type": "module",
+  "main": "./dist/plugin.js",
+  "types": "./dist/plugin.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitgorust/opencode-artifacts.git"
+  },
+  "homepage": "https://github.com/bitgorust/opencode-artifacts",
+  "bugs": "https://github.com/bitgorust/opencode-artifacts/issues",
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "artifacts",
+    "dashboard",
+    "claude-code"
+  ],
   "exports": {
     ".": "./dist/plugin.js",
     "./render": "./dist/render.js",
@@ -14,6 +29,7 @@
   },
   "files": [
     "dist",
+    "skills",
     "README.md",
     "LICENSE"
   ],
