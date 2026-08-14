@@ -51,6 +51,19 @@ icon: 🚨
 
 and gets back `Artifact published to <worktree>/.opencode/artifacts/incident-4172-checkout-latency-spike.html`.
 
+### Proactive use (recommended)
+
+Install the bundled skill so the agent publishes on its own when output suits a page:
+
+```bash
+cp -r skills/artifact-pages ~/.agents/skills/   # or your project's .agents/skills/
+```
+
+It encodes the same trigger Claude Code uses ("a deliverable with an audience is not fully
+delivered while it lives only in terminal scrollback"), the component cheat sheet, and the
+page-naming rules — distilled from Claude Code 2.1.232's actual `artifact-design` skill and
+Artifact tool description (see `docs/claude-code-comparison.md`).
+
 ### Tool: `artifact_publish`
 
 | Arg | Type | Default | Meaning |
