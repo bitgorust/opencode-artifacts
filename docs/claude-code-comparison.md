@@ -64,6 +64,38 @@ Only free-form per-page JS (e.g. drag-drop boards) stays in raw-HTML mode.
 - `docs/evidence/artifact-page.png` — full artifact page (header, timeline table, both charts, error box, footer).
 - `docs/evidence/gallery.png` — auto-generated gallery.
 
+## Full capability inventory (from the 2.1.232 binary)
+
+The public docs lag the shipped feature set. Strings extracted from Claude Code 2.1.232
+(the tool registration, built-in skills, and consent machinery) reveal a second generation
+of capabilities beyond the documented ones:
+
+| Capability | Evidence in binary | Our status |
+|---|---|---|
+| Publish / update same URL, versions, gallery, share menu, permission prompt, emoji favicon, auto-open, live MCP connectors at view time | public docs + tool strings | ✅ at parity (except hosted-only sharing/connectors) |
+| **artifact-design skill** (mandatory design pass before every publish) | `artifact-design` SKILL_MD | ✅ adapted into `skills/artifact-pages` |
+| **Mermaid diagrams** | `artifact-diagramming` skill, mermaid composer | ❌ no mermaid fence yet |
+| **Plan artifacts** (offer to review the implementation plan as a page) | `publishPlanArtifact`, plan consent ask | 🟡 trivially possible today (publish the plan md); no dedicated flow |
+| **Comments on artifacts** (threads with span quotes, resolve, auto-responder pipeline) | `CLAUDE_CODE_ARTIFACT_COMMENTS*`, comment-pipeline prompts | ❌ needs persistence + identity |
+| **Workshop** (decide-and-revise loop: page carries open decisions, reader answers on the page, session reads answers back via `read_decisions`) | workshop skill, decision component | ❌ needs page→session readback |
+| **Shared per-artifact database** (`read_db`/`write_db`, collections/docs/queries; state shared across viewers) | db action strings | ❌ needs a store |
+| **Runtime capabilities** (`window.claude.*`: live data, shared state, file downloads, self-update; declared per page, roster-gated) | `artifact-capabilities` skill, capabilities prompt | ❌ needs a JS bridge + host |
+| **watch/unwatch/status** (session gets woken when another session republishes or comments) | webhook triggers, watch actions | 🟡 viewer-side analog exists (`serve` SSE); session-side wake is structural |
+| **Multi-file publish** (`files` map: separate CSS/JS/data/images) | `files` prompt paragraph | ➖ skipped by design — we inline everything into one file |
+| **Stale-version guard** (refuse to publish over a version this session hasn't seen) | `stale_version_guard` errors | ❌ cheap to add via manifest hashes |
+| **Sensitive-delta guard** (block live-shared republishes that expose new sensitive content) | permission analysis strings | ❌ LLM-judgment feature; could be a hook |
+| **live-edit action** | "not available in this build" | ➖ gated upstream too |
+
+## Best path per gap
+
+1. **Mermaid fence** — same pattern as vega: inline `mermaid.min.js` only when used, render at view time. Low effort, high value. *Next up.*
+2. **Plan artifacts** — document the pattern + add an `examples/patterns/plan.md`; one line in the skill. Docs-level effort.
+3. **Stale-version guard** — store a content hash in `manifest.json` per publish; `artifact_publish` compares and warns/refuses when overwriting unseen content. Small, self-contained.
+4. **Workshop + comments + shared DB** — all three reduce to one mechanism: the `serve` process gains a per-artifact JSON store (write via POST, read via a declared bridge script injected into served pages) and the plugin gains read-back actions. Local single-user versions of comments/DB are of limited value, but the **workshop decide-and-revise loop is genuinely useful locally** (reader answers on the page, session reads decisions back) — build that one first.
+5. **Runtime capabilities / live data** — a declared bridge (`window.opencodeArtifacts.*`) injected by `serve`, proxying allow-listed reads (e.g. MCP tool calls). Medium-high effort; only worth it after workshop proves the bridge pattern.
+6. **Org sharing, multi-viewer state, comment identity, audit** — structural: require `HostedPublisher` + accounts. Not locally replicable.
+7. **Sensitive-delta guard** — an OpenCode permission hook that diffs republished content against the previous version and escalates on new secrets/PII patterns; regex-level first, LLM-review optional.
+
 ## Remaining gaps (structural, not quality)
 
 Org/public **sharing links** and **view-time MCP connectors** require hosted infrastructure
