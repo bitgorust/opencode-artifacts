@@ -43,6 +43,7 @@ test("vega-lite chart inlines vega runtimes and compiled spec", () => {
   assert.ok(html.includes("runtime:vega-embed"));
   assert.ok(!html.includes("runtime:echarts"));
   assert.ok(html.includes("vegaEmbed("));
+  assert.ok(html.includes("ast: true"), "vega must run in CSP-safe interpreter mode");
   assert.ok(html.includes('\\"a\\":\\"A\\"') || html.includes('"a":"A"'));
 });
 
