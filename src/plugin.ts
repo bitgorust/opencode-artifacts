@@ -9,6 +9,7 @@ import {
 } from "./render.ts";
 import { FilePublisher, slugify, StaleArtifactError } from "./publisher.ts";
 import { formatFindings, scanSensitive } from "./guard.ts";
+import { readCollection, writeCollection } from "./serve.ts";
 import { openFile } from "./open.ts";
 
 export const ArtifactsPlugin: Plugin = async () => {
@@ -119,6 +120,66 @@ export const ArtifactsPlugin: Plugin = async () => {
               return `Publish refused: ${err.message}. Re-read the current page and re-apply your edits, then publish again with the new hash.`;
             }
             throw err;
+          }
+        },
+      }),
+      artifact_db: tool({
+        description: [
+          "Read or write an artifact's shared mini-database (collections of JSON documents,",
+          "stored under .opencode/artifacts/.db/). Mirrors what the served page can do through",
+          "the opencodeArtifacts.db bridge.",
+        ].join(" "),
+        args: {
+          slug: tool.schema.string(),
+          collection: tool.schema.string(),
+          op: tool.schema.enum(["get", "list", "set", "delete"]),
+          id: tool.schema.string().optional().describe("Document id (required for get/set/delete)"),
+          doc: tool.schema.unknown().optional().describe("Document body for set"),
+          q: tool.schema
+            .string()
+            .optional()
+            .describe("Equality filter for list, as field:value"),
+        },
+        async execute(args, ctx) {
+          const root = join(ctx.worktree, ".opencode", "artifacts");
+          const store = await readCollection(root, args.slug, args.collection);
+          switch (args.op) {
+            case "get": {
+              if (!args.id) return "get requires id";
+              return args.id in store.docs
+                ? JSON.stringify({ id: args.id, doc: store.docs[args.id] }, null, 2)
+                : `No document '${args.id}' in ${args.slug}/${args.collection}.`;
+            }
+            case "list": {
+              let entries = Object.entries(store.docs);
+              if (args.q) {
+                const [field, ...rest] = args.q.split(":");
+                const want = rest.join(":");
+                entries = entries.filter(
+                  ([, doc]) =>
+                    typeof doc === "object" &&
+                    doc !== null &&
+                    String((doc as Record<string, unknown>)[field]) === want,
+                );
+              }
+              return JSON.stringify(
+                entries.map(([id, doc]) => ({ id, doc })),
+                null,
+                2,
+              );
+            }
+            case "set": {
+              if (!args.id) return "set requires id";
+              store.docs[args.id] = args.doc ?? null;
+              await writeCollection(root, args.slug, args.collection, store);
+              return `Wrote ${args.slug}/${args.collection}/${args.id}.`;
+            }
+            case "delete": {
+              if (!args.id) return "delete requires id";
+              delete store.docs[args.id];
+              await writeCollection(root, args.slug, args.collection, store);
+              return `Deleted ${args.slug}/${args.collection}/${args.id}.`;
+            }
           }
         },
       }),

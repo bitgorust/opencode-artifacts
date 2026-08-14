@@ -119,9 +119,13 @@ async function writeThreads(root: string, slug: string, threads: CommentThread[]
 
 const MAX_THREADS = 200;
 
-type DocStore = { docs: Record<string, unknown> };
+export type DocStore = { docs: Record<string, unknown> };
 
-async function readCollection(root: string, slug: string, collection: string): Promise<DocStore> {
+export async function readCollection(
+  root: string,
+  slug: string,
+  collection: string,
+): Promise<DocStore> {
   try {
     const parsed: unknown = JSON.parse(
       await readFile(join(root, ".db", slug, `${collection}.json`), "utf8"),
@@ -136,7 +140,7 @@ async function readCollection(root: string, slug: string, collection: string): P
   }
 }
 
-async function writeCollection(
+export async function writeCollection(
   root: string,
   slug: string,
   collection: string,

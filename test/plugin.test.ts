@@ -82,6 +82,47 @@ test("artifact_publish blocks credential-looking content unless forced", async (
   });
 });
 
+test("artifact_db reads and writes collection documents", async () => {
+  const hooks = await ArtifactsPlugin({} as unknown as PluginInput);
+  const db = hooks.tool?.artifact_db;
+  assert.ok(db);
+
+  await withWorktree(async (dir) => {
+    const ctx: ToolContext = {
+      sessionID: "s1",
+      messageID: "m1",
+      agent: "test",
+      directory: dir,
+      worktree: dir,
+      abort: new AbortController().signal,
+      metadata: () => {},
+      ask: async () => {},
+    };
+
+    assert.match(
+      String(await db.execute({ slug: "board", collection: "notes", op: "set", id: "n1", doc: { text: "hi", col: "now" } }, ctx)),
+      /Wrote board\/notes\/n1/,
+    );
+    await db.execute({ slug: "board", collection: "notes", op: "set", id: "n2", doc: { text: "yo", col: "later" } }, ctx);
+
+    const got = String(await db.execute({ slug: "board", collection: "notes", op: "get", id: "n1" }, ctx));
+    assert.match(got, /hi/);
+
+    const filtered = String(await db.execute({ slug: "board", collection: "notes", op: "list", q: "col:later" }, ctx));
+    assert.match(filtered, /n2/);
+    assert.ok(!filtered.includes("n1"));
+
+    assert.match(
+      String(await db.execute({ slug: "board", collection: "notes", op: "delete", id: "n1" }, ctx)),
+      /Deleted/,
+    );
+    assert.match(
+      String(await db.execute({ slug: "board", collection: "notes", op: "get", id: "n1" }, ctx)),
+      /No document/,
+    );
+  });
+});
+
 test("artifact_comments lists threads and resolves by id", async () => {
   const hooks = await ArtifactsPlugin({} as unknown as PluginInput);
   const comments = hooks.tool?.artifact_comments;
