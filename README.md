@@ -59,13 +59,25 @@ and gets back `Artifact published to <worktree>/.opencode/artifacts/incident-417
 | `title` | string? | frontmatter `title` | Title override |
 | `open` | boolean? | `false` | Open in the system browser after publishing |
 | `version` | boolean? | `false` | Also keep `<slug>.v<N>.html` history files |
+| `format` | `"markdown" \| "html"`? | `"markdown"` | `"html"` embeds the input as raw trusted HTML |
+
+Publishing asks for permission once (`artifact_publish`), writes the page, updates a
+`manifest.json`, and regenerates a local **gallery** at `.opencode/artifacts/index.html`.
+Every artifact footer links back to the gallery and shows its version and update time.
 
 ## CLI
 
 ```bash
 npm install -g opencode-artifacts
-opencode-artifacts render examples/incident-report.md -o report.html --open
+
+opencode-artifacts render examples/incident-report.md --open --version
+opencode-artifacts serve                       # http://127.0.0.1:4173, pages live-reload on republish
+opencode-artifacts restore <slug> --version 1  # point the stable page back at an older version
+opencode-artifacts latest --open               # reopen the most recently updated artifact
 ```
+
+`serve` relaxes `connect-src` to `'self'` on the served copy only (needed for the
+live-reload EventSource); the files on disk keep `connect-src 'none'`.
 
 ## Authoring format
 
@@ -91,9 +103,14 @@ npm run build   # tsc -> dist/
 
 ## Roadmap
 
-- `LocalServerPublisher` — localhost live reload over SSE
-- `HostedPublisher` — auth + org sharing links
+- `HostedPublisher` — auth + org sharing links (the one structural gap vs Claude Code Artifacts)
 - Mermaid blocks, syntax highlighting, PDF export
+
+## Parity with Claude Code Artifacts
+
+See [`docs/claude-code-comparison.md`](docs/claude-code-comparison.md) for the full feature
+matrix, verified QA log, and screenshots (`docs/evidence/`). Everything achievable without
+hosted infrastructure is at parity; sharing links need `HostedPublisher`.
 
 ## License
 

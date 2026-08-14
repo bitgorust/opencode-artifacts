@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { ArtifactTooLargeError, renderArtifact } from "../src/render.ts";
+import { ArtifactTooLargeError, renderArtifact, renderRawHtml } from "../src/render.ts";
 
 const VEGA_LITE_CHART = [
   "```vega-lite",
@@ -70,4 +70,19 @@ test("chart spec cannot break out of the script tag", () => {
 
 test("size cap throws ArtifactTooLargeError", () => {
   assert.throws(() => renderArtifact("# tiny", { maxBytes: 64 }), ArtifactTooLargeError);
+});
+
+test("every page carries an emoji favicon and a footer placeholder", () => {
+  const { html } = renderArtifact("---\ntitle: T\nicon: 🚨\n---\nhi\n");
+  assert.match(html, /<link rel="icon" href="data:image\/svg\+xml,/);
+  assert.ok(html.includes("<!--artifact:footer-->"));
+});
+
+test("renderRawHtml embeds trusted html and keeps the CSP shell", () => {
+  const { html, meta, chartCount } = renderRawHtml("<section><b>raw</b></section>", { title: "Raw" });
+  assert.equal(meta.title, "Raw");
+  assert.equal(chartCount, 0);
+  assert.ok(html.includes("<section><b>raw</b></section>"));
+  assert.match(html, /Content-Security-Policy/);
+  assert.ok(!html.includes("runtime:vega"));
 });
