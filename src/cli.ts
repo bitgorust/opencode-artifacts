@@ -5,6 +5,14 @@ import { renderArtifact, renderRawHtml } from "./render.ts";
 import { FilePublisher, slugify } from "./publisher.ts";
 import { GitHubPagesPublisher } from "./github-pages.ts";
 import { CloudflarePublisher } from "./cloudflare-publisher.ts";
+import {
+  globalConfigPath,
+  loadConfig,
+  projectConfigPath,
+  saveConfig,
+  type ArtifactsConfig,
+  type DeployTarget,
+} from "./config.ts";
 import { formatFindings, scanSensitive } from "./guard.ts";
 import { serveArtifacts } from "./serve.ts";
 import { openFile } from "./open.ts";
@@ -19,7 +27,8 @@ function usage(): never {
   opencode-artifacts latest [--dir <artifacts-dir>] [--open]
   opencode-artifacts state <slug> [--dir <artifacts-dir>]
   opencode-artifacts deploy --repo <owner/name> [--dir <artifacts-dir>] [--branch <name>]
-  opencode-artifacts deploy --target cloudflare --name <worker> [--dir <artifacts-dir>]`);
+  opencode-artifacts deploy --target cloudflare --name <worker> [--dir <artifacts-dir>]
+  opencode-artifacts init [--global] [--target github|cloudflare] [--repo <owner/name>] [--worker-name <name>] [--yes]`);
   process.exit(2);
 }
 
@@ -163,6 +172,73 @@ async function deployCommand(args: string[]): Promise<void> {
   console.log(baseUrl);
 }
 
+async function ghLogin(): Promise<string | undefined> {
+  try {
+    const { runProcess } = await import("./github-pages.ts");
+    const login = (await runProcess("gh", ["api", "user", "--jq", ".login"])).trim();
+    return /^[a-z0-9-]+$/i.test(login) ? login : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function initCommand(args: string[]): Promise<void> {
+  const global = args.includes("--global");
+  const yes = args.includes("--yes");
+  const path = global ? globalConfigPath() : projectConfigPath(process.cwd());
+
+  const existing = await loadConfig(process.cwd());
+  const config: ArtifactsConfig = { ...existing };
+
+  let target = optionValue(args, "--target") as DeployTarget | undefined;
+  let repo = optionValue(args, "--repo");
+  let workerName = optionValue(args, "--worker-name");
+
+  if (!yes && process.stdin.isTTY) {
+    const { createInterface } = await import("node:readline/promises");
+    const rl = createInterface({ input: process.stdin, output: process.stdout });
+    try {
+      if (target === undefined) {
+        const answer = await rl.question(
+          "Deploy target for published artifacts? [github/cloudflare/skip] (github) ",
+        );
+        const picked = answer.trim().toLowerCase();
+        target = picked === "cloudflare" ? "cloudflare" : picked === "skip" ? undefined : "github";
+      }
+      if (target === "github" && repo === undefined) {
+        const login = await ghLogin();
+        const suggested = login !== undefined ? `${login}/artifacts` : "owner/artifacts";
+        const answer = await rl.question(`GitHub Pages repo (owner/name) [${suggested}] `);
+        repo = answer.trim() === "" ? suggested : answer.trim();
+      }
+      if (target === "cloudflare" && workerName === undefined) {
+        const answer = await rl.question("Cloudflare worker name [opencode-artifacts] ");
+        workerName = answer.trim() === "" ? "opencode-artifacts" : answer.trim();
+      }
+    } finally {
+      rl.close();
+    }
+  }
+
+  if (target !== undefined) {
+    config.deploy = {
+      target,
+      ...(repo !== undefined ? { repo } : {}),
+      ...(workerName !== undefined ? { workerName } : {}),
+    };
+    await saveConfig(path, config);
+    console.log(`Wrote ${path}`);
+    console.log(`Deploy target: ${target}${repo ? ` (${repo})` : ""}${workerName ? ` (${workerName})` : ""}`);
+  } else if (config.deploy !== undefined) {
+    const current = config.deploy;
+    console.log(
+      `Keeping existing deploy target: ${current.target}${current.repo ? ` (${current.repo})` : ""}${current.workerName ? ` (${current.workerName})` : ""}`,
+    );
+  } else {
+    console.log("No deploy target configured; artifacts stay local. Re-run init anytime.");
+  }
+}
+
 async function main(argv: string[]): Promise<void> {
   const [command, ...rest] = argv;
   switch (command) {
@@ -178,6 +254,8 @@ async function main(argv: string[]): Promise<void> {
       return stateCommand(rest);
     case "deploy":
       return deployCommand(rest);
+    case "init":
+      return initCommand(rest);
     default:
       usage();
   }

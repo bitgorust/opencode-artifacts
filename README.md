@@ -29,6 +29,17 @@ Add to your `opencode.json`:
 }
 ```
 
+Then (optional, for hosted deploys) run the setup wizard — it asks once whether and where to
+deploy, and writes the answer to `.opencode/artifacts.json` (or `~/.config` with `--global`):
+
+```bash
+npx opencode-artifacts init
+# or non-interactively: npx opencode-artifacts init --yes --target github --repo you/artifacts
+```
+
+After that, `artifact_publish` with just `deploy: true` uses the configured target — no need
+to repeat repo/worker names.
+
 Then ask in a session, e.g.:
 
 > Summarize this incident investigation and publish it as an artifact with a timeline table and an error-rate chart.

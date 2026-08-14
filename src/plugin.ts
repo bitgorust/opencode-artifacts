@@ -11,6 +11,7 @@ import {
 import { FilePublisher, slugify, StaleArtifactError } from "./publisher.ts";
 import { GitHubPagesPublisher } from "./github-pages.ts";
 import { CloudflarePublisher } from "./cloudflare-publisher.ts";
+import { loadConfig, resolveDeploy } from "./config.ts";
 import { formatFindings, scanSensitive } from "./guard.ts";
 import { readCollection, writeCollection } from "./serve.ts";
 import { openFile } from "./open.ts";
@@ -108,23 +109,28 @@ export const ArtifactsPlugin: Plugin = async () => {
             });
 
             const localDir = join(ctx.worktree, ".opencode", "artifacts");
-            const publisher = (() => {
+            const publisher = await (async () => {
               if (!args.deploy) return new FilePublisher(localDir);
-              const target = args.target ?? (args.repo ? "github" : undefined);
-              if (target === "github" && args.repo) {
+              const config = await loadConfig(ctx.worktree);
+              const resolved = resolveDeploy(
+                { repo: args.repo, target: args.target, workerName: args.workerName },
+                config,
+              );
+              if (resolved.target === "github" && resolved.repo) {
                 return new GitHubPagesPublisher(localDir, {
-                  repo: args.repo,
-                  cloneDir: ghPagesCloneDir(args.repo),
+                  repo: resolved.repo,
+                  branch: resolved.branch,
+                  cloneDir: ghPagesCloneDir(resolved.repo),
                 });
               }
-              if (target === "cloudflare" && args.workerName) {
+              if (resolved.target === "cloudflare" && resolved.workerName) {
                 return new CloudflarePublisher(localDir, {
-                  workerName: args.workerName,
-                  stagingDir: cfStagingDir(args.workerName),
+                  workerName: resolved.workerName,
+                  stagingDir: cfStagingDir(resolved.workerName),
                 });
               }
               throw new Error(
-                "deploy requires repo (github) or target: 'cloudflare' with workerName",
+                `deploy target '${resolved.target}' is missing its ${resolved.target === "github" ? "repo" : "workerName"} — run \`opencode-artifacts init\``,
               );
             })();
             const result = await publisher.publish({
