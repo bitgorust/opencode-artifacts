@@ -117,3 +117,26 @@ test("github alerts become toned callouts and task lists become checkboxes", () 
   assert.match(html, /<input type="checkbox" checked disabled>/);
   assert.match(html, /<input type="checkbox" disabled>/);
 });
+
+test("copy renders a button plus a template carrying the escaped text", () => {
+  const html = renderComponent(
+    "copy",
+    JSON.stringify({ label: "Copy as prompt", text: "line one\nline <two>" }),
+    "component-3",
+  );
+  assert.match(html, /copy-btn" data-copy-target="component-3"/);
+  assert.match(html, /<template id="component-3">line one\nline &lt;two&gt;<\/template>/);
+  assert.match(html, /Copy as prompt/);
+});
+
+test("copy requires a text field", () => {
+  assert.match(renderComponent("copy", "{}"), /chart-error/);
+});
+
+test("a copy-only page still ships the boot script but no chart runtimes", () => {
+  const { html } = renderArtifact("```copy\n" + JSON.stringify({ text: "x" }) + "\n```\n");
+  assert.ok(html.includes("navigator.clipboard"));
+  assert.ok(html.includes("copy-btn"));
+  assert.ok(!html.includes("runtime:vega"));
+  assert.ok(!html.includes("window.__ARTIFACT_CHARTS__=["));
+});

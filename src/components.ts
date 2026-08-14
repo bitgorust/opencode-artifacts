@@ -7,7 +7,8 @@ export type ComponentKind =
   | "compare"
   | "callout"
   | "progress"
-  | "diff";
+  | "diff"
+  | "copy";
 
 export const COMPONENT_KINDS: ReadonlySet<string> = new Set([
   "stats",
@@ -17,6 +18,7 @@ export const COMPONENT_KINDS: ReadonlySet<string> = new Set([
   "callout",
   "progress",
   "diff",
+  "copy",
 ]);
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
@@ -183,7 +185,21 @@ function renderDiff(source: string): string {
   return `<div class="diff">${rows.join("")}</div>`;
 }
 
-export function renderComponent(kind: ComponentKind, json: string): string {
+function renderCopy(spec: unknown, id: string | undefined): string {
+  const item = asRecord(spec);
+  if (!item) return errorBox("copy", "expected a JSON object");
+  const text = str(item, "text");
+  if (text === undefined) return errorBox("copy", "missing 'text'");
+  const target = id ?? "copy-0";
+  const label = str(item, "label") ?? "Copy";
+  return [
+    `<span class="copy-wrap"><button type="button" class="copy-btn" data-copy-target="${escapeHtmlText(target)}">${escapeHtmlText(label)}</button>`,
+    `<template id="${escapeHtmlText(target)}">${escapeHtmlText(text)}</template>`,
+    '<span class="copy-note" aria-live="polite"></span></span>',
+  ].join("");
+}
+
+export function renderComponent(kind: ComponentKind, json: string, id?: string): string {
   if (kind === "diff") return renderDiff(json);
   let spec: unknown;
   try {
@@ -204,5 +220,7 @@ export function renderComponent(kind: ComponentKind, json: string): string {
       return renderCallout(spec);
     case "progress":
       return renderProgress(spec);
+    case "copy":
+      return renderCopy(spec, id);
   }
 }

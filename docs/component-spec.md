@@ -89,6 +89,18 @@ tones: info (blue-gray), warn (amber), good, bad. Bold narrative title + body.
 Plain unified diff text; lines starting with `## note:` become annotation rows (gray, italic,
 spanning). `+` green bg, `-` red bg, `@@` hunk headers muted.
 
+### ```copy — copy-to-clipboard button (added v0.4)
+```json
+{ "label": "Copy as prompt", "text": "multi-line text, preserved" }
+```
+Text rides in an inert `<template>` element (escaping-safe, newline-preserving); the fixed boot
+script writes it to the clipboard on click and shows a transient confirmation.
+
+### Interactive controls (added v0.4)
+No custom component needed: vega-lite `params` with `bind` render as native sliders/selects and
+re-render the chart live through vega's signal graph (CSP-safe under `ast: true`); echarts
+`dataZoom` / toolbox options work as-is. Anything beyond chart-bound controls → raw HTML mode.
+
 ## Markdown-level additions
 
 - GitHub alerts: `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`, `> [!IMPORTANT]`, `> [!CAUTION]`
@@ -106,7 +118,9 @@ spanning). `+` green bg, `-` red bg, `@@` hunk headers muted.
 | Dashboard | `stats`, charts, `callout` |
 | Incident page / postmortem | `timeline`, `stats`, charts, `callout` |
 | Findings linked to lines | `findings` (`location`) |
-| Interactive controls / export-to-prompt | out of scope for the fixed renderer (raw HTML mode can still do it) |
+| Tune with interactive controls | vega-lite `params.bind` sliders, echarts `dataZoom` (verified live in browser QA) |
+| Bring the result back to the session | `copy` button (verified: click writes to clipboard, shows confirmation) |
+| Free-form interactivity (drag-drop boards etc.) | raw HTML mode (`format: "html"`) |
 
 ## Acceptance
 

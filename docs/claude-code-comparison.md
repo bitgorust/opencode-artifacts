@@ -19,9 +19,12 @@ by browser QA with zero console errors — screenshots in `docs/evidence/pattern
 - `pr-walkthrough.png` — severity findings + annotated diff + warning alert
 - `release-checklist.png` — progress bar + task lists + important alert
 - `compare-layouts.png` — variant cards with pills, numbered annotations, tradeoffs
+- `tune-controls.png` — live vega-lite param sliders + echarts dataZoom + copy button (v0.4)
 
-Out of scope for the fixed renderer (raw-HTML mode remains available): free-form interactive
-controls (sliders) and export-to-prompt buttons — Claude builds those with per-page custom JS.
+Interactive patterns are covered inside the fixed renderer: chart-bound controls via vega-lite
+`params.bind` / echarts `dataZoom` (browser-verified: moving a slider re-rendered the chart),
+and export-back-to-session via the `copy` component (browser-verified clipboard write).
+Only free-form per-page JS (e.g. drag-drop boards) stays in raw-HTML mode.
 
 ## Feature matrix
 

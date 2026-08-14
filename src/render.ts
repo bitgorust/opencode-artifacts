@@ -139,6 +139,10 @@ blockquote{margin:1rem 0;padding:.25rem 1rem;border-left:3px solid var(--line);c
 .alert-bad{border-color:var(--bad);background:var(--bad-bg)}
 li.task{list-style:none}
 li.task input{margin-right:.45rem;accent-color:var(--accent)}
+.copy-wrap{display:inline-flex;align-items:center;gap:.55rem;margin:.25rem 0}
+.copy-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-size:.85rem;font-weight:600;cursor:pointer}
+.copy-btn:hover{filter:brightness(1.08)}
+.copy-note{font-size:.8rem;color:var(--good)}
 .progress{margin:1.25rem 0}
 .progress-label{font-size:.85rem;font-weight:600;margin-bottom:.4rem}
 .progress-track{height:.55rem;border-radius:999px;background:var(--code-bg);overflow:hidden}
@@ -181,6 +185,28 @@ const BOOT = `(function () {
       }
     } catch (err) {
       fail(err && err.message ? err.message : String(err));
+    }
+  });
+  document.addEventListener("click", function (ev) {
+    var btn = ev.target && ev.target.closest ? ev.target.closest(".copy-btn") : null;
+    if (!btn) return;
+    var tpl = document.getElementById(btn.getAttribute("data-copy-target"));
+    var wrap = btn.parentNode;
+    var note = wrap ? wrap.querySelector(".copy-note") : null;
+    if (!tpl) return;
+    var text = (tpl.content ? tpl.content.textContent : tpl.textContent) || "";
+    function feedback(msg) {
+      if (!note) return;
+      note.textContent = msg;
+      setTimeout(function () { note.textContent = ""; }, 1600);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { feedback("Copied"); },
+        function () { feedback("Copy blocked - select manually"); },
+      );
+    } else {
+      feedback("Clipboard unavailable");
     }
   });
 })();`;
@@ -264,6 +290,7 @@ interface AssembleInput {
   icon: string;
   bodyHtml: string;
   resolved: ResolvedChart[];
+  needsBoot: boolean;
   maxBytes: number;
 }
 
@@ -300,6 +327,8 @@ function assemblePage(input: AssembleInput): string {
     for (const name of ["vega", "vega-embed", "echarts"] as const) {
       if (runtimes.has(name)) parts.push(`<script>${runtimeBundle(name)}</script>`);
     }
+  }
+  if (input.resolved.length > 0 || input.needsBoot) {
     parts.push(`<script>${BOOT}</script>`);
   }
 
@@ -316,9 +345,11 @@ export function renderArtifact(markdown: string, options: RenderOptions = {}): R
   const doc = parseDocument(markdown);
 
   let bodyHtml = doc.bodyHtml;
+  let needsBoot = false;
   doc.components.forEach((block, index) => {
     const placeholder = `<div class="component" data-component-index="${index}"></div>`;
-    bodyHtml = bodyHtml.replace(placeholder, renderComponent(block.kind, block.json));
+    bodyHtml = bodyHtml.replace(placeholder, renderComponent(block.kind, block.json, `component-${index}`));
+    if (block.kind === "copy") needsBoot = true;
   });
   bodyHtml = wrapSections(enhanceBodyHtml(bodyHtml));
 
@@ -327,6 +358,7 @@ export function renderArtifact(markdown: string, options: RenderOptions = {}): R
     icon: doc.meta.icon ?? "📄",
     bodyHtml,
     resolved: resolveCharts(doc.charts),
+    needsBoot,
     maxBytes: options.maxBytes ?? DEFAULT_MAX_BYTES,
   });
   return { html, meta: doc.meta, chartCount: doc.charts.length };
@@ -342,6 +374,7 @@ export function renderRawHtml(
     icon: meta.icon ?? "📄",
     bodyHtml,
     resolved: [],
+    needsBoot: false,
     maxBytes: options.maxBytes ?? DEFAULT_MAX_BYTES,
   });
   return { html, meta, chartCount: 0 };

@@ -91,6 +91,8 @@ live-reload EventSource); the files on disk keep `connect-src 'none'`.
   - ```` ```callout ```` — tinted insight card: `{tone, title?, body?}`
   - ```` ```progress ```` — progress bar: `{label?, done, total}`
   - ```` ```diff ```` — annotated unified diff (lines starting `## note:` become annotations)
+  - ```` ```copy ```` — copy-to-clipboard button: `{label?, text}` (fixed JS; text rides in a `<template>`, newlines preserved)
+- **Interactive controls without custom JS**: vega-lite `params` with `bind` render as native sliders/dropdowns and re-render the chart live; echarts `dataZoom`/toolbox options work as-is. See `examples/patterns/tune-controls.md`.
 - **Markdown extras**: GitHub alerts (`> [!NOTE]` / `[!TIP]` / `[!IMPORTANT]` / `[!WARNING]` / `[!CAUTION]`), task lists (`- [x]`), auto heading anchors, and `##` sections become white cards.
 - **Broken specs don't break the page** — the slot shows an inline error box instead.
 - **Everything else** is standard Markdown (tables, code blocks, links, images as data URIs).
