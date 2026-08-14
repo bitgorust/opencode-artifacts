@@ -31,7 +31,7 @@ test("plain markdown artifact carries CSP and escaped title, no chart runtimes",
   assert.equal(chartCount, 0);
   assert.match(html, /Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'"/);
   assert.match(html, /<title>My &lt;b&gt;Report&lt;\/b&gt;<\/title>/);
-  assert.match(html, /<h1>Hi<\/h1>/);
+  assert.match(html, /<h1 id="hi">Hi<\/h1>/);
   assert.ok(!html.includes("runtime:vega"));
   assert.ok(!html.includes("runtime:echarts"));
 });

@@ -1,8 +1,27 @@
 # Parity comparison: Claude Code Artifacts vs opencode-artifacts
 
 Baseline: official docs `https://code.claude.com/docs/en/artifacts` and the launch post
-`https://claude.com/blog/artifacts-in-claude-code` (retrieved 2026-08-14).
-Compared against opencode-artifacts v0.2.0.
+`https://claude.com/blog/artifacts-in-claude-code` (retrieved 2026-08-14), plus the official
+viewer screenshot (`docs/references/claude-artifact-viewer.png`).
+Compared against opencode-artifacts v0.3.0.
+
+## Page quality (v0.3)
+
+Claude's page quality comes from a built-in design skill producing raw HTML. We reach the same
+visual language with a fixed renderer: card-based layout on a gray-blue canvas, metric stat
+cards with delta pills, tinted insight callouts, vertical timelines, severity-coded findings,
+annotated diffs, variant comparison cards, progress bars, and GitHub-style alerts. The five
+canonical patterns from the official docs are reproduced in `examples/patterns/` and verified
+by browser QA with zero console errors — screenshots in `docs/evidence/patterns/`:
+
+- `dashboard.png` — stats row + chart + insight callout (compare with the official viewer screenshot)
+- `incident.png` — stats + timeline + area chart + root-cause callout + task list
+- `pr-walkthrough.png` — severity findings + annotated diff + warning alert
+- `release-checklist.png` — progress bar + task lists + important alert
+- `compare-layouts.png` — variant cards with pills, numbered annotations, tradeoffs
+
+Out of scope for the fixed renderer (raw-HTML mode remains available): free-form interactive
+controls (sliders) and export-to-prompt buttons — Claude builds those with per-page custom JS.
 
 ## Feature matrix
 

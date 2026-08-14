@@ -1,16 +1,10 @@
 import { copyFile, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { renderGallery } from "./gallery.ts";
-import { escapeHtmlText, FOOTER_PLACEHOLDER } from "./render.ts";
+import { FOOTER_PLACEHOLDER } from "./render.ts";
+import { escapeHtmlText, slugify } from "./text.ts";
 
-export function slugify(title: string): string {
-  const slug = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
-  return slug.length > 0 ? slug : "artifact";
-}
+export { slugify } from "./text.ts";
 
 export interface ArtifactMeta {
   slug: string;

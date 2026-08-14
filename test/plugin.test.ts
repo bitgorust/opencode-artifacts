@@ -45,7 +45,7 @@ test("artifact_publish asks permission, publishes, and reports the path", async 
     assert.match(String(result), /Artifact published to .*demo-page\.html/);
 
     const page = await readFile(join(dir, ".opencode", "artifacts", "demo-page.html"), "utf8");
-    assert.match(page, /<h1>Hello<\/h1>/);
+    assert.match(page, /<h1 id="hello">Hello<\/h1>/);
     assert.match(page, /artifact-footer/);
 
     const gallery = await readFile(join(dir, ".opencode", "artifacts", "index.html"), "utf8");

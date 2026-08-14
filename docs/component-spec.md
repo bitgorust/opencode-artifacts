@@ -1,0 +1,115 @@
+# Component Authoring Spec (v0.3)
+
+Goal: reach Claude Code Artifacts **page** quality while keeping our authoring model
+(model writes Markdown + JSON specs, fixed renderer owns the HTML/CSS).
+
+Reference: `docs/references/claude-artifact-viewer.png` (official viewer screenshot),
+`docs/claude-code-comparison.md` (pattern list from official docs).
+
+## Design tokens (extracted from the official screenshot)
+
+```
+--page-bg:        #e9edf2  (light gray-blue)
+--card-bg:        #ffffff
+--card-radius:    16px
+--card-padding:   24px
+--card-shadow:    0 1px 3px rgb(15 23 42 / 0.06)
+--ink:            #111827
+--ink-2:          #4b5563
+--ink-3:          #9ca3af
+--line:           #e5e7eb
+--accent:         #6d6bd6  (periwinkle, chart fill / pills)
+--good:           #2f9e6e  on #e4f4ec
+--bad:            #d64550  on #fdeeee
+--warn:           #b45309  on #fdf0dc
+--info:           #33526e  on #dce6f2
+--card-bad-bg:    #fdeeee  (whole metric card tinted when tone=bad)
+--card-info-bg:   #e3eaf4  (insight card, blue-gray)
+--card-warn-bg:   #fdeccd  (insight card, amber)
+--radius-pill:    999px
+--font:           system-ui stack
+--font-mono:      ui-monospace stack
+```
+
+Dark mode: same hues, backgrounds shifted (page `#151a21`, card `#1f2630`, ink `#e5e7eb`),
+via `color-scheme: light dark` + `@media (prefers-color-scheme: dark)` overrides.
+
+## Page layout
+
+- Page background `--page-bg`; content column max-width 1080px.
+- Top-level `## h2` sections become **white cards** (split rendered body HTML on `<h2`,
+  wrap each chunk in `<section class="card">`; intro content before the first h2 stays unwrapped).
+- h2 = narrative headline style: 22px/700, tight letter-spacing.
+- Every heading gets an `id` anchor (slugified text) — pages are single-file, in-page anchors only.
+
+## Components (new fenced block types, JSON payload)
+
+### ```stats — metric cards row (the hero component in the screenshot)
+```json
+[
+  { "label": "EDITOR SESSIONS", "value": "8.41M", "delta": "3.1%", "direction": "up", "tone": "good" },
+  { "label": "EXPORT COMPLETION", "value": "27.8%", "delta": "9.4pt", "direction": "down", "tone": "bad", "emphasis": true }
+]
+```
+Renders: grid of cards; big bold value, small-caps gray label, delta pill (▲/▼) in
+tone color; `tone: "bad"` tints the whole card `--card-bad-bg`. Fields `delta/direction/tone/emphasis` optional.
+
+### ```timeline — vertical incident timeline
+```json
+[{ "time": "13:54", "title": "Alert fires", "detail": "p99 > 2.5s for 5m", "tone": "bad" }]
+```
+Renders: left rail with dots, time in mono, title bold, detail gray; tone colors the dot.
+
+### ```findings — severity-coded findings (PR walkthrough / security review)
+```json
+[{ "severity": "high", "title": "Sync fraud check on hot path", "location": "src/payments/checkout.ts:88", "detail": "..." }]
+```
+Renders: rows with severity pill (critical `#7f1d1d/#fee2e2`, high bad, medium warn, low info),
+location in mono.
+
+### ```compare — variant cards side by side
+```json
+[{ "title": "4.2 — Current", "pill": "red", "annotations": ["Pro preselected", "CTA sells the plan"], "tradeoff": "Higher intent, darker pattern" }]
+```
+Renders: equal-width cards; pill tag, numbered annotations (❶❷), one-line tradeoff in italic gray.
+`body` optional for a mock/description block (raw markdown text, rendered inline).
+
+### ```callout — insight card (colored, like "The funnel didn't sag" / "Cancels are reflexes")
+```json
+{ "tone": "info", "title": "The funnel didn't sag — it snapped", "body": "..." }
+```
+tones: info (blue-gray), warn (amber), good, bad. Bold narrative title + body.
+
+### ```progress — checklist progress bar
+```json
+{ "label": "Migration", "done": 7, "total": 12 }
+```
+
+### ```diff — annotated diff
+Plain unified diff text; lines starting with `## note:` become annotation rows (gray, italic,
+spanning). `+` green bg, `-` red bg, `@@` hunk headers muted.
+
+## Markdown-level additions
+
+- GitHub alerts: `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`, `> [!IMPORTANT]`, `> [!CAUTION]`
+  → styled callout boxes (post-process rendered `<blockquote>` HTML).
+- Task lists: `- [ ]` / `- [x]` render as styled checkboxes (read-only).
+- Invalid JSON in any component fence → inline error box (existing behavior, reused).
+
+## Mapping to the documented Claude patterns
+
+| Claude pattern (docs) | Our components |
+|---|---|
+| Walk through a change (annotated diff, severity) | `diff`, `findings` |
+| Compare alternatives (variants + tradeoff) | `compare` |
+| Track work in progress (checklist) | task lists + `progress` |
+| Dashboard | `stats`, charts, `callout` |
+| Incident page / postmortem | `timeline`, `stats`, charts, `callout` |
+| Findings linked to lines | `findings` (`location`) |
+| Interactive controls / export-to-prompt | out of scope for the fixed renderer (raw HTML mode can still do it) |
+
+## Acceptance
+
+- Each component renders from JSON, escapes text, and has a node:test case.
+- Five example pages under `examples/patterns/`: dashboard, incident, pr-walkthrough,
+  release-checklist, compare-layouts — each passing browser QA (screenshot).

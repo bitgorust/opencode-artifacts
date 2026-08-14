@@ -83,8 +83,20 @@ live-reload EventSource); the files on disk keep `connect-src 'none'`.
 
 - **Frontmatter** (optional): `title: ...`, `icon: ...` between `---` fences. Only `key: value` lines; anything else is ignored with a warning.
 - **Chart blocks**: fenced code blocks tagged `vega-lite`, `vega`, or `echarts`, containing one JSON spec. Vega-Lite specs are compiled to Vega at render time; charts render with Vega's CSP-safe interpreter (`ast: true`).
-- **Broken specs don't break the page** — the chart slot shows an inline error box instead.
+- **Component blocks** (JSON in a fence, see `docs/component-spec.md`):
+  - ```` ```stats ```` — metric cards row: `[{label, value, delta?, direction?, tone?, emphasis?}]`
+  - ```` ```timeline ```` — vertical incident timeline: `[{time, title, detail?, tone?}]`
+  - ```` ```findings ```` — severity-coded findings: `[{severity, title, location?, detail?}]`
+  - ```` ```compare ```` — variant cards: `[{title, pill?, annotations?, tradeoff?}]`
+  - ```` ```callout ```` — tinted insight card: `{tone, title?, body?}`
+  - ```` ```progress ```` — progress bar: `{label?, done, total}`
+  - ```` ```diff ```` — annotated unified diff (lines starting `## note:` become annotations)
+- **Markdown extras**: GitHub alerts (`> [!NOTE]` / `[!TIP]` / `[!IMPORTANT]` / `[!WARNING]` / `[!CAUTION]`), task lists (`- [x]`), auto heading anchors, and `##` sections become white cards.
+- **Broken specs don't break the page** — the slot shows an inline error box instead.
 - **Everything else** is standard Markdown (tables, code blocks, links, images as data URIs).
+
+Worked examples for the five canonical patterns live in `examples/patterns/` with rendered
+screenshots in `docs/evidence/patterns/`.
 
 ## Security model
 

@@ -1,4 +1,5 @@
 import MarkdownIt from "markdown-it";
+import { COMPONENT_KINDS, type ComponentKind } from "./components.ts";
 
 export interface Frontmatter {
   title?: string;
@@ -13,10 +14,16 @@ export interface ChartSpec {
   json: string;
 }
 
+export interface ComponentBlock {
+  kind: ComponentKind;
+  json: string;
+}
+
 export interface ParsedDocument {
   meta: Frontmatter;
   bodyHtml: string;
   charts: ChartSpec[];
+  components: ComponentBlock[];
   warnings: string[];
 }
 
@@ -47,6 +54,7 @@ export function parseDocument(source: string): ParsedDocument {
   const warnings: string[] = [];
   const { meta, body } = parseFrontmatter(source, warnings);
   const charts: ChartSpec[] = [];
+  const components: ComponentBlock[] = [];
 
   const md = new MarkdownIt({ html: false, linkify: true });
   const escapeHtml = md.utils.escapeHtml;
@@ -59,9 +67,14 @@ export function parseDocument(source: string): ParsedDocument {
       charts.push({ kind: info as ChartKind, json: token.content });
       return `<div class="chart" data-chart-index="${index}"></div>\n`;
     }
+    if (COMPONENT_KINDS.has(info)) {
+      const index = components.length;
+      components.push({ kind: info as ComponentKind, json: token.content });
+      return `<div class="component" data-component-index="${index}"></div>\n`;
+    }
     return `<pre><code class="language-${escapeHtml(info)}">${escapeHtml(token.content)}</code></pre>\n`;
   };
 
   const bodyHtml = md.render(body);
-  return { meta, bodyHtml, charts, warnings };
+  return { meta, bodyHtml, charts, components, warnings };
 }

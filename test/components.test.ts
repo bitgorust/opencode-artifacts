@@ -1,0 +1,119 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { renderComponent } from "../src/components.ts";
+import { renderArtifact } from "../src/render.ts";
+
+test("stats renders value, label, and toned delta pill; text is escaped", () => {
+  const html = renderComponent(
+    "stats",
+    JSON.stringify([
+      { label: "FAILURES", value: "61", delta: "18.0%", direction: "up", tone: "bad", emphasis: true },
+      { label: "X <b>", value: "1" },
+    ]),
+  );
+  assert.match(html, /stat-grid/);
+  assert.match(html, /stat-value">61<\/div>/);
+  assert.match(html, /▲ 18\.0%/);
+  assert.match(html, /delta-bad/);
+  assert.match(html, /stat-emphasis/);
+  assert.ok(html.includes("X &lt;b&gt;"));
+});
+
+test("timeline renders dots, times, and details in order", () => {
+  const html = renderComponent(
+    "timeline",
+    JSON.stringify([
+      { time: "13:54", title: "Alert fires", tone: "bad" },
+      { time: "14:32", title: "Mitigated", detail: "p99 < 400ms", tone: "good" },
+    ]),
+  );
+  assert.match(html, /tl-dot dot-bad/);
+  assert.match(html, /tl-dot dot-good/);
+  assert.ok(html.indexOf("Alert fires") < html.indexOf("Mitigated"));
+  assert.match(html, /p99 &lt; 400ms/);
+});
+
+test("findings renders severity pills and mono locations", () => {
+  const html = renderComponent(
+    "findings",
+    JSON.stringify([
+      { severity: "high", title: "TTL dropped", location: "config/cache.ts:14", detail: "60x" },
+    ]),
+  );
+  assert.match(html, /sev sev-high">HIGH</);
+  assert.match(html, /finding-loc">config\/cache\.ts:14</);
+});
+
+test("compare renders variant cards with pill, numbered annotations, and tradeoff", () => {
+  const html = renderComponent(
+    "compare",
+    JSON.stringify([
+      { title: "B — Tabs", pill: "info", annotations: ["one", "two"], tradeoff: "hides settings" },
+    ]),
+  );
+  assert.match(html, /compare-grid/);
+  assert.match(html, /pill pill-info">B — Tabs</);
+  assert.match(html, /class="annotations"/);
+  assert.match(html, /tradeoff">hides settings/);
+});
+
+test("callout renders toned insight card", () => {
+  const html = renderComponent("callout", JSON.stringify({ tone: "warn", title: "T", body: "B" }));
+  assert.match(html, /callout callout-warn/);
+  assert.match(html, /callout-title">T</);
+});
+
+test("progress renders a fill proportional to done/total", () => {
+  const html = renderComponent("progress", JSON.stringify({ label: "Ready", done: 3, total: 4 }));
+  assert.match(html, /Ready — 3\/4/);
+  assert.match(html, /width:75%/);
+});
+
+test("diff renders add/del/note lines with escaping", () => {
+  const html = renderComponent("diff", "+added\n-removed\n## note: watch <this>\n context");
+  assert.match(html, /dl-add">\+added/);
+  assert.match(html, /dl-del">-removed/);
+  assert.match(html, /dl-note">watch &lt;this&gt;/);
+  assert.match(html, /dl-ctx"> context/);
+});
+
+test("malformed component JSON becomes an inline error box", () => {
+  const html = renderComponent("stats", "{nope");
+  assert.match(html, /chart-error/);
+  assert.match(html, /stats/);
+});
+
+test("renderArtifact substitutes component placeholders and keeps charts intact", () => {
+  const md = [
+    "## Section",
+    "```stats",
+    '[{"label":"A","value":"1"}]',
+    "```",
+    "```echarts",
+    '{"xAxis":{"type":"category","data":["a"]},"yAxis":{"type":"value"},"series":[{"type":"bar","data":[1]}]}',
+    "```",
+  ].join("\n");
+  const { html } = renderArtifact(md);
+  assert.ok(!html.includes("data-component-index"));
+  assert.match(html, /stat-grid/);
+  assert.match(html, /data-chart-index="0"/);
+});
+
+test("h2 sections become cards only when an h2 exists, headings get anchors", () => {
+  const withSections = renderArtifact("intro\n\n## One\n\nbody\n\n## Two\n\nmore\n").html;
+  assert.match(withSections, /<section class="section-card"><h2 id="one">One<\/h2>/);
+  assert.equal(withSections.match(/<section class="section-card">/g)?.length, 2);
+
+  const noSections = renderArtifact("just a paragraph\n").html;
+  assert.ok(!noSections.includes('<section class="section-card">'));
+});
+
+test("github alerts become toned callouts and task lists become checkboxes", () => {
+  const md = "> [!WARNING]\n> Careful here\n\n- [x] done\n- [ ] todo\n";
+  const { html } = renderArtifact(md);
+  assert.match(html, /alert alert-warn/);
+  assert.match(html, /alert-title">Warning</);
+  assert.ok(!html.includes("[!WARNING]"));
+  assert.match(html, /<input type="checkbox" checked disabled>/);
+  assert.match(html, /<input type="checkbox" disabled>/);
+});
