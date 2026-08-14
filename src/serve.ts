@@ -15,10 +15,12 @@ export interface ServedArtifacts {
   close(): Promise<void>;
 }
 
-const LIVE_RELOAD_SNIPPET = `<script>window.__ARTIFACT_STATE_URL__="/__state";(function(){try{var es=new EventSource("/__sse");es.addEventListener("reload",function(){location.reload()});}catch(e){}})();</script>`;
+const LIVE_RELOAD_SNIPPET = `<script>window.__ARTIFACT_STATE_URL__="/__state";window.__ARTIFACT_COMMENTS_URL__="/__comments";(function(){try{var es=new EventSource("/__sse");es.addEventListener("reload",function(){location.reload()});}catch(e){}})();function oaSlug(){return decodeURIComponent(location.pathname.split("/").pop()||"").replace(/\\.html$/,"");}function oaJson(r){return r.json();}window.opencodeArtifacts={db:{get:function(col,id){return fetch("/__db/"+oaSlug()+"/"+col+"/"+id).then(function(r){return r.status===404?null:oaJson(r);});},list:function(col,query){var qs=query?("?"+new URLSearchParams(query).toString()):"";return fetch("/__db/"+oaSlug()+"/"+col+qs).then(oaJson);},set:function(col,id,doc){return fetch("/__db/"+oaSlug()+"/"+col+"/"+id,{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify(doc)}).then(oaJson);},remove:function(col,id){return fetch("/__db/"+oaSlug()+"/"+col+"/"+id,{method:"DELETE"}).then(function(r){return r.ok;});}},data:function(name){return fetch("/__data/"+oaSlug()+"/"+name).then(oaJson);}};</script>`;
 
 const MAX_STATE_BODY_BYTES = 64 * 1024;
-const STATE_SLUG_RE = /^[a-z0-9-]+$/;
+const MAX_DB_DOC_BYTES = 256 * 1024;
+const NAME_RE = /^[a-z0-9-]+$/;
+const STATE_SLUG_RE = NAME_RE;
 
 const CONTENT_TYPES: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
@@ -74,6 +76,132 @@ async function writeState(
   await writeFile(join(dir, `${slug}.json`), `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
+export interface CommentThread {
+  id: string;
+  quote: string;
+  text: string;
+  createdAt: string;
+  resolved: boolean;
+}
+
+function isThread(value: unknown): value is CommentThread {
+  if (typeof value !== "object" || value === null) return false;
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record["id"] === "string" &&
+    typeof record["quote"] === "string" &&
+    typeof record["text"] === "string" &&
+    typeof record["resolved"] === "boolean"
+  );
+}
+
+async function readThreads(root: string, slug: string): Promise<CommentThread[]> {
+  try {
+    const parsed: unknown = JSON.parse(
+      await readFile(join(root, ".state", `${slug}.comments.json`), "utf8"),
+    );
+    if (typeof parsed === "object" && parsed !== null && "threads" in parsed) {
+      const threads = (parsed as { threads: unknown }).threads;
+      if (Array.isArray(threads)) return threads.filter(isThread);
+    }
+    return [];
+  } catch {
+    return [];
+  }
+}
+
+async function writeThreads(root: string, slug: string, threads: CommentThread[]): Promise<void> {
+  const dir = join(root, ".state");
+  await mkdir(dir, { recursive: true });
+  const payload = { threads, updatedAt: new Date().toISOString() };
+  await writeFile(join(dir, `${slug}.comments.json`), `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+}
+
+const MAX_THREADS = 200;
+
+type DocStore = { docs: Record<string, unknown> };
+
+async function readCollection(root: string, slug: string, collection: string): Promise<DocStore> {
+  try {
+    const parsed: unknown = JSON.parse(
+      await readFile(join(root, ".db", slug, `${collection}.json`), "utf8"),
+    );
+    if (typeof parsed === "object" && parsed !== null && "docs" in parsed) {
+      const docs = (parsed as { docs: unknown }).docs;
+      if (typeof docs === "object" && docs !== null) return { docs: docs as Record<string, unknown> };
+    }
+    return { docs: {} };
+  } catch {
+    return { docs: {} };
+  }
+}
+
+async function writeCollection(
+  root: string,
+  slug: string,
+  collection: string,
+  store: DocStore,
+): Promise<void> {
+  const dir = join(root, ".db", slug);
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, `${collection}.json`), `${JSON.stringify(store, null, 2)}\n`, "utf8");
+}
+
+interface DataSource {
+  name: string;
+  command: string;
+  args?: string[];
+}
+
+const dataCache = new Map<string, { at: number; payload: string }>();
+const DATA_CACHE_MS = 5000;
+
+async function runDataSource(
+  root: string,
+  slug: string,
+  name: string,
+): Promise<{ status: number; body: string }> {
+  let sources: DataSource[];
+  try {
+    const parsed: unknown = JSON.parse(
+      await readFile(join(root, ".datasources", `${slug}.json`), "utf8"),
+    );
+    sources = Array.isArray(parsed) ? (parsed as DataSource[]) : [];
+  } catch {
+    return { status: 404, body: JSON.stringify({ error: "no datasources for artifact" }) };
+  }
+  const source = sources.find((s) => s.name === name);
+  if (!source) return { status: 404, body: JSON.stringify({ error: `unknown datasource '${name}'` }) };
+
+  const cacheKey = `${slug}/${name}`;
+  const cached = dataCache.get(cacheKey);
+  if (cached && Date.now() - cached.at < DATA_CACHE_MS) {
+    return { status: 200, body: cached.payload };
+  }
+
+  const { execFile } = await import("node:child_process");
+  const output = await new Promise<string>((resolveRun, rejectRun) => {
+    execFile(
+      source.command,
+      source.args ?? [],
+      { timeout: 5000, maxBuffer: 256 * 1024 },
+      (error, stdout) => {
+        if (error) rejectRun(error);
+        else resolveRun(stdout);
+      },
+    );
+  }).catch((err: unknown) => {
+    return `__ERROR__:${err instanceof Error ? err.message : String(err)}`;
+  });
+
+  const payload = output.startsWith("__ERROR__:")
+    ? JSON.stringify({ name, error: output.slice("__ERROR__:".length) })
+    : JSON.stringify({ name, output, fetchedAt: new Date().toISOString() });
+  const status = output.startsWith("__ERROR__:") ? 502 : 200;
+  if (status === 200) dataCache.set(cacheKey, { at: Date.now(), payload });
+  return { status, body: payload };
+}
+
 export async function serveArtifacts(options: ServeOptions): Promise<ServedArtifacts> {
   const root = resolve(options.dir);
   const liveReload = options.liveReload ?? true;
@@ -91,6 +219,140 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
       res.write("retry: 500\n\n");
       clients.add(res);
       req.on("close", () => clients.delete(res));
+      return;
+    }
+
+    if (url.pathname.startsWith("/__data/")) {
+      const rest = decodeURIComponent(url.pathname.slice("/__data/".length));
+      const [slug, name] = rest.split("/");
+      if (!slug || !name || !NAME_RE.test(slug) || !NAME_RE.test(name)) {
+        res.writeHead(400);
+        res.end("bad datasource path");
+        return;
+      }
+      void (async () => {
+        const result = await runDataSource(root, slug, name);
+        res.writeHead(result.status, { "content-type": "application/json; charset=utf-8" });
+        res.end(result.body);
+      })();
+      return;
+    }
+
+    if (url.pathname.startsWith("/__db/")) {
+      const segments = decodeURIComponent(url.pathname.slice("/__db/".length)).split("/");
+      const [slug, collection, id] = segments;
+      if (
+        !slug ||
+        !collection ||
+        !NAME_RE.test(slug) ||
+        !NAME_RE.test(collection) ||
+        (id !== undefined && !NAME_RE.test(id)) ||
+        segments.length > 3
+      ) {
+        res.writeHead(400);
+        res.end("bad db path");
+        return;
+      }
+      void (async () => {
+        try {
+          const store = await readCollection(root, slug, collection);
+          if (req.method === "GET" && id === undefined) {
+            const q = url.searchParams.get("q");
+            const limit = Math.min(Number(url.searchParams.get("limit") ?? "50") || 50, 200);
+            const cursor = Number(url.searchParams.get("cursor") ?? "0") || 0;
+            let entries = Object.entries(store.docs);
+            if (q) {
+              const [field, ...rest] = q.split(":");
+              const want = rest.join(":");
+              entries = entries.filter(([, doc]) => {
+                if (typeof doc !== "object" || doc === null) return false;
+                return String((doc as Record<string, unknown>)[field]) === want;
+              });
+            }
+            const page = entries.slice(cursor, cursor + limit);
+            const next = cursor + limit < entries.length ? String(cursor + limit) : null;
+            res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
+            res.end(
+              JSON.stringify({
+                docs: page.map(([docId, doc]) => ({ id: docId, doc })),
+                next_cursor: next,
+              }),
+            );
+            return;
+          }
+          if (req.method === "GET" && id !== undefined) {
+            if (!(id in store.docs)) {
+              res.writeHead(404);
+              res.end("not found");
+              return;
+            }
+            res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
+            res.end(JSON.stringify({ id, doc: store.docs[id] }));
+            return;
+          }
+          if (req.method === "PUT" && id !== undefined) {
+            const doc: unknown = JSON.parse(await readBody(req, MAX_DB_DOC_BYTES));
+            store.docs[id] = doc;
+            await writeCollection(root, slug, collection, store);
+            res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
+            res.end(JSON.stringify({ id, doc }));
+            return;
+          }
+          if (req.method === "DELETE" && id !== undefined) {
+            delete store.docs[id];
+            await writeCollection(root, slug, collection, store);
+            res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
+            res.end(JSON.stringify({ deleted: id }));
+            return;
+          }
+          res.writeHead(405);
+          res.end("method not allowed");
+        } catch {
+          res.writeHead(400);
+          res.end("bad request");
+        }
+      })();
+      return;
+    }
+
+    if (url.pathname.startsWith("/__comments/")) {
+      const slug = decodeURIComponent(url.pathname.slice("/__comments/".length));
+      if (!STATE_SLUG_RE.test(slug)) {
+        res.writeHead(400);
+        res.end("bad slug");
+        return;
+      }
+      void (async () => {
+        try {
+          if (req.method === "GET") {
+            const threads = await readThreads(root, slug);
+            res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
+            res.end(JSON.stringify({ threads }));
+            return;
+          }
+          if (req.method === "POST") {
+            const body: unknown = JSON.parse(await readBody(req, MAX_STATE_BODY_BYTES * 4));
+            const threads =
+              typeof body === "object" && body !== null
+                ? (body as Record<string, unknown>)["threads"]
+                : undefined;
+            if (!Array.isArray(threads) || !threads.every(isThread) || threads.length > MAX_THREADS) {
+              res.writeHead(400);
+              res.end("expected {threads: CommentThread[]} within limits");
+              return;
+            }
+            await writeThreads(root, slug, threads);
+            res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
+            res.end(JSON.stringify({ threads }));
+            return;
+          }
+          res.writeHead(405);
+          res.end("method not allowed");
+        } catch {
+          res.writeHead(400);
+          res.end("bad request");
+        }
+      })();
       return;
     }
 

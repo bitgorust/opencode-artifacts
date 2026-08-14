@@ -76,14 +76,14 @@ of capabilities beyond the documented ones:
 | **artifact-design skill** (mandatory design pass before every publish) | `artifact-design` SKILL_MD | ✅ adapted into `skills/artifact-pages` |
 | **Mermaid diagrams** | `artifact-diagramming` skill, mermaid composer | ✅ `mermaid` fence (v0.5), runtime inlined on use |
 | **Plan artifacts** (offer to review the implementation plan as a page) | `publishPlanArtifact`, plan consent ask | ✅ publish the plan md — `examples/patterns/plan.md` (v0.5) |
-| **Comments on artifacts** (threads with span quotes, resolve, auto-responder pipeline) | `CLAUDE_CODE_ARTIFACT_COMMENTS*`, comment-pipeline prompts | ❌ needs persistence + identity |
+| **Comments on artifacts** (threads with span quotes, resolve, auto-responder pipeline) | `CLAUDE_CODE_ARTIFACT_COMMENTS*`, comment-pipeline prompts | 🟡 local analog (v0.6): select-text → thread dock, serve-persisted, `artifact_comments` read/resolve; no identity/multi-user |
 | **Workshop** (decide-and-revise loop: page carries open decisions, reader answers on the page, session reads answers back via `read_decisions`) | workshop skill, decision component | ✅ `decisions` component + serve state persistence + `artifact_state` readback (v0.5) |
-| **Shared per-artifact database** (`read_db`/`write_db`, collections/docs/queries; state shared across viewers) | db action strings | 🟡 single-value state exists (v0.5); full doc/query store not built |
-| **Runtime capabilities** (`window.claude.*`: live data, shared state, file downloads, self-update; declared per page, roster-gated) | `artifact-capabilities` skill, capabilities prompt | ❌ needs a JS bridge + host |
+| **Shared per-artifact database** (`read_db`/`write_db`, collections/docs/queries; state shared across viewers) | db action strings | 🟡 local collections DB (v0.6): `/__db` endpoints + `opencodeArtifacts.db` bridge; single-user |
+| **Runtime capabilities** (`window.claude.*`: live data, shared state, file downloads, self-update; declared per page, roster-gated) | `artifact-capabilities` skill, capabilities prompt | 🟡 live-data bridge (v0.6): publish-registered datasources polled via `opencodeArtifacts.data`; no downloads/self-update |
 | **watch/unwatch/status** (session gets woken when another session republishes or comments) | webhook triggers, watch actions | 🟡 viewer-side analog exists (`serve` SSE); session-side wake is structural |
 | **Multi-file publish** (`files` map: separate CSS/JS/data/images) | `files` prompt paragraph | ➖ skipped by design — we inline everything into one file |
 | **Stale-version guard** (refuse to publish over a version this session hasn't seen) | `stale_version_guard` errors | ✅ content-hash `expectedHash` (v0.5) |
-| **Sensitive-delta guard** (block live-shared republishes that expose new sensitive content) | permission analysis strings | ❌ LLM-judgment feature; could be a hook |
+| **Sensitive-delta guard** (block live-shared republishes that expose new sensitive content) | permission analysis strings | ✅ local version (v0.6): credential/PII regex scan blocks publish unless `force` |
 | **live-edit action** | "not available in this build" | ➖ gated upstream too |
 
 ## Best path per gap

@@ -4,6 +4,7 @@ import { COMPONENT_KINDS, type ComponentKind } from "./components.ts";
 export interface Frontmatter {
   title?: string;
   icon?: string;
+  description?: string;
 }
 
 export type ChartKind = "vega-lite" | "vega" | "echarts";
@@ -45,6 +46,7 @@ function parseFrontmatter(source: string, warnings: string[]): { meta: Frontmatt
     const value = kv[2].trim();
     if (key === "title") meta.title = value;
     else if (key === "icon") meta.icon = value;
+    else if (key === "description") meta.description = value;
     else warnings.push(`frontmatter key ignored: ${key}`);
   }
   return { meta, body: source.slice(match[0].length) };

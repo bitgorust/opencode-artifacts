@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { renderArtifact, renderRawHtml } from "./render.ts";
 import { FilePublisher, slugify } from "./publisher.ts";
+import { formatFindings, scanSensitive } from "./guard.ts";
 import { serveArtifacts } from "./serve.ts";
 import { openFile } from "./open.ts";
 
@@ -43,10 +44,18 @@ async function renderCommand(args: string[]): Promise<void> {
   const format = optionValue(args, "--format") ?? "markdown";
   const open = args.includes("--open");
   const version = args.includes("--version");
+  const force = args.includes("--force");
   if (!input) usage();
   if (format !== "markdown" && format !== "html") usage();
 
   const markdown = await readFile(input, "utf8");
+  const findings = scanSensitive(markdown);
+  if (findings.length > 0 && !force) {
+    console.error(
+      `publish blocked: credential-looking strings found: ${formatFindings(findings)}. Re-run with --force to publish anyway.`,
+    );
+    process.exit(1);
+  }
   const rendered =
     format === "html" ? renderRawHtml(markdown, title ? { title } : {}) : renderArtifact(markdown);
   const finalTitle = title ?? rendered.meta.title ?? "Artifact";

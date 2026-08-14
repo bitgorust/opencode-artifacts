@@ -11,6 +11,7 @@ export function renderGallery(manifest: Manifest): string {
       (artifact) => `    <a class="card" href="${artifact.slug}.html">
       <div class="icon">${escapeHtmlText(artifact.icon)}</div>
       <h2>${escapeHtmlText(artifact.title)}</h2>
+      ${artifact.description ? `<div class="desc">${escapeHtmlText(artifact.description)}</div>` : ""}
       <div class="meta">v${artifact.current} · ${artifact.versions.length} version(s) · ${artifact.charts} chart(s)<br>updated ${escapeHtmlText(artifact.updatedAt)}</div>
     </a>`,
     )

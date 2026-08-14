@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { serveArtifacts } from "../src/serve.ts";
@@ -103,4 +103,91 @@ test("state endpoint round-trips posted answers and rejects bad slugs", async ()
     };
     assert.deepEqual(reread.answers, { layout: "tabs", density: "no" });
   });
+});
+
+test("comments endpoint round-trips threads and validates shape", async () => {
+  await withServer({ "a.html": "x" }, async (url) => {
+    const thread = {
+      id: "abc",
+      quote: "some quoted text",
+      text: "why this?",
+      createdAt: new Date().toISOString(),
+      resolved: false,
+    };
+    const posted = await fetch(`${url}/__comments/review-page`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ threads: [thread] }),
+    });
+    assert.equal(posted.status, 200);
+
+    const read = (await (await fetch(`${url}/__comments/review-page`)).json()) as {
+      threads: Array<{ id: string; text: string }>;
+    };
+    assert.equal(read.threads.length, 1);
+    assert.equal(read.threads[0].text, "why this?");
+
+    const bad = await fetch(`${url}/__comments/review-page`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ threads: [{ nope: true }] }),
+    });
+    assert.equal(bad.status, 400);
+  });
+});
+
+test("db endpoint stores, queries, and deletes documents", async () => {
+  await withServer({ "a.html": "x" }, async (url) => {
+    const put = await fetch(`${url}/__db/board/notes/n1`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text: "first", col: "now" }),
+    });
+    assert.equal(put.status, 200);
+    await fetch(`${url}/__db/board/notes/n2`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text: "second", col: "later" }),
+    });
+
+    const one = (await (await fetch(`${url}/__db/board/notes/n1`)).json()) as {
+      doc: { text: string };
+    };
+    assert.equal(one.doc.text, "first");
+
+    const filtered = (await (
+      await fetch(`${url}/__db/board/notes?q=col:later`)
+    ).json()) as { docs: Array<{ id: string }> };
+    assert.deepEqual(
+      filtered.docs.map((d) => d.id),
+      ["n2"],
+    );
+
+    const deleted = await fetch(`${url}/__db/board/notes/n1`, { method: "DELETE" });
+    assert.equal(deleted.status, 200);
+    const gone = await fetch(`${url}/__db/board/notes/n1`);
+    assert.equal(gone.status, 404);
+  });
+});
+
+test("data endpoint runs only registered datasources", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "serve-"));
+  await mkdir(join(dir, ".datasources"), { recursive: true });
+  await writeFile(
+    join(dir, ".datasources", "page.json"),
+    JSON.stringify([{ name: "greeting", command: "printf", args: ["hello-live"] }]),
+  );
+  const served = await serveArtifacts({ dir, port: 0 });
+  try {
+    const ok = (await (await fetch(`${served.url}/__data/page/greeting`)).json()) as {
+      output: string;
+    };
+    assert.equal(ok.output, "hello-live");
+
+    const unknown = await fetch(`${served.url}/__data/page/nope`);
+    assert.equal(unknown.status, 404);
+  } finally {
+    await served.close();
+    await rm(dir, { recursive: true, force: true });
+  }
 });

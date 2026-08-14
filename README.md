@@ -109,6 +109,11 @@ live-reload EventSource); the files on disk keep `connect-src 'none'`.
   - ```` ```decisions ```` — workshop decision rows: `{title?, questions: [{id, question, options: [{id, label, note?}]}]}`. Selections persist to localStorage; under `serve` they also POST to the server, and the session reads them back with the `artifact_state` tool or `opencode-artifacts state <slug>`.
 - **Interactive controls without custom JS**: vega-lite `params` with `bind` render as native sliders/dropdowns and re-render the chart live; echarts `dataZoom`/toolbox options work as-is. See `examples/patterns/tune-controls.md`.
 - **Stale-version guard**: `artifact_publish` results include a content `hash`; pass it back as `expectedHash` on update and the publish is refused if someone changed the artifact in between.
+- **Sensitive-content guard**: publish is blocked when the source contains credential-looking strings (AWS/GitHub/Anthropic/OpenAI keys, private keys, bearer tokens, password literals); override with `force: true` / `--force`.
+- **Comments**: every artifact page has a built-in comment flow — select text → "Comment" → thread dock. Under `serve`, threads persist server-side (`.state/<slug>.comments.json`); the session reads/resolves them with the `artifact_comments` tool.
+- **Shared mini-DB** (raw-HTML pages, under `serve`): `opencodeArtifacts.db.get/list/set/remove(slug-scoped collections)` — a fixed JS bridge over `/__db/` endpoints.
+- **Live data bridge** (raw-HTML pages, under `serve`): publish with `dataSources: [{name, command, args}]` (registered at publish time, not viewer-controlled); the page polls `opencodeArtifacts.data(name)`; the server runs the allow-listed command with a 5s timeout and 5s cache.
+- **Gallery subtitles**: frontmatter `description:` becomes the gallery card's one-line subtitle.
 - **Markdown extras**: GitHub alerts (`> [!NOTE]` / `[!TIP]` / `[!IMPORTANT]` / `[!WARNING]` / `[!CAUTION]`), task lists (`- [x]`), auto heading anchors, and `##` sections become white cards.
 - **Broken specs don't break the page** — the slot shows an inline error box instead.
 - **Everything else** is standard Markdown (tables, code blocks, links, images as data URIs).

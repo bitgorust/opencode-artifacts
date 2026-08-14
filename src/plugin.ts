@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tool, type Plugin } from "@opencode-ai/plugin";
 import {
   ArtifactTooLargeError,
@@ -8,6 +8,7 @@ import {
   type RenderedArtifact,
 } from "./render.ts";
 import { FilePublisher, slugify, StaleArtifactError } from "./publisher.ts";
+import { formatFindings, scanSensitive } from "./guard.ts";
 import { openFile } from "./open.ts";
 
 export const ArtifactsPlugin: Plugin = async () => {
@@ -40,6 +41,22 @@ export const ArtifactsPlugin: Plugin = async () => {
             .describe(
               "Hash from a previous publish result; publishing fails with a conflict if the artifact changed since",
             ),
+          force: tool.schema
+            .boolean()
+            .optional()
+            .describe("Publish even when the sensitive-content scan finds credential-looking strings"),
+          dataSources: tool.schema
+            .array(
+              tool.schema.object({
+                name: tool.schema.string(),
+                command: tool.schema.string(),
+                args: tool.schema.array(tool.schema.string()).optional(),
+              }),
+            )
+            .optional()
+            .describe(
+              "Named read-only shell commands the served page may poll via opencodeArtifacts.data(name) (raw-HTML pages)",
+            ),
         },
         async execute(args, ctx) {
           try {
@@ -49,6 +66,11 @@ export const ArtifactsPlugin: Plugin = async () => {
                 : renderArtifact(args.markdown);
             const title = args.title ?? rendered.meta.title ?? "Artifact";
             const slug = slugify(title);
+
+            const findings = scanSensitive(args.markdown);
+            if (findings.length > 0 && args.force !== true) {
+              return `Publish blocked: the content contains credential-looking strings: ${formatFindings(findings)}. If these are intentional (e.g. redacted examples), call again with force: true.`;
+            }
 
             await ctx.ask({
               permission: "artifact_publish",
@@ -63,11 +85,21 @@ export const ArtifactsPlugin: Plugin = async () => {
               html: rendered.html,
               title,
               icon: rendered.meta.icon,
+              description: rendered.meta.description,
               charts: rendered.chartCount,
               version: args.version ?? false,
               expectedHash: args.expectedHash,
             });
             if (args.open) openFile(result.path);
+            if (args.dataSources && args.dataSources.length > 0) {
+              const registryDir = join(ctx.worktree, ".opencode", "artifacts", ".datasources");
+              await mkdir(registryDir, { recursive: true });
+              await writeFile(
+                join(registryDir, `${slug}.json`),
+                `${JSON.stringify(args.dataSources, null, 2)}\n`,
+                "utf8",
+              );
+            }
             ctx.metadata({
               title: `Artifact: ${title}`,
               metadata: {
@@ -109,6 +141,41 @@ export const ArtifactsPlugin: Plugin = async () => {
           } catch {
             return `No saved state for artifact '${args.slug}'.`;
           }
+        },
+      }),
+      artifact_comments: tool({
+        description:
+          "Read comment threads a reader left on a served artifact page, or resolve a thread after acting on it.",
+        args: {
+          slug: tool.schema.string().describe("Artifact slug (the filename without .html)"),
+          resolveId: tool.schema
+            .string()
+            .optional()
+            .describe("Thread id to mark resolved after you have acted on it"),
+        },
+        async execute(args, ctx) {
+          const threadsPath = join(
+            ctx.worktree,
+            ".opencode",
+            "artifacts",
+            ".state",
+            `${args.slug}.comments.json`,
+          );
+          let parsed: { threads?: Array<Record<string, unknown>> };
+          try {
+            parsed = JSON.parse(await readFile(threadsPath, "utf8")) as typeof parsed;
+          } catch {
+            return `No comments for artifact '${args.slug}'.`;
+          }
+          const threads = Array.isArray(parsed.threads) ? parsed.threads : [];
+          if (args.resolveId !== undefined) {
+            const target = threads.find((t) => t["id"] === args.resolveId);
+            if (!target) return `No comment thread '${args.resolveId}' on '${args.slug}'.`;
+            target["resolved"] = true;
+            await writeFile(threadsPath, `${JSON.stringify({ ...parsed, threads }, null, 2)}\n`, "utf8");
+            return `Resolved thread ${args.resolveId} on '${args.slug}'.`;
+          }
+          return JSON.stringify(threads, null, 2);
         },
       }),
     },

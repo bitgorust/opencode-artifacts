@@ -24,6 +24,7 @@ export interface ArtifactMeta {
   slug: string;
   title: string;
   icon: string;
+  description?: string;
   createdAt: string;
   updatedAt: string;
   current: number;
@@ -42,6 +43,7 @@ export interface PublishInput {
   html: string;
   title?: string;
   icon?: string;
+  description?: string;
   charts?: number;
   version?: boolean;
   expectedHash?: string;
@@ -109,6 +111,7 @@ export class FilePublisher implements Publisher {
         slug: input.slug,
         title: input.title ?? existing?.title ?? input.slug,
         icon: input.icon ?? existing?.icon ?? "📄",
+        description: input.description ?? existing?.description,
         createdAt: existing?.createdAt ?? now,
         updatedAt: now,
         current: nextVersion,
@@ -126,6 +129,7 @@ export class FilePublisher implements Publisher {
       slug: input.slug,
       title: input.title ?? existing?.title ?? input.slug,
       icon: input.icon ?? existing?.icon ?? "📄",
+        description: input.description ?? existing?.description,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
       current: nextVersion,

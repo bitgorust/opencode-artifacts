@@ -77,6 +77,20 @@ test("restore points the stable path back at an older version", async () => {  a
   });
 });
 
+test("gallery card shows the description subtitle", async () => {
+  await withTempDir(async (dir) => {
+    const publisher = new FilePublisher(dir);
+    await publisher.publish({
+      slug: "report",
+      html: PAGE,
+      title: "Report",
+      description: "Weekly deploy health",
+    });
+    const gallery = await readFile(join(dir, "index.html"), "utf8");
+    assert.match(gallery, /class="desc">Weekly deploy health</);
+  });
+});
+
 test("stale guard refuses to publish over an unseen version", async () => {
   await withTempDir(async (dir) => {
     const publisher = new FilePublisher(dir);

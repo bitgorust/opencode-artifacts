@@ -157,6 +157,19 @@ pre.mermaid{background:var(--card-bg);border:1px solid var(--line);border-radius
 .decision-opt.selected .decision-label{font-weight:650;color:var(--accent)}
 .decision-note{font-size:.82rem;color:var(--ink-2)}
 .decisions-hint{font-size:.78rem;color:var(--ink-3);margin-top:.5rem}
+.comments-dock{position:fixed;right:1rem;bottom:1rem;width:300px;max-height:45vh;overflow:auto;background:var(--card-bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 24px rgb(15 23 42/.14);padding:.75rem .9rem;z-index:10;font-size:.85rem}
+.comments-title{font-weight:700;margin-bottom:.4rem}
+.comment{border-top:1px solid var(--line);padding:.45rem 0}
+.comment-quote{font-size:.75rem;color:var(--ink-3);border-left:2px solid var(--accent);padding-left:.45rem;margin-bottom:.2rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.comment-text{white-space:pre-wrap}
+.comment-empty{color:var(--ink-3);font-size:.78rem}
+.comment-resolve{margin-top:.3rem;background:none;border:1px solid var(--line);border-radius:6px;padding:.15rem .55rem;font-size:.75rem;cursor:pointer;color:var(--ink-2)}
+.comment-resolve:hover{border-color:var(--good);color:var(--good)}
+.comment-pop{z-index:20;background:var(--accent);color:#fff;border:none;border-radius:999px;padding:.3rem .8rem;font-size:.78rem;font-weight:600;cursor:pointer;box-shadow:0 2px 8px rgb(15 23 42/.2)}
+.comment-form{position:fixed;right:1rem;bottom:1rem;width:320px;background:var(--card-bg);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 24px rgb(15 23 42/.14);padding:.9rem;z-index:21}
+.comment-input{width:100%;min-height:4.5rem;margin:.5rem 0;border:1px solid var(--line);border-radius:8px;padding:.45rem;font:inherit;background:var(--page-bg);color:var(--ink)}
+.comment-save{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:.35rem .9rem;font-weight:600;cursor:pointer}
+.comment-cancel{background:none;border:1px solid var(--line);border-radius:8px;padding:.35rem .9rem;margin-left:.4rem;cursor:pointer;color:var(--ink-2)}
 .progress{margin:1.25rem 0}
 .progress-label{font-size:.85rem;font-weight:600;margin-bottom:.4rem}
 .progress-track{height:.55rem;border-radius:999px;background:var(--code-bg);overflow:hidden}
@@ -172,6 +185,7 @@ pre.mermaid{background:var(--card-bg);border:1px solid var(--line);border-radius
 .card:hover{box-shadow:0 4px 14px rgb(15 23 42/.12)}
 .card h2{margin:.2rem 0 .4rem;font-size:1.05rem}
 .card .meta{font-size:.8rem;color:var(--ink-2)}
+.card .desc{font-size:.85rem;color:var(--ink-2);margin:.1rem 0 .4rem}
 .card .icon{font-size:1.6rem}
 .gallery-empty{color:var(--ink-3);text-align:center;padding:3rem 0}
 @media print{body{background:#fff}.section-card,.stat,.variant,.card{box-shadow:none;border:1px solid #ddd}}`;
@@ -270,6 +284,138 @@ const BOOT = `(function () {
       if (el) el.classList.add("selected");
     });
   } catch (e) {}
+
+  var commentsKey = "artifact-comments:" + location.pathname;
+  function commentsUrl() { return window.__ARTIFACT_COMMENTS_URL__ || null; }
+  var threads = [];
+  var dock = null;
+  var popBtn = null;
+  var form = null;
+
+  function slugFromPath() {
+    return decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html$/, "");
+  }
+  function make(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function loadLocal() {
+    try { return JSON.parse(localStorage.getItem(commentsKey) || "[]"); } catch (e) { return []; }
+  }
+  function persist() {
+    var url = commentsUrl();
+    if (url) {
+      fetch(url + "/" + encodeURIComponent(slugFromPath()), {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ threads: threads }),
+      }).catch(function () {});
+    } else {
+      try { localStorage.setItem(commentsKey, JSON.stringify(threads)); } catch (e) {}
+    }
+  }
+  function renderDock() {
+    if (!dock) {
+      dock = make("div", "comments-dock");
+      document.body.appendChild(dock);
+    }
+    dock.textContent = "";
+    var open = threads.filter(function (t) { return !t.resolved; });
+    dock.appendChild(make("div", "comments-title", "Comments (" + open.length + ")"));
+    open.forEach(function (t) {
+      var item = make("div", "comment");
+      item.appendChild(make("div", "comment-quote", t.quote));
+      item.appendChild(make("div", "comment-text", t.text));
+      var resolveBtn = make("button", "comment-resolve", "Resolve");
+      resolveBtn.setAttribute("data-id", t.id);
+      item.appendChild(resolveBtn);
+      dock.appendChild(item);
+    });
+    if (open.length === 0) dock.appendChild(make("div", "comment-empty", "Select text on the page to comment."));
+  }
+  function hidePop() {
+    if (popBtn && popBtn.parentNode) popBtn.parentNode.removeChild(popBtn);
+    popBtn = null;
+  }
+  function closeForm() {
+    if (form && form.parentNode) form.parentNode.removeChild(form);
+    form = null;
+  }
+  document.addEventListener("mouseup", function () {
+    setTimeout(function () {
+      var sel = window.getSelection();
+      var main = document.querySelector(".artifact-body");
+      if (!sel || sel.isCollapsed || !main || !main.contains(sel.anchorNode)) { hidePop(); return; }
+      var rect = sel.getRangeAt(0).getBoundingClientRect();
+      hidePop();
+      popBtn = make("button", "comment-pop", "Comment");
+      popBtn.style.position = "fixed";
+      popBtn.style.left = Math.min(rect.left, window.innerWidth - 90) + "px";
+      popBtn.style.top = rect.bottom + 6 + "px";
+      popBtn.setAttribute("data-quote", sel.toString().slice(0, 200));
+      document.body.appendChild(popBtn);
+    }, 10);
+  });
+  document.addEventListener("click", function (ev) {
+    var t = ev.target;
+    if (!t || !t.classList) return;
+    if (t.classList.contains("comment-pop")) {
+      closeForm();
+      form = make("div", "comment-form");
+      form.appendChild(make("div", "comment-quote", t.getAttribute("data-quote") || ""));
+      form.appendChild(make("textarea", "comment-input"));
+      form.appendChild(make("button", "comment-save", "Save"));
+      form.appendChild(make("button", "comment-cancel", "Cancel"));
+      document.body.appendChild(form);
+      var input = form.querySelector(".comment-input");
+      if (input) input.focus();
+      hidePop();
+      return;
+    }
+    if (t.classList.contains("comment-save") && form) {
+      var ta = form.querySelector(".comment-input");
+      var q = form.querySelector(".comment-quote");
+      var text = ta ? ta.value.trim() : "";
+      if (text !== "") {
+        threads.push({
+          id: Date.now().toString(36),
+          quote: q ? q.textContent : "",
+          text: text,
+          createdAt: new Date().toISOString(),
+          resolved: false,
+        });
+        persist();
+        renderDock();
+      }
+      closeForm();
+      return;
+    }
+    if (t.classList.contains("comment-cancel")) { closeForm(); return; }
+    if (t.classList.contains("comment-resolve")) {
+      var id = t.getAttribute("data-id");
+      threads.forEach(function (th) { if (th.id === id) th.resolved = true; });
+      persist();
+      renderDock();
+    }
+  });
+  var initialCommentsUrl = commentsUrl();
+  if (initialCommentsUrl) {
+    fetch(initialCommentsUrl + "/" + encodeURIComponent(slugFromPath()))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && Array.isArray(data.threads)) {
+          threads = data.threads;
+          try { localStorage.setItem(commentsKey, JSON.stringify(threads)); } catch (e) {}
+          renderDock();
+        }
+      })
+      .catch(function () { threads = loadLocal(); renderDock(); });
+  } else {
+    threads = loadLocal();
+  }
+  renderDock();
 })();`;
 
 const ALERT_TONES: Record<string, string> = {
@@ -349,6 +495,7 @@ function resolveCharts(charts: ChartSpec[]): ResolvedChart[] {
 interface AssembleInput {
   title: string;
   icon: string;
+  description?: string;
   bodyHtml: string;
   resolved: ResolvedChart[];
   needsBoot: boolean;
@@ -374,6 +521,9 @@ function assemblePage(input: AssembleInput): string {
     `<meta http-equiv="Content-Security-Policy" content="${CSP}">`,
     '<meta name="viewport" content="width=device-width, initial-scale=1">',
     `<link rel="icon" href="${emojiFaviconDataUri(input.icon)}">`,
+    input.description !== undefined
+      ? `<meta name="description" content="${escapeHtmlText(input.description)}">`
+      : "",
     `<title>${escapeHtmlText(input.title)}</title>`,
     `<style>${ARTIFACT_CSS}</style>`,
     "</head>",
@@ -393,9 +543,7 @@ function assemblePage(input: AssembleInput): string {
   if (input.needsMermaid) {
     parts.push(`<script>${runtimeBundle("mermaid")}</script>`);
   }
-  if (input.resolved.length > 0 || input.needsBoot || input.needsMermaid) {
-    parts.push(`<script>${BOOT}</script>`);
-  }
+  parts.push(`<script>${BOOT}</script>`);
 
   parts.push("</body>", "</html>");
   const html = parts.join("\n");
@@ -423,6 +571,7 @@ export function renderArtifact(markdown: string, options: RenderOptions = {}): R
   const html = assemblePage({
     title: doc.meta.title ?? "Artifact",
     icon: doc.meta.icon ?? "📄",
+    description: doc.meta.description,
     bodyHtml,
     resolved: resolveCharts(doc.charts),
     needsBoot,
