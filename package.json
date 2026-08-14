@@ -1,0 +1,44 @@
+{
+  "name": "opencode-artifacts",
+  "version": "0.1.0",
+  "description": "Publish OpenCode session output as self-contained, interactive HTML artifact pages.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./dist/plugin.js",
+    "./render": "./dist/render.js",
+    "./publisher": "./dist/publisher.js"
+  },
+  "bin": {
+    "opencode-artifacts": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test test/",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "echarts": "^5.6.0",
+    "markdown-it": "^14.1.0",
+    "vega": "^5.30.0",
+    "vega-embed": "^6.29.0",
+    "vega-lite": "^5.21.0"
+  },
+  "peerDependencies": {
+    "@opencode-ai/plugin": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@opencode-ai/plugin": "^1.0.0",
+    "@types/markdown-it": "^14.1.2",
+    "@types/node": "^24.0.0",
+    "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
