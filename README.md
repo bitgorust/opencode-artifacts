@@ -1,13 +1,13 @@
 # opencode-artifacts
 
-Publish [OpenCode](https://opencode.ai) session output as self-contained, interactive HTML artifact pages.
+Publish OpenCode session output as self-contained, interactive HTML artifact pages.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ![An incident artifact: stat cards, a timeline, a live chart, and a root-cause callout](docs/evidence/patterns/incident.png)
 
 Inspired by [Claude Code Artifacts](https://code.claude.com/docs/en/artifacts), rebuilt as a
-local-first, open-source OpenCode plugin. The model writes Markdown + JSON specs; a fixed
+local-first, open-source [OpenCode](https://opencode.ai) plugin. The model writes Markdown + JSON specs; a fixed
 renderer owns the HTML/CSS, so page quality doesn't depend on the model's design skills and
 output stays diff-friendly and cheap in tokens.
 

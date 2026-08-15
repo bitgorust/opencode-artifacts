@@ -36,6 +36,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "node --test test/*.test.ts",
+    "check": "node scripts/check-repo.ts",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {

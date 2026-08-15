@@ -2,10 +2,10 @@
 
 Baseline: official docs `https://code.claude.com/docs/en/artifacts` and the launch post
 `https://claude.com/blog/artifacts-in-claude-code` (retrieved 2026-08-14), plus the official
-viewer screenshot (`docs/references/claude-artifact-viewer.png`).
-Compared against opencode-artifacts v0.3.0.
+viewer screenshot (`docs/references/claude-artifact-viewer.png`) and capability strings from
+the Claude Code 2.1.232 binary. Version-specific additions are tracked in git history.
 
-## Page quality (v0.3)
+## Page quality
 
 Claude's page quality comes from a built-in design skill producing raw HTML. We reach the same
 visual language with a fixed renderer: card-based layout on a gray-blue canvas, metric stat
