@@ -50,6 +50,13 @@ org-grade identity in front of the whole site.
 
 ## Notes
 
+- Deploy-verified 2026-08-15: `https://opencode-artifacts.kenuyx7487.workers.dev` served the
+  gallery and pages, and a workshop decision clicked in the browser round-tripped through KV
+  (`/__state` read-back). Evidence: `docs/evidence/hosted-worker.png`.
+- Three assets config keys are load-bearing and all easy to miss: `binding = "ASSETS"` (without
+  it `run_worker_first` is ignored), `run_worker_first = true` (without it assets bypass the
+  worker and never get the bridge injected), `html_handling = "none"` (without it `.html` URLs
+  redirect-strip and change the slug the bridge derives).
 - KV is eventually consistent (edge-cached up to 60s); fine for comments/decisions, do not
   use it for counters that need strictness.
 - Free-tier write limits make the mini-DB suitable for annotations, not telemetry.

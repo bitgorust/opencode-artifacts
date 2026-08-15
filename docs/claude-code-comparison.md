@@ -74,7 +74,7 @@ of capabilities beyond the documented ones:
 
 | Capability | Evidence in binary | Our status |
 |---|---|---|
-| Publish / update same URL, versions, gallery, share menu, permission prompt, emoji favicon, auto-open, live MCP connectors at view time | public docs + tool strings | ✅ at parity locally; public sharing links via GitHub Pages (v0.7); authenticated hosting via Cloudflare Worker + KV + Access (v0.8, see `docs/hosted-cloudflare.md`); viewer-identity connectors stay hosted-only |
+| Publish / update same URL, versions, gallery, share menu, permission prompt, emoji favicon, auto-open, live MCP connectors at view time | public docs + tool strings | ✅ at parity locally; public sharing links via GitHub Pages (v0.7); authenticated hosting via Cloudflare Worker + KV + Access (deploy-verified, see `docs/hosted-cloudflare.md`); viewer-identity connectors stay hosted-only |
 | **artifact-design skill** (mandatory design pass before every publish) | `artifact-design` SKILL_MD | ✅ adapted into `skills/artifact-pages` |
 | **Mermaid diagrams** | `artifact-diagramming` skill, mermaid composer | ✅ `mermaid` fence (v0.5), runtime inlined on use |
 | **Plan artifacts** (offer to review the implementation plan as a page) | `publishPlanArtifact`, plan consent ask | ✅ publish the plan md — `examples/patterns/plan.md` (v0.5) |

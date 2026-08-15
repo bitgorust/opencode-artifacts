@@ -16,6 +16,9 @@ compatibility_date = "2025-06-01"
 
 [assets]
 directory = "assets"
+binding = "ASSETS"
+html_handling = "none"
+run_worker_first = true
 
 [[kv_namespaces]]
 binding = "ARTIFACTS_KV"
@@ -82,12 +85,22 @@ export class CloudflarePublisher implements Publisher {
 
   private async ensureKvNamespace(): Promise<string> {
     const idFile = join(this.stagingDir, "kv-id.txt");
-    try {
-      const cached = (await readFile(idFile, "utf8")).trim();
-      if (/^[0-9a-f]{32}$/.test(cached)) return cached;
-    } catch {
-      // first deploy: create the namespace
+    const cached = await readFile(idFile, "utf8").then(
+      (value) => value.trim(),
+      () => "",
+    );
+    if (/^[0-9a-f]{32}$/.test(cached)) return cached;
+    const list = await this.runner("npx", ["wrangler", "kv", "namespace", "list"]);
+    const existing = list.match(
+      /\{[^{}]*"title":\s*"ARTIFACTS_KV"[^{}]*"id":\s*"([0-9a-f]{32})"[^{}]*\}|\{[^{}]*"id":\s*"([0-9a-f]{32})"[^{}]*"title":\s*"ARTIFACTS_KV"[^{}]*\}/,
+    );
+    const existingId = existing?.[1] ?? existing?.[2];
+    if (existingId) {
+      await mkdir(this.stagingDir, { recursive: true });
+      await writeFile(idFile, existingId, "utf8");
+      return existingId;
     }
+
     const output = await this.runner("npx", [
       "wrangler",
       "kv",
@@ -95,7 +108,8 @@ export class CloudflarePublisher implements Publisher {
       "create",
       "ARTIFACTS_KV",
     ]);
-    const match = output.match(/id\s*=\s*"([0-9a-f]{32})"/);
+    const match =
+      output.match(/"id":\s*"([0-9a-f]{32})"/) ?? output.match(/id\s*=\s*"([0-9a-f]{32})"/);
     if (!match) {
       throw new Error(
         `could not parse KV namespace id from wrangler output: ${output.slice(0, 300)}`,
