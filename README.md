@@ -2,6 +2,7 @@
 
 Publish OpenCode session output as self-contained, interactive HTML artifact pages.
 
+[![npm](https://img.shields.io/npm/v/opencode-artifacts)](https://www.npmjs.com/package/opencode-artifacts)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ![A funnel-analysis artifact in the report theme: emphasized stat cards, an annotated area chart marking the v4.2 drop, an insight callout, and a before/after comparison](docs/evidence/patterns/funnel-report.png)
@@ -53,6 +54,9 @@ output stays diff-friendly and cheap in tokens.
 ```bash
 npm install opencode-artifacts
 ```
+
+Published at [npmjs.com/package/opencode-artifacts](https://www.npmjs.com/package/opencode-artifacts)
+with provenance attestations (trusted publishing, see `docs/release.md`).
 
 Add to your `opencode.json`:
 

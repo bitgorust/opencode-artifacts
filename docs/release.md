@@ -4,7 +4,12 @@ Publishing uses npm trusted publishing (OIDC) — no long-lived tokens. The publ
 (`.github/workflows/publish.yml`) runs on version tags and produces provenance attestations
 automatically (public repo + public package).
 
-## One-time setup
+## Setup (completed)
+
+The package was first published manually (`npm publish --otp`), then the trusted publisher
+was linked on npmjs.com (GitHub Actions: `bitgorust/opencode-artifacts`, workflow
+`publish.yml`, action `npm publish`). These steps never need repeating; they are recorded
+here for forks:
 
 1. First publish is manual (the package must exist before a trusted publisher can be linked):
 
@@ -12,12 +17,8 @@ automatically (public repo + public package).
    npm publish --otp <code-from-your-authenticator>
    ```
 
-2. Link the trusted publisher: npmjs.com → package `opencode-artifacts` → Settings →
-   Trusted Publisher → GitHub Actions:
-   - Organization or user: `bitgorust`
-   - Repository: `opencode-artifacts`
-   - Workflow filename: `publish.yml` (filename only, case-sensitive)
-   - Allowed actions: `npm publish`
+2. Link the trusted publisher: npmjs.com → package → Settings →
+   Trusted Publisher → GitHub Actions, with repository and workflow filename (exact, case-sensitive).
 3. Then harden: package Settings → Publishing access → "Require two-factor authentication
    and disallow tokens".
 
