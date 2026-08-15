@@ -18,7 +18,7 @@ enforces the machine-checkable subset; CI runs it on every push.
 
 ## 2. Code
 
-- Strict TypeScript: no `as any`, no `@ts-ignore`/`@ts-expect-error`, no non-null assertion
+- Strict TypeScript: no `as any`, no `@ts-ignore`/`@ts-expect-error`, no non-null assertion [check:no-as-any] [check:no-ts-ignore] [check:no-ts-expect-error]
   where a real check exists. (`tsc strict`, enforced by check-repo grep)
 - Errors are typed (`ArtifactTooLargeError`, `StaleArtifactError`) and surfaced with
   actionable messages — what failed and what to do next.
@@ -48,8 +48,9 @@ enforces the machine-checkable subset; CI runs it on every push.
 - CSP on every emitted page: `default-src 'none'; script-src 'unsafe-inline';
   style-src 'unsafe-inline'; img-src data:; connect-src 'none'`. Served/hosted copies may
   relax `connect-src` to `'self'`; the on-disk file never changes. (`src/served-html.ts`)
+  [check:csp-no-unsafe-eval]
 - No `unsafe-eval`, ever — charts run through vega's `ast: true` interpreter.
-  (regression-locked after browser QA caught the eval violation)
+  (regression-locked after browser QA caught the eval violation) [check:vega-interpreter]
 - Chart JSON is `\u003c`-escaped inside `<script>` payloads. (XSS breakout test)
 - 15 MiB rendered cap, enforced before any write.
 - Credential-pattern scan blocks publish unless `force`. (`src/guard.ts`)
@@ -76,8 +77,10 @@ enforces the machine-checkable subset; CI runs it on every push.
 ## 6. Documentation
 
 - README follows the collected conventions: funnel order (what → demo → install → usage →
-  limits → license last), one-liner < 120 chars matching `package.json` description and the
-  GitHub repo description, TOC past 100 lines, repo-local images, judicious badges.
+  limits → license last) [check:readme-section-install] [check:readme-section-usage] [check:readme-section-limitations] [check:readme-section-contributing] [check:readme-section-license],
+  one-liner < 120 chars matching `package.json` description and the
+  GitHub repo description [check:readme-one-liner], TOC past 100 lines, repo-local images
+  [check:readme-links], judicious badges.
   Sources: [Art of README](https://github.com/hackergrrl/art-of-readme),
   [Standard Readme](https://github.com/RichardLitt/standard-readme/blob/main/spec.md),
   [Make a README](https://www.makeareadme.com/),
@@ -85,6 +88,9 @@ enforces the machine-checkable subset; CI runs it on every push.
   [GitHub Docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes).
 - Docs name versions only via git tags; body text describes behavior, not version numbers
   that rot. (learned: comparison doc pinned "v0.3.0" and went stale within two releases)
+  [check:docs-no-version-pins]
+- Core docs never go missing: the spec, component spec, parity comparison, and LICENSE.
+  [check:file-principles] [check:file-component-spec] [check:file-comparison] [check:file-license]
 - Chart guidance is honesty-first: title the finding, not the axes; encodings must not
   exaggerate; summarize large datasets instead of inlining them. (Claude Code dataviz skill
   callout + token-cost guidance)
@@ -94,7 +100,7 @@ enforces the machine-checkable subset; CI runs it on every push.
 ## 7. Versioning and commits
 
 - [SemVer](https://semver.org/): breaking authoring-format or tool-arg changes → minor at
-  minimum until 1.0, then major.
+  minimum until 1.0, then major. [check:pkg-version-semver]
 - [Conventional Commits](https://www.conventionalcommits.org/), atomic: one concern per
   commit.
 - Never commit secrets; the guard patterns in `src/guard.ts` apply to our own repo too.
@@ -106,6 +112,7 @@ enforces the machine-checkable subset; CI runs it on every push.
   `@opencode-ai/plugin` as peer + dev.
 - `npm pack` contents are reviewable: `files` covers `dist`, `skills`, README, LICENSE;
   `main`/`types`/`repository`/`keywords` present. (checked by check-repo + CI pack dry-run)
+  [check:pkg-metadata] [check:pkg-files-skills]
 - Install docs must cover both the registry path and a non-registry path (file: spec),
   matching what OpenCode actually accepts.
 
@@ -119,7 +126,7 @@ enforces the machine-checkable subset; CI runs it on every push.
 ## 10. Automation that keeps this true
 
 - `.github/workflows/ci.yml` on every push/PR: install, build, test, `check-repo`,
-  `npm pack --dry-run`.
+  `npm pack --dry-run`. [check:file-ci]
 - `npm run check` locally runs the same structural assertions before you push.
 
 ## 11. Agent-facing guidance (skills, AGENTS.md, tool descriptions)
@@ -136,15 +143,16 @@ Sources: [Anthropic — Equipping agents with Agent Skills](https://www.anthropi
   loaded) → SKILL.md body (< 500 lines, loaded when relevant) → reference files loaded on
   demand, linked **one level deep** from SKILL.md (nested references get partial reads).
   Reference files over 100 lines carry a table of contents. (Anthropic, both sources)
+  [check:file-skill] [check:file-skill-components] [check:file-skill-visuals]
 - **A description is a trigger contract, not a summary**: what it does + when to use it +
   phrases a user would actually say. Written for the model scanning a skill list, not for
   humans browsing. Same contract governs our tool descriptions (`artifact_publish` reads as
   when-to-publish guidance, not API docs). (Claude Code lessons; Anthropic checklist)
 - **Never state the obvious** — the model already knows how to code and read a repo. Skill
   content exists to push it out of its default behavior. The highest-signal section is
-  **gotchas**, grown from observed failures over time — ours include "BOOT runs before the
-  serve snippet is injected" and "area charts need clip: true under layered marks".
-  (Claude Code lessons)
+  **gotchas**, grown from observed failures over time. (Claude Code lessons)
+  [check:file-skill-gotchas]
+- **AGENTS.md is for agents what README is for humans** [check:file-agents]
 - **Inform, don't railroad**: give the model what it needs and leave adaptation room; skills
   get reused in contexts you didn't foresee. (Claude Code lessons)
 - **Scripts beat prose for deterministic work**: a validator that runs is better than

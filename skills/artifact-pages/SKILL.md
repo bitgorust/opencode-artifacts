@@ -13,7 +13,8 @@ Authoring reference (component JSON schemas, chart fences, alerts, task lists):
 **reference/components.md** in this skill's directory. Load it before building your first
 page in a session, or whenever you need an exact schema. If the page carries a diagram or
 chart, also load **reference/visuals.md** (when a picture earns its place, form selection,
-color semantics, anti-patterns).
+color semantics, anti-patterns). Concrete worked pages to imitate live in the repo at
+`examples/patterns/` — one file per pattern, each browser-verified.
 
 ## When to publish
 

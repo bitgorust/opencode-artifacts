@@ -1,0 +1,6 @@
+#!/bin/sh
+set -e
+echo "pre-push: structural checks"
+npm run check --silent
+echo "pre-push: tests"
+npm test --silent 2>&1 | grep -E "^ℹ (tests|pass|fail)"

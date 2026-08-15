@@ -2,6 +2,11 @@
 
 Guidance for coding agents working in this repository. Humans start at README.md.
 
+Read `docs/engineering-principles.md` before non-trivial work — it is the living rulebook.
+Rules marked `[check:<id>]` are machine-enforced by `scripts/checks.ts`; a new principle
+becomes enforceable by adding its registry entry and tagging it — the consistency assertion
+fails if either side is missing.
+
 ## Commands
 
 - `npm test` — run the full suite (node --test, no framework; must be green before commit)
