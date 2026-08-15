@@ -4,7 +4,8 @@ Goal: reach Claude Code Artifacts **page** quality while keeping our authoring m
 (model writes Markdown + JSON specs, fixed renderer owns the HTML/CSS).
 
 Reference: `docs/references/claude-artifact-viewer.png` (official viewer screenshot),
-`docs/claude-code-comparison.md` (pattern list from official docs).
+`docs/claude-code-comparison.md` (pattern list from official docs), and
+`docs/page-quality-benchmark.md` (comparative quality gate).
 
 ## Design tokens (extracted from the official screenshot)
 
@@ -41,6 +42,14 @@ via `color-scheme: light dark` + `@media (prefers-color-scheme: dark)` overrides
   wrap each chunk in `<section class="card">`; intro content before the first h2 stays unwrapped).
 - h2 = narrative headline style: 22px/700, tight letter-spacing.
 - Every heading gets an `id` anchor (slugified text) — pages are single-file, in-page anchors only.
+- Primary charts, diagrams, diffs, and mockups size from their container instead of keeping a
+  small fixed canvas inside a wide card. A deliberately compact visual must have adjacent
+  narrative or comparison content that explains the remaining space.
+- Desktop compositions may use full-width, split, asymmetric, or dense dashboard layouts;
+  narrow viewports recompose into a readable sequence without clipped labels or horizontal
+  page scrolling.
+- Card treatment follows information hierarchy. The renderer supplies emphasis and
+  composition variants so every section is not forced into an identical white rectangle.
 
 ## Components
 
@@ -120,3 +129,6 @@ header toggle cycles system → dark → light and persists to localStorage
 - Each component renders from JSON, escapes text, and has a node:test case.
 - Every example page under `examples/patterns/` passes browser QA with a screenshot archived
   in `docs/evidence/patterns/`.
+- The core declarative corpus passes the hard gates and blinded equal-or-better threshold in
+  [`docs/page-quality-benchmark.md`](page-quality-benchmark.md). Pattern coverage and golden
+  screenshots alone do not establish parity with Claude Code Artifacts.

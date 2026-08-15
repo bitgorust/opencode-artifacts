@@ -2,6 +2,8 @@ import { readFile, readdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { CHECKS, type Check } from "./checks.ts";
+import { validateRequirementsTraceability } from "./requirements-traceability.ts";
+import { validateSpecRepository } from "./spec-workflow-lib.ts";
 
 const root = join(import.meta.dirname, "..");
 let failures = 0;
@@ -57,11 +59,24 @@ async function evaluate(check: Check): Promise<void> {
     }
     case "readme-links": {
       const readme = await read("README.md");
-      const linkRe = /\[[^\]]+\]\(((?:docs|examples|skills)\/[^)]+)\)/g;
+      const linkRe = /\[[^\]]+\]\(((?:docs|examples|skills|specs)\/[^)]+)\)/g;
       for (const match of readme.matchAll(linkRe)) {
         const target = match[1].split("#")[0];
         report(existsSync(join(root, target)), `readme-link: ${target}`);
       }
+      return;
+    }
+    case "requirements-traceability": {
+      const errors = validateRequirementsTraceability(
+        await read(check.spec),
+        await read(check.traceability),
+      );
+      report(errors.length === 0, check.id, errors.join("; "));
+      return;
+    }
+    case "spec-workflow": {
+      const errors = await validateSpecRepository(root);
+      report(errors.length === 0, check.id, errors.join("; "));
       return;
     }
     case "package-field": {

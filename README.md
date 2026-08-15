@@ -181,7 +181,14 @@ browser-verified screenshots in [`docs/evidence/patterns/`](docs/evidence/patter
 npm install
 npm test        # node --test, no framework
 npm run build   # tsc -> dist/
+npm run check   # structural contracts
 ```
+
+Behavior changes use the repository-native
+[spec-anchored workflow](specs/README.md): risk-scaled proposal/delta packets, human approval,
+exact validation and verification evidence, and an updated current-behavior spec before
+archive. The governing decision and alternatives are in
+[ADR 0001](docs/adr/0001-spec-anchored-development.md).
 
 ## Product specification
 
@@ -189,6 +196,12 @@ The authoritative target, boundaries, security model, and definition of complete
 [`docs/product-spec.md`](docs/product-spec.md). It is grounded in current official Claude Code
 Artifacts and OpenCode documentation and distinguishes portable pages, public snapshots,
 authenticated collaboration, and viewer-scoped connectors.
+Its MECE requirement families map to delivery phases, owner roles, evidence, release
+applicability, and current status in
+[`docs/requirements-traceability.md`](docs/requirements-traceability.md).
+“Equal or better” page quality is a target, not a current claim; the reproducible same-input
+comparison and pass thresholds are defined in
+[`docs/page-quality-benchmark.md`](docs/page-quality-benchmark.md).
 
 ## Roadmap
 
@@ -213,7 +226,8 @@ local 2.1.233 install and its unauthenticated service boundary.
 Issues and PRs welcome at
 [github.com/bitgorust/opencode-artifacts](https://github.com/bitgorust/opencode-artifacts/issues).
 Please run `npm test` before submitting; add a test for every behavior change. For anything
-visual, attach a browser screenshot.
+visual, attach a browser screenshot. Standard and high-risk behavior changes also follow the
+[spec-anchored change workflow](specs/README.md).
 
 ## License
 

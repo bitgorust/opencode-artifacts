@@ -12,6 +12,8 @@ fails if either side is missing.
 - `npm test` — run the full suite (node --test, no framework; must be green before commit)
 - `npm run build` — compile TypeScript to `dist/` (tsc, must exit 0)
 - `npm run check` — structural repo assertions (packaging, README, security invariants)
+- `npm run spec -- new <id> --lane standard|high-risk --title "..."` — scaffold a behavior
+  change packet; use `validate <id> --phase ...` and `archive <id>` for its gates
 - `node dist/cli.js render examples/patterns/<name>.md -o /tmp/x.html` — render a sample page
 - `npm pack --dry-run` — review what ships to npm
 
@@ -28,6 +30,8 @@ fails if either side is missing.
   - `skills/artifact-pages/` — the agent skill (SKILL.md + reference/, progressive
     disclosure per docs/engineering-principles.md §11).
   - `docs/` — spec, component reference, parity docs; `docs/evidence/` — QA screenshots.
+  - `specs/current/` — behavior known to ship; `specs/changes/` — active deltas;
+    `specs/archive/` — verified decision history. See `specs/README.md`.
 - **Import style:** relative imports carry the `.ts` extension; tsc rewrites them on build.
   No constructor parameter properties (type stripper rejects them) — declare fields
   explicitly.
@@ -48,3 +52,17 @@ fails if either side is missing.
 - Conventional Commits, atomic. SemVer; pre-1.0 minors may add tool args, never remove.
 - Rules live in `docs/engineering-principles.md` — if you change behavior it governs, update
   it in the same commit.
+
+## Spec-anchored changes
+
+- **Trivial:** no observable behavior or governed invariant changes, or a bug restores an
+  already explicit current spec. A packet is unnecessary.
+- **Standard:** observable behavior, a public contract, or a normative requirement changes.
+  Create a standard packet.
+- **High-risk:** security, privacy, authorization, concurrency, durability, migration,
+  destructive action, public compatibility, or an irreversible decision changes. Create a
+  high-risk packet with `design.md`.
+- Do not implement a standard/high-risk packet while it contains `[NEEDS CLARIFICATION]` or
+  before human approval is recorded in `change.json`.
+- If evidence contradicts a packet, amend and reapprove it. Update the affected
+  `specs/current/*.spec.md` in the same change, record exact evidence, then archive.

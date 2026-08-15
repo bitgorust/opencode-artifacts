@@ -38,6 +38,7 @@
     "build": "tsc -p tsconfig.json",
     "test": "node --test test/*.test.ts",
     "check": "node scripts/check-repo.ts",
+    "spec": "node scripts/spec-workflow.ts",
     "prepare": "git config core.hooksPath .githooks || true",
     "prepublishOnly": "npm run build"
   },

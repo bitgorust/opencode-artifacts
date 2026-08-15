@@ -28,7 +28,8 @@ was not exercised on this machine.
 ## Page quality
 
 Claude's page quality comes from a built-in design skill producing raw HTML. Our fixed
-renderer covers comparable structured-report patterns: card-based layout on a gray-blue canvas, metric stat
+renderer covers the same structured-report categories: card-based layout on a gray-blue
+canvas, metric stat
 cards with delta pills, tinted insight callouts, vertical timelines, severity-coded findings,
 annotated diffs, variant comparison cards, progress bars, and GitHub-style alerts. The six
 canonical patterns from the official docs are reproduced in `examples/patterns/` and verified
@@ -45,6 +46,13 @@ Interactive patterns are covered inside the fixed renderer: chart-bound controls
 `params.bind` / echarts `dataZoom` (browser-verified: moving a slider re-rendered the chart),
 and export-back-to-session via the `copy` component (browser-verified clipboard write).
 Only free-form per-page JS (e.g. drag-drop boards) stays in raw-HTML mode.
+
+Category coverage is not evidence of equal visual quality. The retained official screenshot
+and current dashboard example expose a real composition gap: our chart remains small inside a
+wide card with unexplained empty space, while Claude's reference uses denser, bespoke visual
+storytelling. Equal-or-better quality is currently **unverified** and is governed by the
+same-input, multi-run, blinded method in
+[`docs/page-quality-benchmark.md`](page-quality-benchmark.md).
 
 ## Feature matrix
 
@@ -135,14 +143,14 @@ limit). Reachable real samples reviewed in a browser:
   buttons. Visually indistinguishable from our `default` theme. The glamour samples are
   curated; the median output looks like this.
 
-Subjective quality assessment from those reachable public samples (not an authenticated
-same-prompt benchmark):
+Subjective coverage assessment from those reachable public samples (not an authenticated
+same-prompt quality benchmark):
 
-| Task class | Same quality as Claude? |
+| Task class | Coverage today |
 |---|---|
-| Dashboards, reports, incidents, timelines, checklists, comparisons, data tables | Comparable structured coverage with a consistent renderer floor; see `docs/evidence/patterns/` |
+| Dashboards, reports, incidents, timelines, checklists, comparisons, data tables | Core components exist, but visual non-inferiority is unverified; see `docs/evidence/patterns/` |
 | Explainers with bespoke SVG diagrams | Partially — mermaid yes; hand-tuned SVG needs `format: "html"` |
-| Interactive playgrounds (canvas sims, 3D, pyodide tools, single-purpose editors) | Only via raw-HTML mode; quality then tracks the model, same as theirs |
+| Interactive playgrounds (canvas sims, 3D, pyodide tools, single-purpose editors) | Only via raw-HTML mode; quality varies with the authoring model and has not been benchmarked |
 | Editorial bespoke pages (claudeatplay class) | Only via raw-HTML mode; our named themes cover part of the intent |
 
 ## Remaining gaps

@@ -5,6 +5,8 @@ export type Check =
   | { id: string; kind: "readme-section"; section: string }
   | { id: string; kind: "readme-one-liner" }
   | { id: string; kind: "readme-links" }
+  | { id: string; kind: "requirements-traceability"; spec: string; traceability: string }
+  | { id: string; kind: "spec-workflow" }
   | { id: string; kind: "package-field"; field: "version-semver" | "metadata" | "files-skills" };
 
 export const CHECKS: Check[] = [
@@ -29,6 +31,21 @@ export const CHECKS: Check[] = [
   { id: "file-skill-gotchas", kind: "grep-required", pattern: "## Gotchas", path: "skills/artifact-pages/SKILL.md" },
   { id: "file-agent-analyst", kind: "file-exists", path: "agents/artifact-comment-analyst.md" },
   { id: "file-principles", kind: "file-exists", path: "docs/engineering-principles.md" },
+  { id: "file-product-spec", kind: "file-exists", path: "docs/product-spec.md" },
+  { id: "file-roadmap", kind: "file-exists", path: "docs/roadmap.md" },
+  { id: "file-page-quality", kind: "file-exists", path: "docs/page-quality-benchmark.md" },
+  {
+    id: "file-release-evidence-template",
+    kind: "file-exists",
+    path: "docs/release-evidence-template.md",
+  },
+  {
+    id: "file-traceability",
+    kind: "requirements-traceability",
+    spec: "docs/product-spec.md",
+    traceability: "docs/requirements-traceability.md",
+  },
+  { id: "spec-workflow", kind: "spec-workflow" },
   { id: "file-component-spec", kind: "file-exists", path: "docs/component-spec.md" },
   { id: "file-comparison", kind: "file-exists", path: "docs/claude-code-comparison.md" },
   { id: "file-license", kind: "file-exists", path: "LICENSE" },

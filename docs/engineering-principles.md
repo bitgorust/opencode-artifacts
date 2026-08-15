@@ -1,214 +1,283 @@
-# Engineering Principles
+# Engineering principles
 
-The rulebook for this repository. Every rule cites its source. `scripts/check-repo.ts`
-enforces the machine-checkable subset; CI runs it on every push.
+The durable engineering rulebook for this repository. The product specification owns
+**what** the product must do; this file owns **how engineering decisions are made**. AGENTS.md
+owns repository-working instructions, component-spec.md owns authoring syntax, and
+`scripts/checks.ts` owns enforcement mechanics. One fact has one canonical home.
 
-## 1. Intent and scope
+Rules marked `[check:<id>]` are machine-enforced by `scripts/check-repo.ts`; CI runs them on
+every push. The eleven domains are MECE at the engineering-governance level. Product behavior is
+collectively exhausted by [`docs/product-spec.md`](product-spec.md), not repeated here.
 
-- Ship the smallest change that satisfies the explicit request; park "could also improve X"
-  in a closing note, not in the diff. (karpathy-guidelines, repo-local skill)
-- Commit to one approach; reopen only on contradicting evidence. (karpathy-guidelines)
-- Every claim of "done" rests on tool output from the same session — tests actually run,
-  pages actually rendered. "Should pass" is not verification.
-  (superpowers `verification-before-completion` skill)
-- User-visible output is verified through its real surface: pages in a browser, CLI by
-  running it, publishers against a fake runner plus one real deploy per new target.
-  (this repo's QA history: every surfaced bug — CSP/eval, script ordering, state races —
-  came from browser QA, not unit tests)
+| Domain | Owns | Defers to |
+|---|---|---|
+| 1. Outcome and scope | value, priority, honest scope | product requirements and roadmap |
+| 2. Trust and security | adversarial boundaries, least authority, exploit prevention | threat model |
+| 3. Privacy and data governance | purpose, disclosure, retention, and personal-data rights | data inventory and privacy policy |
+| 4. Data integrity and lifecycle | identity, transactions, recovery, artifact ownership | lifecycle requirements and schemas |
+| 5. Architecture and compatibility | boundaries, extension points, portability, evolution | component/API specifications |
+| 6. Experience and accessibility | clarity, visual quality, inclusive interaction | component spec and benchmark |
+| 7. Reliability, performance, and cost | failure behavior, operability, resource budgets | measured budgets and runbooks |
+| 8. Verification and evidence | how claims become accepted | tests and retained evidence |
+| 9. Distribution and supply chain | what ships and how consumers trust it | release policy and CI artifacts |
+| 10. Change and code stewardship | maintainability, documentation, versioned change | AGENTS.md workflow |
+| 11. Agent and context design | model-facing interfaces and attention budget | skill/tool/AGENTS.md content |
 
-## 2. Code
+## 1. Outcome and scope
 
-- Strict TypeScript: no `as any`, no `@ts-ignore`/`@ts-expect-error`, no non-null assertion [check:no-as-any] [check:no-ts-ignore] [check:no-ts-expect-error]
-  where a real check exists. (`tsc strict`, enforced by check-repo grep)
-- Errors are typed (`ArtifactTooLargeError`, `StaleArtifactError`) and surfaced with
-  actionable messages — what failed and what to do next.
-- Silent catch only where the operation is genuinely best-effort: client-side
-  `localStorage` persistence inside the artifact BOOT string; tolerated remote operations
-  during deploy (pull-before-push, Pages-enable retry); and absent-or-unreadable *optional*
-  resources (config files, state stores, caches) that fall back to a documented default.
-  Everything else must propagate or be returned.
-- Substrate constraints of this environment: Node 24 type stripping runs the tests, so no
-  constructor parameter properties; `.ts` import specifiers with
-  `rewriteRelativeImportExtensions` so the same sources compile to `dist/`.
+- Optimize for the explicit user outcome and the smallest coherent change that achieves it.
+  Record adjacent opportunities rather than silently expanding scope. (karpathy-guidelines,
+  repo-local guidance)
+- Preserve the product priority order: durable local authoring first, review and sharing
+  second, administration third. Convenience never weakens security, privacy, recoverability,
+  or truthfulness. (`OUT-01`)
+- Commit to one approach while evidence supports it; reopen the choice when a test, user
+  outcome, dependency, or risk contradicts it. (karpathy-guidelines)
+- Capability language is an interface. Say local, public-static, authenticated, connected,
+  shipped, partial, missing, or unverified according to enforced behavior and current
+  evidence—never according to intent.
+- A feature stops at the artifact boundary: a durable single-page capture plus bounded
+  collaboration enhancements. Multi-route applications and general business backends belong
+  in application deployment systems.
 
-## 3. Architecture
+## 2. Trust and security
 
-- Pipeline separation: **capture → author (Markdown) → render (fixed) → publish
-  (interface)**. The renderer never trusts the model; publishers never touch markup.
-  (`docs/superpowers/specs/2026-08-14-opencode-artifacts-design.md`)
-- New capabilities join as a component fence, a Publisher, or a serve/hosted endpoint —
-  not as branches inside existing units.
-- The model authors declarative specs; arbitrary per-page JS lives only in `format: "html"`
-  mode, which visibly opts out of renderer guarantees.
-  (docs/component-spec.md; Claude Code's "capture of work, not an application")
+- Treat Markdown, metadata, component JSON, assets, paths, URLs, headers, request bodies,
+  connector arguments/results, page JavaScript, and provider responses as untrusted at their
+  boundary. Validate before authority or filesystem access; fail closed and within limits.
+- Markdown uses `markdown-it` with `html: false`; raw HTML never passes through Markdown mode.
+  Trusted HTML is a separately permissioned execution surface, never an implicit fallback.
+- Every emitted page carries the strict on-disk CSP: `default-src 'none'; script-src
+  'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'`. Served or
+  hosted copies may relax `connect-src` only to the documented self boundary; the portable
+  file never changes. No `unsafe-eval`, ever—Vega uses its `ast: true` interpreter.
+  [check:csp-no-unsafe-eval] [check:vega-interpreter]
+- Encode data for its exact HTML/CSS/URL/script context. Chart JSON is `\u003c`-escaped inside
+  script payloads; user-facing text goes through the repository escaping helpers.
+- Least authority is end to end: publishing, datasource execution, audience expansion,
+  connector grant/call, trusted HTML, and destructive action have distinct scopes. Page code
+  and public files never receive publisher, session, identity, connector, or administrator
+  credentials.
+- Scan the final bytes that cross an audience boundary, including title, metadata, assets,
+  configuration, and staged files. Overrides are explicit, targeted, auditable, and do not
+  become a remembered broader permission.
+- Authentication is not authorization. Verify the identity boundary cannot be bypassed,
+  authorize every server-side operation, namespace state/cache/audit data by all relevant
+  authorities, and regression-test hostile cross-site/cross-viewer access.
+- New trust boundaries require threat-model, abuse prevention, containment, incident,
+  key-rotation, and recovery treatment before release. A security claim without an adversarial
+  test is unresolved.
 
-## 4. Security invariants — each must have a test
+## 3. Privacy and data governance
 
-- `markdown-it` with `html: false`; raw HTML never passes through Markdown mode.
-- CSP on every emitted page: `default-src 'none'; script-src 'unsafe-inline';
-  style-src 'unsafe-inline'; img-src data:; connect-src 'none'`. Served/hosted copies may
-  relax `connect-src` to `'self'`; the on-disk file never changes. (`src/served-html.ts`)
-  [check:csp-no-unsafe-eval]
-- No `unsafe-eval`, ever — charts run through vega's `ast: true` interpreter.
-  (regression-locked after browser QA caught the eval violation) [check:vega-interpreter]
-- Chart JSON is `\u003c`-escaped inside `<script>` payloads. (XSS breakout test)
-- 15 MiB rendered cap, enforced before any write.
-- Credential-pattern scan blocks publish unless `force`. (`src/guard.ts`)
-- Stale-version refusals must carry the live content back (head + body, capped) so the
-  session can merge and republish in one step — the autoread-recovery pattern.
-  (Claude Code 2.1.232 stale-version guard)
-- Interactive elements must have visible `:focus-visible` states; respect
-  `prefers-reduced-motion` if motion is ever added.
-  (Claude Code artifact-design skill, "Build cleanly")
-- Local state directories (`.state`, `.db`, `.datasources`) never leave the machine —
-  both hosted publishers exclude them by test.
-- Datasources are registered at publish time by the session; viewers can only poll
-  registered names. (no viewer-defined commands)
+- Every collected or transmitted field has a named capability-bound purpose, sensitivity,
+  operator/controller, location, recipient, retention, and deletion path. “Useful later” is
+  not a purpose.
+- Local creation has no default telemetry. Analytics and studies are opt-in and consented;
+  declining measurement never removes product capability.
+- Operators, third parties, data regions, and unsupported compliance claims are disclosed at
+  the boundary where a user selects hosting or a connector. Provider defaults are not treated
+  as informed consent.
+- Logs, metrics, fixtures, screenshots, traces, benchmarks, and support bundles minimize,
+  pseudonymize, or avoid private content and identities. Private artifacts do not leave their
+  deployment boundary without explicit authority.
+- Users and authorized administrators can understand, list, export, correct where applicable,
+  and delete the data the selected capability stores. Deletion covers derived copies and
+  states documented backup expiry; it produces auditable completion evidence.
+- Public sharing has an abuse, takedown, and intellectual-property path. Embedded third-party
+  material retains required license and attribution; private or ambiguous reference artifacts
+  are not redistributed.
 
-## 5. Testing
+## 4. Data integrity and lifecycle
 
-- `node --test` only, no framework. One behavior, one test. (superpowers TDD skill)
-- New behavior lands with its test in the same commit.
-- Tests must not depend on network, clocks beyond millisecond ordering, or machine paths
-  outside tmpdir. External commands go through the injectable `Runner`.
-- Browser QA with a screenshot is required evidence for any change to emitted HTML/CSS/JS;
-  screenshots land in `docs/evidence/`.
+- Artifact identity is stable; revisions are immutable; the selected head is mutable and
+  auditable. Titles, slugs, paths, and presentation URLs are references, not identity.
+- A stale check and its commit are one atomic concurrency operation. Mutations use a
+  cross-process transaction, serialization, or compare-and-swap, never an unprotected
+  read-modify-write sequence.
+- Multi-file publication and state migration are crash-safe: after interruption, readers see
+  a complete old state or a complete new state. Backups, repair, retry, and rollback are
+  bounded, idempotent or resumable, and tested through fault injection.
+- Stale refusals carry the bounded live metadata and content needed to merge and retry in one
+  session. They never write a partial result or require rediscovery of artifact identity.
+- Local state directories (`.state`, `.db`, `.datasources`) never enter a hosted publication.
+  Datasources are publisher-registered fixed capabilities; viewers cannot supply commands.
+- Users own portable output and supported exports. Provider choice, package removal, upgrade,
+  or service disappearance must not strand the stable HTML or silently detach its state.
+- Archive, restore, import, export, and state repair are explicit artifact operations.
+  Destructive work names exact scope, transaction boundary, and recovery before execution.
 
-## 6. Documentation
+## 5. Architecture and compatibility
 
-- README follows the collected conventions: funnel order (what → demo → install → usage →
-  limits → license last) [check:readme-section-install] [check:readme-section-usage] [check:readme-section-limitations] [check:readme-section-contributing] [check:readme-section-license],
-  one-liner < 120 chars matching `package.json` description and the
-  GitHub repo description [check:readme-one-liner], TOC past 100 lines, repo-local images
-  [check:readme-links], judicious badges.
-  Sources: [Art of README](https://github.com/hackergrrl/art-of-readme),
-  [Standard Readme](https://github.com/RichardLitt/standard-readme/blob/main/spec.md),
-  [Make a README](https://www.makeareadme.com/),
-  [Open Source Guides](https://opensource.guide/starting-a-project/),
-  [GitHub Docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes).
-- Docs name versions only via git tags; body text describes behavior, not version numbers
-  that rot. (learned: comparison doc pinned "v0.3.0" and went stale within two releases)
+- Preserve the pipeline boundary: **capture → author (Markdown/components) → render (fixed) →
+  publish (interface)**. The renderer never trusts authored input; publishers never rewrite
+  markup. (`docs/superpowers/specs/2026-08-14-opencode-artifacts-design.md`)
+- New capabilities join through the narrowest existing extension point: a component fence,
+  Publisher implementation, storage adapter, or documented local/hosted endpoint—not
+  conditionals scattered across established units.
+- The model authors declarative specifications. Arbitrary per-page JavaScript exists only in
+  explicit trusted-HTML mode and does not inherit fixed-renderer guarantees.
+- The portable page is the long-term compatibility layer. Services are progressive
+  enhancement; no page-view dependency, account, package runtime, or network is required.
+- Schemas, CLI/tool contracts, component syntax, exports, routes, and host adapters evolve by
+  versioned migration and SemVer. Unknown future state fails without mutation; removals have
+  a tested migration path.
+- Platform differences—paths, locks, atomic replace, shells, launchers, fonts, locales, line
+  endings, browsers, and host APIs—live behind explicit adapters and support-matrix tests.
+- Current environment substrate: strict TypeScript, ESM/NodeNext, Node 24 native type
+  stripping, no constructor parameter properties, and `.ts` relative import specifiers with
+  `rewriteRelativeImportExtensions`. These constraints are implementation facts, not product
+  requirements.
+
+## 6. Experience, page quality, and accessibility
+
+- Optimize every surface for the user's next decision: clear purpose, hierarchy, provenance,
+  status, authority, consequences, and recovery. Empty, loading, denied, stale, offline,
+  quota, and partial-service states are designed states.
+- Correct and accessible is the floor; deliberate composition is the quality bar. Responsive
+  pages recompose rather than shrink, use space intentionally, and avoid accidental clipping,
+  dead zones, repetitive cards, and undersized primary visuals.
+- Built-in interactions are keyboard-operable, expose semantic landmarks/names/state, have
+  visible `:focus-visible`, support zoom and narrow viewports, and respect
+  `prefers-reduced-motion`. Accessibility is verified with automation plus representative
+  manual assistive-technology checks.
+- Chart and data guidance is honesty-first: title the finding, preserve provenance, expose
+  uncertainty/missing values, avoid exaggerated encodings, and summarize rather than inline
+  unusably large datasets.
+- Project tokens may alter declared design values, not execute code. Explicit prompt choices
+  outrank project tokens; project tokens outrank curated defaults.
+- “Equal or better” is comparative, not aesthetic rhetoric. It requires the current
+  same-input, multi-run, blinded benchmark in `docs/page-quality-benchmark.md`; golden images
+  establish regression stability only.
+
+## 7. Reliability, performance, operability, and cost
+
+- Every dependency and stateful boundary has named behavior for timeout, cancellation, retry,
+  duplication, restart, partial failure, and degradation. Continue with last-known safe data
+  only when authority and integrity remain valid.
+- Errors are typed and actionable: what failed, what remained unchanged, and the next safe
+  action. Silent catch is reserved for documented best-effort behavior: browser localStorage,
+  tolerated deploy-provider probes, and absent/unreadable optional configuration or caches.
+  Everything else propagates or is returned.
+- Health, readiness, structured logs, metrics, alerts, and correlation identifiers are product
+  operations, not post-launch extras. They remain bounded and redact content/credentials.
+- Backups are not evidence until restore is tested. Rollouts, schema changes, and provider
+  migrations have preflight, staged enablement, verification, rollback, and incident owners.
+- Performance is governed by reproducible percentile budgets for render, useful page load,
+  interaction, update delivery, memory/storage, and supported capacity. The 15 MiB cap applies
+  to final expanded bytes before any write.
+- Quotas and overload behavior protect existing data and tenant isolation. Warning thresholds
+  precede hard limits; overload rejects safely and recovers without manual undocumented edits.
+- Hosted and connector designs publish cost envelopes for idle, nominal, and limit workloads.
+  Cost optimizations cannot trade away transactional consistency, isolation, accessibility,
+  or offline portability.
+
+## 8. Verification and evidence
+
+- Every “done,” compatibility, privacy, security, performance, production-readiness, or parity
+  claim rests on tool/user evidence from the same change or a still-current dated report.
+  “Should pass” and screenshots without execution traces are not verification.
+- Tests follow the risk pyramid: deterministic unit/property tests; transaction/concurrency/
+  migration/fault tests; packed-host tests; browser/accessibility tests; fake-provider tests;
+  then minimal real-provider smoke and recovery tests. Network and machine-specific state do
+  not enter deterministic tests.
+- New behavior lands with its test. One test should explain one behavior; external commands
+  go through injectable boundaries such as `Runner`.
+- User-visible HTML/CSS/JS changes are exercised in a browser at supported desktop/mobile
+  widths and interaction modes; screenshots live in `docs/evidence/` with console/runtime
+  results. Comparative quality uses all required runs and retains losing archetypes.
+- Requirements trace in one direction: specification → roadmap/owner → test or manual
+  protocol → dated evidence → release claim. The checked matrix must cover every normative ID.
+  [check:file-traceability]
+- CI runs install, build, test, structural checks, and pack inspection for every push/PR;
+  local `npm run check` uses the same structural assertions. [check:file-ci]
+- Failed, excluded, flaky, unsupported, and not-applicable outcomes are visible beside passes.
+  Evidence is never cherry-picked to protect a claim.
+
+## 9. Distribution and supply-chain integrity
+
+- The npm package follows official OpenCode plugin contracts: named plugin export,
+  runtime dependencies in `dependencies`, and `@opencode-ai/plugin` as peer plus development
+  dependency. Install instructions cover registry/config and tested non-registry development
+  paths.
+- Packed contents are deliberate and reviewable: `dist`, `skills`, README, and LICENSE ship;
+  entrypoints, types, repository metadata, keywords, and runtime dependencies resolve from the
+  tarball. [check:pkg-metadata] [check:pkg-files-skills] [check:file-license]
+- Releases are built and tested from the exact packed bytes in clean supported hosts. They
+  produce dependency/license/vulnerability evidence, SBOM, and provenance suitable for
+  consumer integrity verification.
+- Dependencies default to zero additions. A dependency must justify capability, browser
+  weight, CSP/network behavior, license, vulnerability surface, update ownership, and removal
+  path. Conditional inlining is the exception that permits existing heavy visual runtimes.
+- No dependency introduces a page-view network requirement. Previously created portable pages
+  survive package/runtime removal because their required bytes are already embedded.
+- Supported-version, deprecation, security-response, compromised-release, and end-of-life
+  policies match actual staffing and test coverage; release notes name capability level,
+  migrations, known limits, and evidence.
+
+## 10. Change, code, and documentation stewardship
+
+- Strict TypeScript: no `as any`, `@ts-ignore`, `@ts-expect-error`, or non-null assertion where
+  a real runtime/type check exists. [check:no-as-any] [check:no-ts-ignore]
+  [check:no-ts-expect-error]
+- Use typed domain errors and explicit state transitions. Prefer readable direct code over
+  abstraction without repeated need; keep security and transaction boundaries conspicuous.
+- SemVer governs public authoring/tool/package contracts; pre-1.0 breaking changes require at
+  least a minor release. Commits are conventional and atomic; secrets never enter history.
+  [check:pkg-version-semver]
+- Documentation has one canonical owner per fact, links claims to evidence, and names versions
+  through tags or evidence metadata rather than prose that silently rots.
   [check:docs-no-version-pins]
-- Core docs never go missing: the spec, component spec, parity comparison, and LICENSE.
-  [check:file-principles] [check:file-component-spec] [check:file-comparison] [check:file-license]
-- Chart guidance is honesty-first: title the finding, not the axes; encodings must not
-  exaggerate; summarize large datasets instead of inlining them. (Claude Code dataviz skill
-  callout + token-cost guidance)
-- Every claimed capability in docs links to evidence: a test, an example file, or a
-  screenshot.
+- Standard and high-risk behavior changes follow the spec-anchored workflow in
+  [`docs/adr/0001-spec-anchored-development.md`](adr/0001-spec-anchored-development.md): target
+  intent, current shipped behavior, proposed deltas, and evidence remain separate; unresolved
+  contract decisions block implementation; verified changes update current truth before
+  archive. Deterministic structure and references are machine-checked. [check:spec-workflow]
+- README follows the user funnel: what → evidence/demo → install → usage → limits →
+  contributing → license. Its one-liner matches package/repository metadata; internal links
+  resolve; the core contract documents remain present.
+  [check:readme-one-liner] [check:readme-section-install] [check:readme-section-usage]
+  [check:readme-section-limitations] [check:readme-section-contributing]
+  [check:readme-section-license] [check:readme-links] [check:file-principles]
+  [check:file-product-spec] [check:file-roadmap] [check:file-page-quality]
+  [check:file-release-evidence-template] [check:file-component-spec]
+  [check:file-comparison]
+- A new or changed principle updates its requirement/evidence/check owner in the same change.
+  Machine-checkable rules receive a registered `[check:<id>]`; the registry and principle tags
+  must remain bijective.
 
-## 7. Versioning and commits
+## 11. Agent and context design
 
-- [SemVer](https://semver.org/): breaking authoring-format or tool-arg changes → minor at
-  minimum until 1.0, then major. [check:pkg-version-semver]
-- [Conventional Commits](https://www.conventionalcommits.org/), atomic: one concern per
-  commit.
-- Never commit secrets; the guard patterns in `src/guard.ts` apply to our own repo too.
+Sources: [Anthropic skill guidance](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills),
+[Anthropic context engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents),
+[OpenAI agent guide](https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf),
+[OpenAI AGENTS.md guide](https://developers.openai.com/codex/guides/agents-md), and
+[agents.md](https://agents.md/).
 
-## 8. Packaging and distribution
-
-- Follow the [OpenCode plugin docs](https://opencode.ai/docs/plugins/): named plugin
-  function export, npm-installable with runtime deps declared in `dependencies`,
-  `@opencode-ai/plugin` as peer + dev.
-- `npm pack` contents are reviewable: `files` covers `dist`, `skills`, README, LICENSE;
-  `main`/`types`/`repository`/`keywords` present. (checked by check-repo + CI pack dry-run)
-  [check:pkg-metadata] [check:pkg-files-skills]
-- Install docs must cover both the registry path and a non-registry path (file: spec),
-  matching what OpenCode actually accepts.
-
-## 9. Dependencies
-
-- Default to zero new dependencies. Heavy browser runtimes (vega, echarts, mermaid) are
-  allowed only because they inline conditionally into pages; a new one must justify its size
-  the same way.
-- No dependency may introduce network calls at page view time (CSP model).
-
-## 10. Automation that keeps this true
-
-- `.github/workflows/ci.yml` on every push/PR: install, build, test, `check-repo`,
-  `npm pack --dry-run`. [check:file-ci]
-- `npm run check` locally runs the same structural assertions before you push.
-
-## 11. Agent-facing guidance (skills, AGENTS.md, tool descriptions)
-
-Sources: [Anthropic — Equipping agents with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills),
-[Anthropic — Skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices),
-[Anthropic — Lessons from building Claude Code](https://claude.com/blog/lessons-from-building-claude-code-how-we-use-skills),
-[OpenAI — A practical guide to building agents](https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf),
-[OpenAI Codex — AGENTS.md guide](https://developers.openai.com/codex/guides/agents-md),
-[agents.md](https://agents.md/),
-[GitHub — agents.md lessons from 2,500 repos](https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/).
-
-- **Progressive disclosure is the load-bearing structure.** Metadata (~50 tokens, always
-  loaded) → SKILL.md body (< 500 lines, loaded when relevant) → reference files loaded on
-  demand, linked **one level deep** from SKILL.md (nested references get partial reads).
-  Reference files over 100 lines carry a table of contents. (Anthropic, both sources)
-  [check:file-skill] [check:file-skill-components] [check:file-skill-visuals]
-- **A description is a trigger contract, not a summary**: what it does + when to use it +
-  phrases a user would actually say. Written for the model scanning a skill list, not for
-  humans browsing. Same contract governs our tool descriptions (`artifact_publish` reads as
-  when-to-publish guidance, not API docs). (Claude Code lessons; Anthropic checklist)
-- **Never state the obvious** — the model already knows how to code and read a repo. Skill
-  content exists to push it out of its default behavior. The highest-signal section is
-  **gotchas**, grown from observed failures over time. (Claude Code lessons)
+- Context is a finite attention budget. Include the smallest current set of high-signal facts
+  that changes behavior; retrieve detail just in time and keep stable prefixes stable.
+- Progressive disclosure is the load-bearing skill structure: compact trigger metadata →
+  relevant SKILL.md (<500 lines) → one-level-deep references, with a contents list on long
+  references. [check:file-skill] [check:file-skill-components]
+  [check:file-skill-visuals]
+- A skill/tool description is a trigger contract—what it enables and when to use it—not a
+  duplicate API manual. High-signal gotchas grow from observed failures, not imagined rules.
   [check:file-skill-gotchas]
-- **AGENTS.md is for agents what README is for humans** [check:file-agents]
-- **Inform, don't railroad**: give the model what it needs and leave adaptation room; skills
-  get reused in contexts you didn't foresee. (Claude Code lessons)
-- **Scripts beat prose for deterministic work**: a validator that runs is better than
-  instructions describing validation. Our `scripts/check-repo.ts` is this principle applied
-  to ourselves. (Anthropic best practices)
-- **One agent first; split only on demonstrated complexity** — conditional-laden prompts or
-  overlapping tools are the split signals, not aesthetics. We ship one skill, not eleven.
-  Sub-agent definitions (e.g. `agents/artifact-comment-analyst.md`) ship as installable
-  files, same opt-in model as skills. (OpenAI practical guide) [check:file-agent-analyst]
-- **High-risk actions get human checkpoints** — our `ctx.ask` publish prompt and the guard
-  `force` gate are the intervention points; never route around them silently. (OpenAI
-  guardrails)
-- **AGENTS.md is for agents what README is for humans**: commands early (with flags),
-  concrete examples over prose, stack with versions, and three-tier boundaries
-  (always / ask first / never). Nearest file wins on conflict. (agents.md; GitHub study)
-- **When the agent makes the same mistake twice, retrospective → update the guidance.** Rules
-  grow from real friction, not upfront anticipation. (OpenAI Codex best practices)
-
-### Context engineering for the current model generation
-
-Sources: [Anthropic — Effective context engineering for AI agents (2025-09)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents),
-[Anthropic — New rules of context engineering (2026-07)](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models),
-[Anthropic Cookbook — Memory, compaction, and tool clearing (2026-03)](https://platform.claude.com/cookbook/tool-use-context-engineering-context-engineering-tools),
-[LangChain — Context engineering for agents (2025-07)](https://www.langchain.com/blog/context-engineering-for-agents),
-[tianpan.co — Four strategies, with benchmarks (2026-02)](https://tianpan.co/blog/2026-02-28-four-strategies-agent-context-engineering),
-[Anthropic — The unreasonable effectiveness of HTML (2026-05)](https://claude.com/blog/using-claude-code-the-unreasonable-effectiveness-of-html).
-
-**The master principle**: context is a finite attention budget subject to context rot; find
-the smallest set of high-signal tokens that maximize the likelihood of the desired outcome.
-Everything we inject into a session — tool descriptions, skill bodies, proactive guidance,
-artifact content returned by tools — is audited against this. (Anthropic 2025-09)
-
-Applied to this repo:
-
-- **Judgment over rules; expressive interfaces over examples.** Anthropic removed 80% of
-  Claude Code's system prompt with no eval loss. Add a rule when a failure is observed;
-  re-evaluate rules when the harness model generation changes. Two held tensions: GitHub's
-  agents.md study says code examples beat explanations (true for style/persona), while
-  Anthropic says examples constrain tool exploration (true for tool surfaces — our enum-typed
-  args and digest/verbose flags do this). (2026-07)
-- **Altitude**: specific enough to guide, flexible enough to adapt — no brittle if-else
-  logic, no vague aspiration. Applies to every description we ship. (2025-09)
-- **One fact, one home**: the tool description owns how, the skill owns when/why, AGENTS.md
-  owns repo facts. Repetition was an old-model workaround; deleted here. (2026-07)
-- **Just-in-time over front-loading**: lightweight identifiers in context (paths, slugs,
-  hashes), content loaded on demand — our `reference/` files, capped 16 KB stale-guard
-  preview, and `digest: true` comment triage all follow this. (2025-09)
-- **Token-efficient tool returns**: compact pointers by default (path + hash), full content
-  only on explicit request; evidence shows observation masking beats summarization (~50% cost
-  cut on SWE-bench-class workloads) — large returns must justify themselves. (2026-02)
-- **Durable external state over in-context accumulation**: our artifact pages are rich
-  references for later sessions (better than prose specs), and `.state`/`.db` stores double
-  as agent scratchpads that survive compaction and session resets. Compaction/memory/
-  sub-agent strategy belongs to the harness; our job is to be good storage. (2025-09, 2026-05)
-- **Prefix stability is a feature**: the proactive injection is a static string computed once
-  at plugin init, never rebuilt per turn — reordering or rebuilding context silently breaks
-  prompt caching. (2026-02)
-- **Anti-patterns we refuse**: whole-document dumps into context, unbounded transcripts,
-  stale memory without a supersede path, deferred-loading nothing. (2026-05 guide)
+- AGENTS.md is the agent entrypoint: commands early, concrete repository facts, examples where
+  style requires them, and always/ask/never boundaries. Nearest file wins.
+  [check:file-agents]
+- Inform judgment rather than encode brittle prompt conditionals. Use expressive typed tool
+  interfaces; scripts beat prose for deterministic validation.
+- Start with one agent/skill and split only when demonstrated complexity creates separable
+  context or authority. Optional sub-agent definitions ship as explicit files.
+  [check:file-agent-analyst]
+- High-risk external actions keep a human checkpoint. Agent convenience never routes around
+  permission, force, audience, destructive-action, or credential boundaries.
+- Durable external state stores stable identifiers and summaries; large content is loaded on
+  demand. Tool returns are bounded by default and expose full content only explicitly.
+- Anti-patterns: whole-document context dumps, unbounded transcripts, repeated facts with no
+  canonical owner, stale memory without supersession, examples that accidentally narrow an
+  expressive tool, and deferred-loading everything.
+- When the same model failure recurs, perform a retrospective, improve the canonical guidance
+  or interface, add executable validation where possible, and re-evaluate it when the host
+  model/tool generation changes.
