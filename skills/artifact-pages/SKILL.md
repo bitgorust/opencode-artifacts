@@ -77,10 +77,11 @@ or colon. Keep the title stable across republishes.
 
 ## The comment loop
 
-When a served artifact has readers, close the loop: `artifact_comments` with `digest: true`
-for a triage view (unresolved first, age-marked), act on each thread, then resolve by id with
-`resolveId`. If acting changed the page, republish. Leave a thread open only while the
-conversation is genuinely still active.
+When a served artifact has readers, close the loop. With more than a couple of open threads,
+dispatch the `artifact-comment-analyst` subagent (from `agents/` in the plugin repo) for a
+triage brief; for one or two, read them directly with `artifact_comments` `digest: true`.
+Act on each thread, then resolve by id with `resolveId`. If acting changed the page,
+republish. Leave a thread open only while the conversation is genuinely still active.
 
 ## Gotchas
 

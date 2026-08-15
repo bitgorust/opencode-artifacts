@@ -160,7 +160,8 @@ Sources: [Anthropic — Equipping agents with Agent Skills](https://www.anthropi
   to ourselves. (Anthropic best practices)
 - **One agent first; split only on demonstrated complexity** — conditional-laden prompts or
   overlapping tools are the split signals, not aesthetics. We ship one skill, not eleven.
-  (OpenAI practical guide)
+  Sub-agent definitions (e.g. `agents/artifact-comment-analyst.md`) ship as installable
+  files, same opt-in model as skills. (OpenAI practical guide) [check:file-agent-analyst]
 - **High-risk actions get human checkpoints** — our `ctx.ask` publish prompt and the guard
   `force` gate are the intervention points; never route around them silently. (OpenAI
   guardrails)

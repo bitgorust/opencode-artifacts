@@ -30,6 +30,7 @@
   "files": [
     "dist",
     "skills",
+    "agents",
     "README.md",
     "LICENSE"
   ],

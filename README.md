@@ -120,6 +120,11 @@ session's system context — visible in the plugin source, off by default, and r
 deleting the option. Alternative for non-plugin environments: `cp -r skills/artifact-pages
 ~/.agents/skills/` (don't use both).
 
+Comment triage at scale: `agents/artifact-comment-analyst.md` is a read-only subagent that
+digests open comment threads into an actionable brief (blocking issues first, with the page's
+current wording at each quote). Install with
+`cp agents/artifact-comment-analyst.md ~/.config/opencode/agent/`.
+
 CLI (also usable standalone, `npm install -g opencode-artifacts`):
 
 ```bash

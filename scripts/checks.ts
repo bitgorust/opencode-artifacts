@@ -27,6 +27,7 @@ export const CHECKS: Check[] = [
   { id: "file-skill-components", kind: "file-exists", path: "skills/artifact-pages/reference/components.md" },
   { id: "file-skill-visuals", kind: "file-exists", path: "skills/artifact-pages/reference/visuals.md" },
   { id: "file-skill-gotchas", kind: "grep-required", pattern: "## Gotchas", path: "skills/artifact-pages/SKILL.md" },
+  { id: "file-agent-analyst", kind: "file-exists", path: "agents/artifact-comment-analyst.md" },
   { id: "file-principles", kind: "file-exists", path: "docs/engineering-principles.md" },
   { id: "file-component-spec", kind: "file-exists", path: "docs/component-spec.md" },
   { id: "file-comparison", kind: "file-exists", path: "docs/claude-code-comparison.md" },
