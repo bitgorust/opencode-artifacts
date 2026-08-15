@@ -1,5 +1,7 @@
 # Parity comparison: Claude Code Artifacts vs opencode-artifacts
 
+Full capability inventory with binary evidence: [`docs/claude-code-inventory.md`](claude-code-inventory.md).
+
 Baseline: official docs `https://code.claude.com/docs/en/artifacts` and the launch post
 `https://claude.com/blog/artifacts-in-claude-code` (retrieved 2026-08-14), plus the official
 viewer screenshot (`docs/references/claude-artifact-viewer.png`) and capability strings from
