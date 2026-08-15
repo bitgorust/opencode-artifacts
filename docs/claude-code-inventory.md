@@ -25,6 +25,16 @@ The template skills share a discipline worth copying: slot markers that must ALL
 "never invent a value", provenance footers, and number-formatting rules — all now in our
 `docs/component-spec.md` and skill reference.
 
+## Absorption status (vs our artifact-pages skill)
+
+Fully absorbed: artifact-design, artifact-dashboard, artifact-data-table, artifact-explainer,
+artifact-pr-review (structure), workshop, plan-artifact, artifact-components (philosophy).
+Not applicable: artifact-capabilities (no `window.claude.*` runtime).
+
+Absorbed in `skills/artifact-pages/reference/visuals.md`: artifact-diagramming (mechanism-over-name, labeled arrows, one-figure-one-claim) and dataviz (form heuristic, color-by-meaning,
+anti-pattern list, interaction discipline). Their runnable palette validator stays unported —
+our palettes are fixed token sets, so there is nothing to validate.
+
 Plus: plan-artifact flow (offer to review a plan as a page) and a reusable-component skill
 (first entry: the workshop decision component).
 

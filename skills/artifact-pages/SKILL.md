@@ -11,7 +11,9 @@ The renderer owns all design — your job is structure and content, never CSS.
 
 Authoring reference (component JSON schemas, chart fences, alerts, task lists):
 **reference/components.md** in this skill's directory. Load it before building your first
-page in a session, or whenever you need an exact schema.
+page in a session, or whenever you need an exact schema. If the page carries a diagram or
+chart, also load **reference/visuals.md** (when a picture earns its place, form selection,
+color semantics, anti-patterns).
 
 ## When to publish
 
