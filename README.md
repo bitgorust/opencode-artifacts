@@ -38,7 +38,9 @@ output stays diff-friendly and cheap in tokens.
 
 ## Features
 
-- **Dashboards, PR walkthroughs, incident timelines, checklists, comparisons** — component fences (`stats`, `timeline`, `findings`, `compare`, `callout`, `progress`, `diff`, `copy`, `mermaid`, `decisions`) plus Vega-Lite / Vega / ECharts / Mermaid charts, all inlined into one strict-CSP file
+- **Dashboards, PR walkthroughs, incident timelines, checklists, comparisons** — component fences (`stats`, `timeline`, `findings`, `compare`, `callout`, `progress`, `diff`, `copy`, `mermaid`, `decisions`, `table`) plus Vega-Lite / Vega / ECharts / Mermaid charts, all inlined into one strict-CSP file
+- **Interactive data tables**: the `table` fence gives you sortable, filterable, number-formatted tables with row counts — [license-audit example](docs/evidence/patterns/license-audit.png)
+- **Provenance on every page**: frontmatter `source:` lands in the footer as `Data: …`
 - **Curated themes**: frontmatter `theme: report | ops | editorial` restyles the whole page — [one source, three identities](docs/evidence/patterns/funnel-report.png); unnamed pages follow system dark/light with a three-state header toggle
 - **Gallery + versions**: every publish updates `.opencode/artifacts/index.html`; `version: true` keeps numbered history; `restore` rolls back; a stale-version hash guard prevents blind overwrites
 - **Interactive**: chart-bound controls (vega-lite `params.bind`, echarts `dataZoom`), text-selection comments, workshop decision pages the session can read back

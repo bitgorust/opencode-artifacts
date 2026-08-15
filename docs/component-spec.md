@@ -115,6 +115,31 @@ by `opencode-artifacts serve` — POSTs the full answers map to `/__state/<slug>
 `opencode-artifacts state <slug>`. This is the local analog of Claude Code's workshop
 `read_decisions` loop.
 
+### ```table — interactive data table (added v0.13)
+```json
+{ "caption": "npm ls --omit=dev", "columns": [{ "key": "name", "label": "Package" }, { "key": "deps", "label": "Deps", "type": "num" }], "rows": [ { "name": "vega", "deps": 45 } ] }
+```
+Filter input + click-to-sort headers + row count; `num` columns right-align, format with
+thousands separators, and sort by raw value. Row markup is server-rendered; sorting/filtering
+is fixed BOOT JS — no payload duplication.
+
+### Data honesty rules (from Claude Code's dashboard/dataviz skills)
+
+- Format numbers for scanning: unit + 2–3 significant figures, thousands separators; at most
+  one decimal on percentages.
+- Color deltas by meaning, not direction — when a decrease is the improvement (latency, cost,
+  error rate), the tone must say whether the news is good.
+- Narrow ranges far from zero need an explicit y-domain — and the truncated axis must be
+  disclosed in the chart title or footer.
+- Breakdown tables: roughly top ten rows, roll the tail into "Other".
+- Never invent values, dates, or a time axis for data that has none; a section without real
+  data is removed, not filled.
+
+### Provenance (added v0.13)
+
+Frontmatter `source:` lands in the page footer as `Data: <source>` — every data page names
+where its numbers came from and when they were captured.
+
 ### Stale-version guard (added v0.5)
 Every publish records a 12-char content hash in the manifest and returns it. Callers pass it
 back as `expectedHash`; a mismatch throws `StaleArtifactError` and nothing is written. The

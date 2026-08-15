@@ -25,6 +25,7 @@ export interface ArtifactMeta {
   title: string;
   icon: string;
   description?: string;
+  source?: string;
   createdAt: string;
   updatedAt: string;
   current: number;
@@ -44,6 +45,7 @@ export interface PublishInput {
   title?: string;
   icon?: string;
   description?: string;
+  source?: string;
   charts?: number;
   version?: boolean;
   expectedHash?: string;
@@ -79,8 +81,9 @@ async function readManifest(dir: string): Promise<Manifest> {
 function footerHtml(meta: ArtifactMeta): string {
   return [
     '<footer class="artifact-footer">',
-    `Published by opencode-artifacts · v${meta.current} · updated ${escapeHtmlText(meta.updatedAt)} · `,
-    '<a href="index.html">Gallery</a>',
+    `Published by opencode-artifacts · v${meta.current} · updated ${escapeHtmlText(meta.updatedAt)}`,
+    meta.source ? ` · Data: ${escapeHtmlText(meta.source)}` : "",
+    ' · <a href="index.html">Gallery</a>',
     "</footer>",
   ].join("");
 }
@@ -113,6 +116,7 @@ export class FilePublisher implements Publisher {
         title: input.title ?? existing?.title ?? input.slug,
         icon: input.icon ?? existing?.icon ?? "📄",
         description: input.description ?? existing?.description,
+        source: input.source ?? existing?.source,
         createdAt: existing?.createdAt ?? now,
         updatedAt: now,
         current: nextVersion,
@@ -131,6 +135,7 @@ export class FilePublisher implements Publisher {
       title: input.title ?? existing?.title ?? input.slug,
       icon: input.icon ?? existing?.icon ?? "📄",
         description: input.description ?? existing?.description,
+        source: input.source ?? existing?.source,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
       current: nextVersion,

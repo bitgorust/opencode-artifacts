@@ -85,6 +85,8 @@ async function renderCommand(args: string[]): Promise<void> {
       html: rendered.html,
       title: finalTitle,
       icon: rendered.meta.icon,
+      description: rendered.meta.description,
+      source: rendered.meta.source,
       charts: rendered.chartCount,
       version,
     });

@@ -169,6 +169,7 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
               title,
               icon: rendered.meta.icon,
               description: rendered.meta.description,
+              source: rendered.meta.source,
               charts: rendered.chartCount,
               version: args.version ?? false,
               expectedHash: args.expectedHash,

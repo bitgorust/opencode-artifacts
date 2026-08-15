@@ -20,6 +20,25 @@ unseen changes; `force: true` overrides the credential scan.
 | ```` ```copy ```` | `{label?, text}` | copy-to-clipboard button (for handing text back to the session) |
 | ```` ```mermaid ```` | raw mermaid source (not JSON) | diagrams: graph/sequence/ER/... |
 | ```` ```decisions ```` | `{title?, questions: [{id, question, options: [{id, label, note?}]}]}` | workshop rows; answers read back via `artifact_state` |
+| ```` ```table ```` | `{caption?, columns: [{key, label, type?: num}], rows: [{...}]}` | sortable, filterable data tables |
+
+## Data honesty (non-negotiable)
+
+- Numbers format for scanning: unit + 2–3 significant figures, thousands separators.
+- Color deltas by meaning, not direction — a falling error rate is `good`, not `bad`.
+- Truncated axes are disclosed in the chart title or footer.
+- Breakdown tables keep ~top ten rows plus "Other".
+- Never invent values or a time axis that doesn't exist; drop the section instead.
+- Every data page sets frontmatter `source:` (system + capture date) — it lands in the footer.
+
+## Structures that work
+
+- **Explainer**: lede stating what the reader learns → numbered steps pairing short prose
+  with a visual (diagram or code) → recap. For PR walkthroughs/system tours, use sections
+  instead of steps, open with one wide architecture diagram when there's a structural story.
+- **PR briefing**: synthesis title with the bottom line → recommendation → judgment calls
+  (`decisions` or `findings`) → signals → blind spots. Readable in two minutes without
+  opening the diff.
 
 ## Charts
 

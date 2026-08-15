@@ -77,8 +77,21 @@ test("restore points the stable path back at an older version", async () => {  a
   });
 });
 
-test("gallery card shows the description subtitle", async () => {
+test("published footer carries the data source when set", async () => {
   await withTempDir(async (dir) => {
+    const publisher = new FilePublisher(dir);
+    const result = await publisher.publish({
+      slug: "audit",
+      html: "x\n<!--artifact:footer-->",
+      title: "Audit",
+      source: "package-lock.json, 2026-08-15",
+    });
+    const page = await readFile(result.path, "utf8");
+    assert.match(page, /Data: package-lock\.json, 2026-08-15/);
+  });
+});
+
+test("gallery card shows the description subtitle", async () => {  await withTempDir(async (dir) => {
     const publisher = new FilePublisher(dir);
     await publisher.publish({
       slug: "report",

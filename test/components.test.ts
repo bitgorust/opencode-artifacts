@@ -156,8 +156,34 @@ test("mermaid fence rejects empty source", () => {
   assert.match(renderComponent("mermaid", "  \n"), /chart-error/);
 });
 
-test("theme frontmatter applies a curated override, unknown themes fall back", () => {
-  const themed = renderArtifact("---\ntitle: T\ntheme: report\n---\nx\n").html;
+test("table renders sortable headers, numeric sort values, and a row count", () => {
+  const html = renderComponent(
+    "table",
+    JSON.stringify({
+      columns: [
+        { key: "name", label: "Package" },
+        { key: "deps", label: "Deps", type: "num" },
+      ],
+      rows: [
+        { name: "vega", deps: 45 },
+        { name: "markdown-it", deps: 6 },
+      ],
+      caption: "npm ls --prod",
+    }),
+  );
+  assert.match(html, /data-type="num"/);
+  assert.match(html, /data-v="45">45</);
+  assert.match(html, /2 rows/);
+  assert.match(html, /table-filter/);
+  assert.match(html, /npm ls --prod/);
+});
+
+test("table rejects malformed specs with an error box", () => {
+  assert.match(renderComponent("table", '{"columns":[]}'), /chart-error/);
+  assert.match(renderComponent("table", "{bad"), /chart-error/);
+});
+
+test("theme frontmatter applies a curated override, unknown themes fall back", () => {  const themed = renderArtifact("---\ntitle: T\ntheme: report\n---\nx\n").html;
   assert.ok(themed.includes("--page-bg:#f6f0e4"));
   assert.ok(themed.includes("Georgia"));
   assert.ok(themed.includes('<html lang="en" data-page-theme="report">'));

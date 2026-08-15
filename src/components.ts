@@ -10,7 +10,8 @@ export type ComponentKind =
   | "diff"
   | "copy"
   | "mermaid"
-  | "decisions";
+  | "decisions"
+  | "table";
 
 export const COMPONENT_KINDS: ReadonlySet<string> = new Set([
   "stats",
@@ -23,6 +24,7 @@ export const COMPONENT_KINDS: ReadonlySet<string> = new Set([
   "copy",
   "mermaid",
   "decisions",
+  "table",
 ]);
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
@@ -255,6 +257,63 @@ function renderDecisions(spec: unknown): string {
   ].join("");
 }
 
+function renderTable(spec: unknown): string {
+  const item = asRecord(spec);
+  if (!item) return errorBox("table", "expected a JSON object");
+  const columns = item["columns"];
+  const rows = item["rows"];
+  if (!Array.isArray(columns) || !Array.isArray(rows)) {
+    return errorBox("table", "expected 'columns' and 'rows' arrays");
+  }
+
+  const cols = columns.map((entry) => {
+    const col = asRecord(entry);
+    if (!col) return undefined;
+    const key = str(col, "key");
+    const label = str(col, "label");
+    if (!key || !label) return undefined;
+    return { key, label, type: str(col, "type") === "num" ? "num" : "text" };
+  });
+  if (cols.some((c) => c === undefined)) {
+    return errorBox("table", "each column needs 'key' and 'label'");
+  }
+
+  const head = cols
+    .map(
+      (c) =>
+        `<th scope="col" data-type="${c!.type}"${c!.type === "num" ? ' class="num"' : ""}><button type="button" class="th-sort">${escapeHtmlText(c!.label)}</button></th>`,
+    )
+    .join("");
+
+  const body = rows
+    .map((row) => {
+      const record = asRecord(row) ?? {};
+      const cells = cols
+        .map((c) => {
+          const raw = record[c!.key];
+          const isNum = c!.type === "num" && typeof raw === "number" && Number.isFinite(raw);
+          const display = isNum
+            ? raw.toLocaleString("en-US")
+            : escapeHtmlText(raw === undefined || raw === null ? "—" : String(raw));
+          const dataV = isNum ? ` data-v="${raw}"` : ` data-v="${escapeHtmlText(String(raw ?? ""))}"`;
+          return `<td${c!.type === "num" ? ' class="num"' : ""}${dataV}>${display}</td>`;
+        })
+        .join("");
+      return `<tr>${cells}</tr>`;
+    })
+    .join("\n");
+
+  const caption = str(item, "caption");
+  return [
+    '<div class="table-wrap">',
+    '<input class="table-filter" type="search" placeholder="Filter rows…" aria-label="Filter rows">',
+    `<div class="table-scroll"><table class="data-table"><thead><tr>${head}</tr></thead>`,
+    `<tbody>${body}</tbody></table></div>`,
+    `<div class="table-meta"><span class="table-count">${rows.length} rows</span>${caption ? `<span class="table-caption">${escapeHtmlText(caption)}</span>` : ""}</div>`,
+    "</div>",
+  ].join("\n");
+}
+
 export function renderComponent(kind: ComponentKind, json: string, id?: string): string {
   if (kind === "diff") return renderDiff(json);
   if (kind === "mermaid") return renderMermaid(json);
@@ -281,5 +340,7 @@ export function renderComponent(kind: ComponentKind, json: string, id?: string):
       return renderCopy(spec, id);
     case "decisions":
       return renderDecisions(spec);
+    case "table":
+      return renderTable(spec);
   }
 }

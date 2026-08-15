@@ -6,6 +6,7 @@ export interface Frontmatter {
   icon?: string;
   description?: string;
   theme?: string;
+  source?: string;
 }
 
 export type ChartKind = "vega-lite" | "vega" | "echarts";
@@ -49,6 +50,7 @@ function parseFrontmatter(source: string, warnings: string[]): { meta: Frontmatt
     else if (key === "icon") meta.icon = value;
     else if (key === "description") meta.description = value;
     else if (key === "theme") meta.theme = value;
+    else if (key === "source") meta.source = value;
     else warnings.push(`frontmatter key ignored: ${key}`);
   }
   return { meta, body: source.slice(match[0].length) };

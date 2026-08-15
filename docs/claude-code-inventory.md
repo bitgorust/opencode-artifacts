@@ -12,8 +12,18 @@ registration, consent machinery). Purpose: the reference inventory for our parit
 | `artifact-capabilities` | `window.claude.*` runtime roster | gate: must load before declaring capabilities |
 | `artifact-diagramming` | diagram craft, inline SVG, mermaid | when drawing |
 | `artifact-pr-review` | PR review pages | when reviewing |
+| `artifact-pr-review` | PR review pages | when reviewing |
 | `workshop` | decide-and-revise loop pages | when workshopping |
-| adjacent: `dataviz`, `whiteboard`, `prototype` | chart honesty, board, prototype pages | referenced from artifact-design |
+| `artifact-dashboard` | KPI tiles + primary chart + breakdown table, slot template | dashboards |
+| `artifact-data-table` | sortable/filterable table, slot template | tabular datasets |
+| `artifact-explainer` | step-by-step teaching pages, slot template | explainers/tutorials |
+| `artifact-components` | embeddable reusable components with hash-pinned scripts | when a page carries decisions |
+| `plan-artifact` | publish the implementation plan as a page | plan review |
+| adjacent: `dataviz`, `whiteboard`/`canvas`, `prototype` | chart honesty method (with a runnable palette validator), canvas board, app prototype | referenced from artifact-design |
+
+The template skills share a discipline worth copying: slot markers that must ALL be replaced,
+"never invent a value", provenance footers, and number-formatting rules — all now in our
+`docs/component-spec.md` and skill reference.
 
 Plus: plan-artifact flow (offer to review a plan as a page) and a reusable-component skill
 (first entry: the workshop decision component).
