@@ -97,6 +97,42 @@ test("proactive option injects the guidance into the system transform", async ()
   assert.match(output.system[0], /not fully delivered/);
 });
 
+test("stale conflict returns the live content for immediate merge", async () => {
+  const hooks = await ArtifactsPlugin({} as unknown as PluginInput);
+  const publish = hooks.tool?.artifact_publish;
+  assert.ok(publish);
+
+  await withWorktree(async (dir) => {
+    const ctx: ToolContext = {
+      sessionID: "s1",
+      messageID: "m1",
+      agent: "test",
+      directory: dir,
+      worktree: dir,
+      abort: new AbortController().signal,
+      metadata: () => {},
+      ask: async () => {},
+    };
+
+    const first = String(await publish.execute({ markdown: "---\ntitle: Guard Demo\n---\n# V1 marker\n" }, ctx));
+    const hash = first.match(/hash: ([0-9a-f]{12})/)?.[1];
+    assert.ok(hash);
+
+    await publish.execute({ markdown: "---\ntitle: Guard Demo\n---\n# V2 marker\n" }, ctx);
+
+    const conflict = String(
+      await publish.execute(
+        { markdown: "---\ntitle: Guard Demo\n---\n# V3 marker\n", expectedHash: hash },
+        ctx,
+      ),
+    );
+    assert.match(conflict, /Publish refused/);
+    assert.match(conflict, /live version; raw HTML follows/);
+    assert.match(conflict, /V2 marker/);
+    assert.ok(!conflict.includes("V3 marker</h1>") || conflict.includes("V2 marker"));
+  });
+});
+
 test("artifact_db reads and writes collection documents", async () => {
   const hooks = await ArtifactsPlugin({} as unknown as PluginInput);
   const db = hooks.tool?.artifact_db;
@@ -177,5 +213,19 @@ test("artifact_comments lists threads and resolves by id", async () => {
       await readFile(join(stateDir, "page.comments.json"), "utf8"),
     ) as { threads: Array<{ resolved: boolean }> };
     assert.equal(after.threads[0].resolved, true);
+
+    await writeFile(
+      join(stateDir, "page.comments.json"),
+      JSON.stringify({
+        threads: [
+          { id: "t2", quote: "the funnel", text: "this drop is wrong", createdAt: new Date().toISOString(), resolved: false },
+          { id: "t1", quote: "q", text: "fix this", createdAt: "2026-08-14", resolved: true },
+        ],
+      }),
+    );
+    const digest = String(await comments.execute({ slug: "page", digest: true }, ctx));
+    assert.match(digest, /1 open, 1 resolved/);
+    assert.match(digest, /\[t2\]/);
+    assert.ok(!digest.includes("[t1]"));
   });
 });

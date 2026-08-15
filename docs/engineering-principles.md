@@ -52,6 +52,12 @@ enforces the machine-checkable subset; CI runs it on every push.
 - Chart JSON is `\u003c`-escaped inside `<script>` payloads. (XSS breakout test)
 - 15 MiB rendered cap, enforced before any write.
 - Credential-pattern scan blocks publish unless `force`. (`src/guard.ts`)
+- Stale-version refusals must carry the live content back (head + body, capped) so the
+  session can merge and republish in one step — the autoread-recovery pattern.
+  (Claude Code 2.1.232 stale-version guard)
+- Interactive elements must have visible `:focus-visible` states; respect
+  `prefers-reduced-motion` if motion is ever added.
+  (Claude Code artifact-design skill, "Build cleanly")
 - Local state directories (`.state`, `.db`, `.datasources`) never leave the machine —
   both hosted publishers exclude them by test.
 - Datasources are registered at publish time by the session; viewers can only poll
@@ -78,6 +84,9 @@ enforces the machine-checkable subset; CI runs it on every push.
   [GitHub Docs](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes).
 - Docs name versions only via git tags; body text describes behavior, not version numbers
   that rot. (learned: comparison doc pinned "v0.3.0" and went stale within two releases)
+- Chart guidance is honesty-first: title the finding, not the axes; encodings must not
+  exaggerate; summarize large datasets instead of inlining them. (Claude Code dataviz skill
+  callout + token-cost guidance)
 - Every claimed capability in docs links to evidence: a test, an example file, or a
   screenshot.
 

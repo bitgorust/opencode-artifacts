@@ -156,8 +156,19 @@ test("mermaid fence rejects empty source", () => {
   assert.match(renderComponent("mermaid", "  \n"), /chart-error/);
 });
 
-test("decisions renders option rows with question/option data attributes", () => {
-  const html = renderComponent(
+test("theme frontmatter applies a curated override, unknown themes fall back", () => {
+  const themed = renderArtifact("---\ntitle: T\ntheme: report\n---\nx\n").html;
+  assert.ok(themed.includes("--page-bg:#f6f0e4"));
+  assert.ok(themed.includes("Georgia"));
+
+  const unknown = renderArtifact("---\ntitle: T\ntheme: neon-arcade\n---\nx\n").html;
+  assert.ok(!unknown.includes("--page-bg:#f6f0e4"));
+
+  const plain = renderArtifact("---\ntitle: T\n---\nx\n").html;
+  assert.ok(!plain.includes("Georgia"));
+});
+
+test("decisions renders option rows with question/option data attributes", () => {  const html = renderComponent(
     "decisions",
     JSON.stringify({
       title: "Open decisions",

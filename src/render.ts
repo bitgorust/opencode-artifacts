@@ -188,7 +188,19 @@ pre.mermaid{background:var(--card-bg);border:1px solid var(--line);border-radius
 .card .desc{font-size:.85rem;color:var(--ink-2);margin:.1rem 0 .4rem}
 .card .icon{font-size:1.6rem}
 .gallery-empty{color:var(--ink-3);text-align:center;padding:3rem 0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 @media print{body{background:#fff}.section-card,.stat,.variant,.card{box-shadow:none;border:1px solid #ddd}}`;
+
+const THEME_CSS: Record<string, string> = {
+  report: `:root{color-scheme:light;--page-bg:#f6f0e4;--card-bg:#fffdf7;--ink:#2b251a;--ink-2:#6b5f49;--ink-3:#a29378;--line:#e3d9c4;--accent:#b4541e;--code-bg:#f1e9d8}
+h2,.callout-title,.stat-value{font-family:Georgia,Charter,"Times New Roman",serif}`,
+  ops: `:root{color-scheme:dark;--page-bg:#0f140f;--card-bg:#171f17;--ink:#d5e5cf;--ink-2:#8fa389;--ink-3:#5c6b57;--line:#263026;--accent:#4ade80;--code-bg:#131c13;--good:#4ade80;--good-bg:#14311f;--bad:#f87171;--bad-bg:#3a1d1d;--warn:#fbbf24;--warn-bg:#3a2f16;--info:#7ea4c7;--info-bg:#1c2a38;--card-info-bg:#1c2a38;--card-warn-bg:#33290f}
+h2,.callout-title{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:0}`,
+  editorial: `:root{color-scheme:light;--page-bg:#fafafa;--card-bg:#ffffff;--ink:#141414;--ink-2:#525252;--ink-3:#a3a3a3;--line:#e5e5e5;--accent:#141414;--code-bg:#f5f5f5;--radius:4px;--shadow:none}
+h2{font-family:Georgia,Charter,"Times New Roman",serif;font-size:1.6rem;font-weight:500}
+.section-card,.stat,.variant,.card{border:1px solid var(--line)}
+.artifact-header h1{font-family:Georgia,Charter,"Times New Roman",serif;font-size:1.35rem;font-weight:500}`,
+};
 
 const BOOT = `(function () {
   var charts = window.__ARTIFACT_CHARTS__ || [];
@@ -414,8 +426,8 @@ const BOOT = `(function () {
       .catch(function () { threads = loadLocal(); renderDock(); });
   } else {
     threads = loadLocal();
+    if (threads.some(function (t) { return !t.resolved; })) renderDock();
   }
-  renderDock();
 })();`;
 
 const ALERT_TONES: Record<string, string> = {
@@ -496,6 +508,7 @@ interface AssembleInput {
   title: string;
   icon: string;
   description?: string;
+  theme?: string;
   bodyHtml: string;
   resolved: ResolvedChart[];
   needsBoot: boolean;
@@ -525,7 +538,7 @@ function assemblePage(input: AssembleInput): string {
       ? `<meta name="description" content="${escapeHtmlText(input.description)}">`
       : "",
     `<title>${escapeHtmlText(input.title)}</title>`,
-    `<style>${ARTIFACT_CSS}</style>`,
+    `<style>${ARTIFACT_CSS}${input.theme !== undefined ? (THEME_CSS[input.theme] ?? "") : ""}</style>`,
     "</head>",
     "<body>",
     `<header class="artifact-header"><span class="artifact-icon">${escapeHtmlText(input.icon)}</span><h1>${escapeHtmlText(input.title)}</h1></header>`,
@@ -572,6 +585,7 @@ export function renderArtifact(markdown: string, options: RenderOptions = {}): R
     title: doc.meta.title ?? "Artifact",
     icon: doc.meta.icon ?? "📄",
     description: doc.meta.description,
+    theme: doc.meta.theme,
     bodyHtml,
     resolved: resolveCharts(doc.charts),
     needsBoot,

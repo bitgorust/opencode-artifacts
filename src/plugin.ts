@@ -117,13 +117,14 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             .describe("Cloudflare Worker name (target cloudflare)"),
         },
         async execute(args, ctx) {
+          let slug = "artifact";
           try {
             const rendered: RenderedArtifact =
               args.format === "html"
                 ? renderRawHtml(args.markdown, args.title ? { title: args.title } : {})
                 : renderArtifact(args.markdown);
             const title = args.title ?? rendered.meta.title ?? "Artifact";
-            const slug = slugify(title);
+            slug = slugify(title);
 
             const findings = scanSensitive(args.markdown);
             if (findings.length > 0 && args.force !== true) {
@@ -198,7 +199,28 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
               return `Artifact too large: ${err.message}`;
             }
             if (err instanceof StaleArtifactError) {
-              return `Publish refused: ${err.message}. Re-read the current page and re-apply your edits, then publish again with the new hash.`;
+              const currentPath = join(ctx.worktree, ".opencode", "artifacts", `${slug}.html`);
+              let current = "";
+              try {
+                current = await readFile(currentPath, "utf8");
+              } catch {
+                current = "(could not read current page)";
+              }
+              const cap = 16000;
+              const bodyAt = current.indexOf("<body");
+              const preview =
+                current.length <= cap
+                  ? current
+                  : bodyAt > 0
+                    ? `${current.slice(0, 2000)}\n…\n${current.slice(bodyAt, bodyAt + cap)}`
+                    : current.slice(0, cap);
+              return [
+                `Publish refused: ${err.message}.`,
+                "The current published content follows — merge your edits onto it, then publish again with the new hash.",
+                `[Artifact ${slug} — live version; raw HTML follows]`,
+                preview,
+                "[End of live content]",
+              ].join("\n\n");
             }
             throw err;
           }
@@ -287,13 +309,17 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
       }),
       artifact_comments: tool({
         description:
-          "Read comment threads a reader left on a served artifact page, or resolve a thread after acting on it.",
+          "Read comment threads a reader left on a served artifact page, or resolve a thread after acting on it. Pass digest: true for a compact triage view (unresolved first, oldest unresolved at top).",
         args: {
           slug: tool.schema.string().describe("Artifact slug (the filename without .html)"),
           resolveId: tool.schema
             .string()
             .optional()
             .describe("Thread id to mark resolved after you have acted on it"),
+          digest: tool.schema
+            .boolean()
+            .optional()
+            .describe("Return a compact triage digest instead of raw threads"),
         },
         async execute(args, ctx) {
           const threadsPath = join(
@@ -316,6 +342,22 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             target["resolved"] = true;
             await writeFile(threadsPath, `${JSON.stringify({ ...parsed, threads }, null, 2)}\n`, "utf8");
             return `Resolved thread ${args.resolveId} on '${args.slug}'.`;
+          }
+          if (args.digest === true) {
+            const open = threads.filter((t) => t["resolved"] !== true);
+            const resolvedCount = threads.length - open.length;
+            const lines = [
+              `${open.length} open, ${resolvedCount} resolved on '${args.slug}'.`,
+              ...open.map((t) => {
+                const ageMin = Math.max(
+                  0,
+                  Math.round((Date.now() - Date.parse(String(t["createdAt"] ?? ""))) / 60000),
+                );
+                const age = Number.isNaN(ageMin) ? "?" : `${ageMin}m`;
+                return `- [${t["id"]}] (${age} ago) "${String(t["quote"] ?? "").slice(0, 60)}" — ${String(t["text"] ?? "").slice(0, 120)}`;
+              }),
+            ];
+            return lines.join("\n");
           }
           return JSON.stringify(threads, null, 2);
         },

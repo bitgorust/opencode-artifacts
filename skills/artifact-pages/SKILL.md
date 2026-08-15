@@ -1,6 +1,6 @@
 ---
 name: artifact-pages
-description: Publish session output as interactive artifact pages via the artifact_publish tool (opencode-artifacts plugin). Use proactively whenever a deliverable has an audience — reports, plans, PR walkthroughs, dashboards, incident timelines, comparisons, checklists — or whenever output is easier to see as a page than to read as terminal text. Covers when to publish, how to author with the component system, and page-naming rules.
+description: Publish session output as interactive artifact pages via the artifact_publish tool (opencode-artifacts plugin). Use proactively whenever a deliverable has an audience — reports, plans, PR walkthroughs, dashboards, incident timelines, comparisons, checklists — or whenever output is easier to see as a page than to read as terminal text. Covers when to publish, page naming, and the comment loop; component schemas live in reference/components.md.
 ---
 
 # Artifact Pages
@@ -8,6 +8,10 @@ description: Publish session output as interactive artifact pages via the artifa
 You have the `artifact_publish` tool (opencode-artifacts plugin). It renders Markdown + JSON
 component specs into one self-contained interactive HTML page under `.opencode/artifacts/`.
 The renderer owns all design — your job is structure and content, never CSS.
+
+Authoring reference (component JSON schemas, chart fences, alerts, task lists):
+**reference/components.md** in this skill's directory. Load it before building your first
+page in a session, or whenever you need an exact schema.
 
 ## When to publish
 
@@ -28,21 +32,6 @@ Publish proactively when output is easier to look at than to read line by line:
 
 Do NOT publish for quick answers, code snippets, or anything terminal text handles fine.
 
-## How to author
-
-- Frontmatter sets `title:` and `icon:` (emoji, becomes the favicon).
-- `##` sections become white cards; put the summary before the detail.
-- Components are fenced JSON blocks: `stats` `timeline` `findings` `compare` `callout`
-  `progress` `diff` `copy`. Schemas: `docs/component-spec.md` in the plugin repo.
-- Charts are fenced specs: ```` ```vega-lite ```` / ```` ```vega ```` / ```` ```echarts ````.
-  Title the finding, not the axes. Interactivity needs no custom JS: vega-lite `params` with
-  `bind` render as sliders, echarts `dataZoom` gives pan/zoom.
-- GitHub alerts (`> [!NOTE]` `[!TIP]` `[!IMPORTANT]` `[!WARNING]` `[!CAUTION]`) become
-  callout boxes; `- [ ]` / `- [x]` become checkboxes.
-- Update in place: republish with the same title (stable path). `version: true` keeps
-  numbered history. `open: true` opens the browser.
-- Broken specs never break the page — the slot shows an inline error box; fix and republish.
-
 ## Naming (adapted from Claude Code's artifact-design skill)
 
 Name the page like a product, not a caption: a short noun phrase, typically two to four
@@ -54,8 +43,18 @@ or colon. Keep the title stable across republishes.
 
 - Encode state in form, not just numbers: use `tone` fields (`good`/`bad`/`warn`) so what
   needs attention reads at a glance.
+- Title the finding, not the axes — and never let an encoding exaggerate the data.
+- Charts cost tokens: prefer a summarized dataset over an inlined full dump; drop
+  interactivity nobody needs.
 - Real content only — never lorem ipsum or placeholder data.
 - Honor the project's own conventions first: if the repo documents design tokens or a brand
   palette, reflect them in chart colors (e.g. vega-lite `mark.color`).
 - Pages are local files. For live auto-refresh while iterating, suggest
   `opencode-artifacts serve` (open pages reload on every republish).
+
+## The comment loop
+
+When a served artifact has readers, close the loop: `artifact_comments` with `digest: true`
+for a triage view (unresolved first, age-marked), act on each thread, then resolve by id with
+`resolveId`. If acting changed the page, republish. Leave a thread open only while the
+conversation is genuinely still active.

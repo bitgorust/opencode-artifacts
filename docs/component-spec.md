@@ -117,7 +117,21 @@ by `opencode-artifacts serve` — POSTs the full answers map to `/__state/<slug>
 
 ### Stale-version guard (added v0.5)
 Every publish records a 12-char content hash in the manifest and returns it. Callers pass it
-back as `expectedHash`; a mismatch throws `StaleArtifactError` and nothing is written.
+back as `expectedHash`; a mismatch throws `StaleArtifactError` and nothing is written. The
+plugin wraps refusals with the current page content (head + body, 16 KB cap) so the session
+can merge edits and republish without a separate read — the autoread-recovery pattern from
+Claude Code's stale guard.
+
+### Themes (added v0.11)
+Frontmatter `theme:` selects a curated variant appended after the base stylesheet so it wins
+in both color modes: `default` (gray-blue canvas, white cards), `report` (warm paper, serif
+display headings, terracotta accent), `ops` (dark-first, terminal green, mono headings),
+`editorial` (white, large serif display type, hairline borders, square corners). Unknown
+values fall back to `default`. Themes are deliberately single-look (like Claude Code's
+"commits to one visual world" allowance) rather than dual-theme.
+
+Evidence: `docs/evidence/patterns/funnel-{report,ops,editorial}.png` — one source, three
+identities, browser-verified.
 
 ## Markdown-level additions
 
