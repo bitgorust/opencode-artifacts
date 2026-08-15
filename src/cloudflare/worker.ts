@@ -11,7 +11,9 @@ export default {
     const api = await handleApiRequest(request, env.ARTIFACTS_KV);
     if (api !== null) return api;
 
-    const asset = await env.ASSETS.fetch(request);
+    const url = new URL(request.url);
+    const target = url.pathname === "/" ? new URL("/index.html", request.url) : request.url;
+    const asset = await env.ASSETS.fetch(new Request(target, request));
     const isHtml = asset.headers.get("content-type")?.includes("text/html") ?? false;
     if (!isHtml) return asset;
 
