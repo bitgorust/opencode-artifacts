@@ -1,21 +1,40 @@
 # opencode-artifacts
 
-Publish [OpenCode](https://opencode.ai) session output as **self-contained, interactive HTML artifact pages** — dashboards, PR walkthroughs, incident timelines, comparisons — anything easier to see as a page than to read as terminal text.
+Publish [OpenCode](https://opencode.ai) session output as self-contained, interactive HTML artifact pages.
 
-Inspired by Claude Code's Artifacts, rebuilt as a local-first, open-source OpenCode plugin.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## How it works
+![An incident artifact: stat cards, a timeline, a live chart, and a root-cause callout](docs/evidence/patterns/incident.png)
 
-```
-Markdown + chart specs  ──▶  fixed renderer  ──▶  ONE self-contained .html  ──▶  Publisher
-(authoring layer)          (this package)        (inline CSS/JS, strict CSP)     (v1: local file)
-```
+Inspired by [Claude Code Artifacts](https://code.claude.com/docs/en/artifacts), rebuilt as a
+local-first, open-source OpenCode plugin. The model writes Markdown + JSON specs; a fixed
+renderer owns the HTML/CSS, so page quality doesn't depend on the model's design skills and
+output stays diff-friendly and cheap in tokens.
 
-- **Authoring layer is Markdown**, not raw HTML — cheap for the model to write, diff-friendly, hard to get wrong. Charts are declared as JSON specs in fenced blocks.
-- **The renderer is fixed, trusted code.** It inlines only the chart runtimes actually used (Vega/Vega-Lite via vega-embed, or ECharts), applies a strict CSP, and enforces a 15 MiB size cap.
-- **Publisher is an interface.** v1 ships `FilePublisher` (writes `.opencode/artifacts/<slug>.html` with optional versioned history). A localhost live-reload server or a hosted sharing service can be added later without touching the renderer.
+## Contents
 
-## Install (OpenCode plugin)
+- [Features](#features)
+- [Install](#install)
+- [Usage](#usage)
+- [Authoring format](#authoring-format)
+- [Sharing and hosting](#sharing-and-hosting)
+- [Limitations](#limitations)
+- [Development](#development)
+- [Roadmap](#roadmap)
+- [Parity with Claude Code Artifacts](#parity-with-claude-code-artifacts)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Features
+
+- **Dashboards, PR walkthroughs, incident timelines, checklists, comparisons** — component fences (`stats`, `timeline`, `findings`, `compare`, `callout`, `progress`, `diff`, `copy`, `mermaid`, `decisions`) plus Vega-Lite / Vega / ECharts / Mermaid charts, all inlined into one strict-CSP file
+- **Gallery + versions**: every publish updates `.opencode/artifacts/index.html`; `version: true` keeps numbered history; `restore` rolls back; a stale-version hash guard prevents blind overwrites
+- **Interactive**: chart-bound controls (vega-lite `params.bind`, echarts `dataZoom`), text-selection comments, workshop decision pages the session can read back
+- **Live reload**: `opencode-artifacts serve` refreshes open pages on every republish
+- **Sharing**: cost-free public hosting via GitHub Pages, or authenticated hosting via Cloudflare Workers + KV + Access
+- **Safe by default**: no raw HTML passthrough, credential-pattern scan blocks accidental secret leaks, no external requests at view time
+
+## Install
 
 ```bash
 npm install opencode-artifacts
@@ -39,31 +58,32 @@ specs work too — for a local checkout (after `npm install && npm run build`):
 }
 ```
 
-Then (optional, for hosted deploys) run the setup wizard — it asks once whether and where to
-deploy, and writes the answer to `.opencode/artifacts.json` (or `~/.config` with `--global`):
+Optional, for hosted deploys — the wizard asks once whether and where to deploy and writes the
+answer to `.opencode/artifacts.json` (`--global` for all projects):
 
 ```bash
 npx opencode-artifacts init
-# or non-interactively: npx opencode-artifacts init --yes --target github --repo you/artifacts
+# non-interactive: npx opencode-artifacts init --yes --target github --repo you/artifacts
 ```
 
-After that, `artifact_publish` with just `deploy: true` uses the configured target — no need
-to repeat repo/worker names.
+## Usage
 
-Then ask in a session, e.g.:
+In a session, just ask:
 
-> Summarize this incident investigation and publish it as an artifact with a timeline table and an error-rate chart.
+> Summarize this incident investigation and publish it as an artifact with a timeline and an error-rate chart.
 
-The model calls the `artifact_publish` tool with Markdown like:
+The agent calls the `artifact_publish` tool with Markdown like:
 
 ````markdown
 ---
 title: Incident 4172 — Checkout latency spike
 icon: 🚨
+description: p99 spike traced to a sync fraud-check call
 ---
 
-# Timeline
-...
+```stats
+[{ "label": "PEAK P99", "value": "2.6s", "tone": "bad", "emphasis": true }]
+```
 
 ```vega-lite
 { "data": { "values": [...] }, "mark": "bar", "encoding": { ... } }
@@ -72,82 +92,50 @@ icon: 🚨
 
 and gets back `Artifact published to <worktree>/.opencode/artifacts/incident-4172-checkout-latency-spike.html`.
 
-### Proactive use (recommended)
-
-Install the bundled skill so the agent publishes on its own when output suits a page:
+For proactive behavior (the agent publishes on its own when output suits a page), install the
+bundled skill:
 
 ```bash
 cp -r skills/artifact-pages ~/.agents/skills/   # or your project's .agents/skills/
 ```
 
-It encodes the same trigger Claude Code uses ("a deliverable with an audience is not fully
-delivered while it lives only in terminal scrollback"), the component cheat sheet, and the
-page-naming rules — distilled from Claude Code 2.1.232's actual `artifact-design` skill and
-Artifact tool description (see `docs/claude-code-comparison.md`).
-
-### Tool: `artifact_publish`
-
-| Arg | Type | Default | Meaning |
-|---|---|---|---|
-| `markdown` | string (required) | — | Full Markdown source of the page |
-| `title` | string? | frontmatter `title` | Title override |
-| `open` | boolean? | `false` | Open in the system browser after publishing |
-| `version` | boolean? | `false` | Also keep `<slug>.v<N>.html` history files |
-| `format` | `"markdown" \| "html"`? | `"markdown"` | `"html"` embeds the input as raw trusted HTML |
-
-Publishing asks for permission once (`artifact_publish`), writes the page, updates a
-`manifest.json`, and regenerates a local **gallery** at `.opencode/artifacts/index.html`.
-Every artifact footer links back to the gallery and shows its version and update time.
-
-## CLI
+CLI (also usable standalone, `npm install -g opencode-artifacts`):
 
 ```bash
-npm install -g opencode-artifacts
-
-opencode-artifacts render examples/incident-report.md --open --version
-opencode-artifacts serve                       # http://127.0.0.1:4173, pages live-reload on republish
-opencode-artifacts restore <slug> --version 1  # point the stable page back at an older version
-opencode-artifacts latest --open               # reopen the most recently updated artifact
+opencode-artifacts render page.md --open --version   # render + open + keep version history
+opencode-artifacts serve                             # http://127.0.0.1:4173, live reload
+opencode-artifacts restore <slug> --version 1        # roll the stable page back
+opencode-artifacts latest --open                     # reopen the most recent artifact
+opencode-artifacts state <slug>                      # read workshop answers back
 ```
-
-`serve` relaxes `connect-src` to `'self'` on the served copy only (needed for the
-live-reload EventSource); the files on disk keep `connect-src 'none'`.
 
 ## Authoring format
 
-- **Frontmatter** (optional): `title: ...`, `icon: ...` between `---` fences. Only `key: value` lines; anything else is ignored with a warning.
-- **Chart blocks**: fenced code blocks tagged `vega-lite`, `vega`, or `echarts`, containing one JSON spec. Vega-Lite specs are compiled to Vega at render time; charts render with Vega's CSP-safe interpreter (`ast: true`).
-- **Component blocks** (JSON in a fence, see `docs/component-spec.md`):
-  - ```` ```stats ```` — metric cards row: `[{label, value, delta?, direction?, tone?, emphasis?}]`
-  - ```` ```timeline ```` — vertical incident timeline: `[{time, title, detail?, tone?}]`
-  - ```` ```findings ```` — severity-coded findings: `[{severity, title, location?, detail?}]`
-  - ```` ```compare ```` — variant cards: `[{title, pill?, annotations?, tradeoff?}]`
-  - ```` ```callout ```` — tinted insight card: `{tone, title?, body?}`
-  - ```` ```progress ```` — progress bar: `{label?, done, total}`
-  - ```` ```diff ```` — annotated unified diff (lines starting `## note:` become annotations)
-  - ```` ```copy ```` — copy-to-clipboard button: `{label?, text}` (fixed JS; text rides in a `<template>`, newlines preserved)
-  - ```` ```mermaid ```` — diagram source (graph/sequence/ER/...), rendered live with the inline mermaid runtime
-  - ```` ```decisions ```` — workshop decision rows: `{title?, questions: [{id, question, options: [{id, label, note?}]}]}`. Selections persist to localStorage; under `serve` they also POST to the server, and the session reads them back with the `artifact_state` tool or `opencode-artifacts state <slug>`.
-- **Interactive controls without custom JS**: vega-lite `params` with `bind` render as native sliders/dropdowns and re-render the chart live; echarts `dataZoom`/toolbox options work as-is. See `examples/patterns/tune-controls.md`.
-- **Stale-version guard**: `artifact_publish` results include a content `hash`; pass it back as `expectedHash` on update and the publish is refused if someone changed the artifact in between.
-- **Sensitive-content guard**: publish is blocked when the source contains credential-looking strings (AWS/GitHub/Anthropic/OpenAI keys, private keys, bearer tokens, password literals); override with `force: true` / `--force`.
-- **Comments**: every artifact page has a built-in comment flow — select text → "Comment" → thread dock. Under `serve`, threads persist server-side (`.state/<slug>.comments.json`); the session reads/resolves them with the `artifact_comments` tool.
-- **Shared mini-DB** (raw-HTML pages, under `serve`): `opencodeArtifacts.db.get/list/set/remove(slug-scoped collections)` — a fixed JS bridge over `/__db/` endpoints.
-- **Live data bridge** (raw-HTML pages, under `serve`): publish with `dataSources: [{name, command, args}]` (registered at publish time, not viewer-controlled); the page polls `opencodeArtifacts.data(name)`; the server runs the allow-listed command with a 5s timeout and 5s cache.
-- **Gallery subtitles**: frontmatter `description:` becomes the gallery card's one-line subtitle.
-- **Markdown extras**: GitHub alerts (`> [!NOTE]` / `[!TIP]` / `[!IMPORTANT]` / `[!WARNING]` / `[!CAUTION]`), task lists (`- [x]`), auto heading anchors, and `##` sections become white cards.
-- **Broken specs don't break the page** — the slot shows an inline error box instead.
-- **Everything else** is standard Markdown (tables, code blocks, links, images as data URIs).
+Full reference: [`docs/component-spec.md`](docs/component-spec.md). Short version:
 
-Worked examples for the five canonical patterns live in `examples/patterns/` with rendered
-screenshots in `docs/evidence/patterns/`.
+- **Frontmatter**: `title`, `icon` (emoji favicon), `description` (gallery subtitle)
+- **Components** (JSON fences): `stats` metric cards, `timeline`, `findings` (severity-coded), `compare` variant cards, `callout` insight cards, `progress`, `diff` (annotated), `copy` (copy-to-session button), `decisions` (workshop rows the session reads back via `artifact_state`)
+- **Charts/diagrams**: ```` ```vega-lite ```` / ```` ```vega ```` / ```` ```echarts ```` / ```` ```mermaid ```` fences; runtimes inline only when used
+- **Markdown extras**: GitHub alerts (`> [!WARNING]` etc.), task lists, heading anchors, `##` sections become cards
+- Broken specs degrade to inline error boxes; the page always ships
 
-## Security model
+Worked examples for every canonical pattern: [`examples/patterns/`](examples/patterns/) with
+browser-verified screenshots in [`docs/evidence/patterns/`](docs/evidence/patterns/).
 
-- Raw HTML in Markdown is never passed through (`markdown-it` with `html: false`).
-- Every page ships with `default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'` — no external requests at view time, no `unsafe-eval`.
-- Embedded chart JSON is `\u003c`-escaped so a spec cannot break out of its `<script>` tag.
-- Pages over 15 MiB are rejected before anything is written.
+## Sharing and hosting
+
+| Target | Command | You get |
+|---|---|---|
+| Local files | (default) | `.opencode/artifacts/<slug>.html` + gallery |
+| Live preview | `opencode-artifacts serve` | localhost gallery, SSE live reload, comments/decisions/mini-DB persistence |
+| GitHub Pages | `opencode-artifacts deploy --repo you/artifacts` | public URL per artifact; git history as audit log ([live demo](https://bitgorust.github.io/artifacts/)) |
+| Cloudflare | `deploy --target cloudflare --name my-artifacts` | Workers + KV hosted gallery; comments/decisions/DB work hosted; add Access for org auth — [guide](docs/hosted-cloudflare.md) |
+
+## Limitations
+
+- Local-first: without a deploy target, artifacts are files on your machine — no share links
+- Viewer-identity MCP data calls (Claude Code's connector model) need hosted infrastructure we don't run; the datasource bridge executes local shell commands only, and only under `serve`
+- Raw per-page JavaScript (drag-drop boards etc.) is only possible in `format: "html"` mode, which opts out of the fixed renderer's guarantees
 
 ## Development
 
@@ -157,42 +145,23 @@ npm test        # node --test, no framework
 npm run build   # tsc -> dist/
 ```
 
-## Cost-free public sharing (GitHub Pages)
-
-Publish to a public GitHub Pages site — git history doubles as version history and audit log:
-
-```bash
-opencode-artifacts deploy --repo <you>/artifacts            # one-off sync of the local gallery
-# or per publish, in OpenCode: artifact_publish with deploy: true, repo: "<you>/artifacts"
-```
-
-The repo is created (public) on first use, Pages is enabled automatically, and local state
-(`.state`/`.db`/`.datasources`) is never uploaded. Every deploy is a commit
-(`publish <slug> v<N>`), so the repo's log is the audit trail. Live demo:
-`https://bitgorust.github.io/artifacts/` (see `docs/evidence/live-*.png`).
-
-For authenticated/org sharing on the free tier, deploy to Cloudflare Workers + KV and put
-Cloudflare Access in front (≤ 50 users free):
-
-```bash
-wrangler login   # one-time
-opencode-artifacts deploy --target cloudflare --name my-artifacts
-```
-
-Decisions, comments, and the mini-DB work on the hosted worker (KV-backed); shell
-datasources stay local-only. Full guide: `docs/hosted-cloudflare.md`.
-
 ## Roadmap
 
-- Comment authorship via Access identity headers
+- Comment authorship via Cloudflare Access identity headers
 - Syntax highlighting, PDF export
 
 ## Parity with Claude Code Artifacts
 
-See [`docs/claude-code-comparison.md`](docs/claude-code-comparison.md) for the full feature
-matrix, verified QA log, and screenshots (`docs/evidence/`). Everything achievable without
-hosted infrastructure is at parity; sharing links need `HostedPublisher`.
+Full capability inventory (extracted from the Claude Code 2.1.232 binary), feature matrix,
+and verified QA log: [`docs/claude-code-comparison.md`](docs/claude-code-comparison.md).
+
+## Contributing
+
+Issues and PRs welcome at
+[github.com/bitgorust/opencode-artifacts](https://github.com/bitgorust/opencode-artifacts/issues).
+Please run `npm test` before submitting; add a test for every behavior change. For anything
+visual, attach a browser screenshot.
 
 ## License
 
-MIT
+[MIT](LICENSE) © bitgorust
