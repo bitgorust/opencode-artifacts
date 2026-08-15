@@ -1,7 +1,8 @@
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import { homedir } from "node:os";
+import { fileURLToPath } from "node:url";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
-import { tool, type Plugin } from "@opencode-ai/plugin";
+import { tool, type Hooks, type Plugin } from "@opencode-ai/plugin";
 import {
   ArtifactTooLargeError,
   renderArtifact,
@@ -24,8 +25,36 @@ function cfStagingDir(workerName: string): string {
   return join(homedir(), ".cache", "opencode-artifacts", "cloudflare", workerName);
 }
 
-export const ArtifactsPlugin: Plugin = async () => {
-  return {
+const PROACTIVE_FALLBACK = `## Artifact pages
+You have the artifact_publish tool (opencode-artifacts). A finished deliverable with an
+audience — a report, a plan others will follow, a reference document — is not fully delivered
+while it lives only in terminal scrollback: publish it as an artifact and hand the user the
+path. Publish proactively when output is easier to look at than to read line by line: PR
+walkthroughs, dashboards, incident timelines, comparisons, checklists. Do not publish for
+quick answers or code snippets. Author in Markdown with frontmatter (title, icon); use
+component fences (stats, timeline, findings, compare, callout, progress, diff, copy, mermaid,
+decisions) and chart fences (vega-lite, vega, echarts). Republish with the same title to
+update in place. Name pages like products: a short noun phrase, no appended explainers.`;
+
+async function proactiveGuidance(): Promise<string> {
+  try {
+    const path = join(
+      dirname(fileURLToPath(import.meta.url)),
+      "..",
+      "skills",
+      "artifact-pages",
+      "SKILL.md",
+    );
+    const raw = await readFile(path, "utf8");
+    const body = raw.replace(/^---[\s\S]*?---\s*/, "").trim();
+    return body === "" ? PROACTIVE_FALLBACK : body;
+  } catch {
+    return PROACTIVE_FALLBACK;
+  }
+}
+
+export const ArtifactsPlugin: Plugin = async (_input, options) => {
+  const hooks: Hooks = {
     tool: {
       artifact_publish: tool({
         description: [
@@ -293,6 +322,15 @@ export const ArtifactsPlugin: Plugin = async () => {
       }),
     },
   };
+
+  if (options?.["proactive"] === true) {
+    const guidance = await proactiveGuidance();
+    hooks["experimental.chat.system.transform"] = async (_input, output) => {
+      output.system.push(guidance);
+    };
+  }
+
+  return hooks;
 };
 
 export default ArtifactsPlugin;

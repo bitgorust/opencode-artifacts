@@ -92,12 +92,19 @@ description: p99 spike traced to a sync fraud-check call
 
 and gets back `Artifact published to <worktree>/.opencode/artifacts/incident-4172-checkout-latency-spike.html`.
 
-For proactive behavior (the agent publishes on its own when output suits a page), install the
-bundled skill:
+For proactive behavior (the agent publishes on its own when output suits a page), enable the
+plugin option:
 
-```bash
-cp -r skills/artifact-pages ~/.agents/skills/   # or your project's .agents/skills/
+```json
+{
+  "plugin": [["opencode-artifacts", { "proactive": true }]]
+}
 ```
+
+This injects the bundled guidance (adapted from Claude Code's artifact-design skill) into the
+session's system context — visible in the plugin source, off by default, and removable by
+deleting the option. Alternative for non-plugin environments: `cp -r skills/artifact-pages
+~/.agents/skills/` (don't use both).
 
 CLI (also usable standalone, `npm install -g opencode-artifacts`):
 

@@ -82,6 +82,21 @@ test("artifact_publish blocks credential-looking content unless forced", async (
   });
 });
 
+test("proactive option injects the guidance into the system transform", async () => {
+  const off = await ArtifactsPlugin({} as unknown as PluginInput);
+  assert.equal(off["experimental.chat.system.transform"], undefined);
+
+  const on = await ArtifactsPlugin({} as unknown as PluginInput, { proactive: true });
+  const transform = on["experimental.chat.system.transform"];
+  assert.ok(transform);
+
+  const output = { system: [] as string[] };
+  await transform({}, output);
+  assert.equal(output.system.length, 1);
+  assert.match(output.system[0], /artifact_publish/);
+  assert.match(output.system[0], /not fully delivered/);
+});
+
 test("artifact_db reads and writes collection documents", async () => {
   const hooks = await ArtifactsPlugin({} as unknown as PluginInput);
   const db = hooks.tool?.artifact_db;
