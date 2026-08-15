@@ -98,8 +98,33 @@ of capabilities beyond the documented ones:
 6. **Org sharing, multi-viewer state, comment identity, audit** — structural: require `HostedPublisher` + accounts. Not locally replicable.
 7. **Sensitive-delta guard** — an OpenCode permission hook that diffs republished content against the previous version and escalates on new secrets/PII patterns; regex-level first, LLM-review optional.
 
-## Remaining gaps (structural, not quality)
+## Public artifact quality survey (2026-08-15)
 
+Galleries exist — [madewithclaude.com](https://madewithclaude.com/),
+[awesome-claude-artifacts](https://github.com/madewithclaude/awesome-claude-artifacts),
+claudeartifacts.club, [claudeatplay.com](https://claudeatplay.com/) — but claude.ai-hosted
+artifact pages are IP-region-blocked from this machine (the shell redirects; the
+`claudeusercontent.com` content host itself answers, so this is geo-policy, not a technical
+limit). Reachable real samples reviewed in a browser:
+
+- **claudeatplay.com** (self-hosted gallery of Claude-made interactive pieces): editorial
+  ceiling — bespoke dark canvas, display serif, Roman-numeral indices, per-piece custom
+  canvas animations. Above our fixed renderer; reachable for us only via raw-HTML mode.
+- **tools.simonwillison.net** (Claude-artifact-built utility tools, e.g. the SQLite Query
+  Explainer): the *everyday* artifact register — gray ground, white card, system sans, blue
+  buttons. Visually indistinguishable from our `default` theme. The glamour samples are
+  curated; the median output looks like this.
+
+Same-task quality verdict:
+
+| Task class | Same quality as Claude? |
+|---|---|
+| Dashboards, reports, incidents, timelines, checklists, comparisons, data tables | Yes — with better consistency (fixed renderer floor), see `docs/evidence/patterns/` |
+| Explainers with bespoke SVG diagrams | Partially — mermaid yes; hand-tuned SVG needs `format: "html"` |
+| Interactive playgrounds (canvas sims, 3D, pyodide tools, single-purpose editors) | Only via raw-HTML mode; quality then tracks the model, same as theirs |
+| Editorial bespoke pages (claudeatplay class) | Only via raw-HTML mode; our named themes cover part of the intent |
+
+## Remaining gaps (structural, not quality)
 Org/public **sharing links** and **view-time MCP connectors** require hosted infrastructure
 (accounts, org auth, retention, compliance). The `Publisher` interface already isolates that
 work behind `HostedPublisher`; everything user-visible on a single machine is at parity.
