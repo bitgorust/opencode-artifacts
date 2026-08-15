@@ -50,10 +50,13 @@ for (const match of readme.matchAll(linkRe)) {
 
 for (const required of [
   "skills/artifact-pages/SKILL.md",
+  "skills/artifact-pages/reference/components.md",
+  "skills/artifact-pages/reference/visuals.md",
   "docs/engineering-principles.md",
   "docs/component-spec.md",
   "docs/claude-code-comparison.md",
   "LICENSE",
+  "AGENTS.md",
   ".github/workflows/ci.yml",
 ]) {
   check(`exists: ${required}`, existsSync(join(root, required)));

@@ -120,3 +120,43 @@ enforces the machine-checkable subset; CI runs it on every push.
 - `.github/workflows/ci.yml` on every push/PR: install, build, test, `check-repo`,
   `npm pack --dry-run`.
 - `npm run check` locally runs the same structural assertions before you push.
+
+## 11. Agent-facing guidance (skills, AGENTS.md, tool descriptions)
+
+Sources: [Anthropic — Equipping agents with Agent Skills](https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills),
+[Anthropic — Skill authoring best practices](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices),
+[Anthropic — Lessons from building Claude Code](https://claude.com/blog/lessons-from-building-claude-code-how-we-use-skills),
+[OpenAI — A practical guide to building agents](https://cdn.openai.com/business-guides-and-resources/a-practical-guide-to-building-agents.pdf),
+[OpenAI Codex — AGENTS.md guide](https://developers.openai.com/codex/guides/agents-md),
+[agents.md](https://agents.md/),
+[GitHub — agents.md lessons from 2,500 repos](https://github.blog/ai-and-ml/github-copilot/how-to-write-a-great-agents-md-lessons-from-over-2500-repositories/).
+
+- **Progressive disclosure is the load-bearing structure.** Metadata (~50 tokens, always
+  loaded) → SKILL.md body (< 500 lines, loaded when relevant) → reference files loaded on
+  demand, linked **one level deep** from SKILL.md (nested references get partial reads).
+  Reference files over 100 lines carry a table of contents. (Anthropic, both sources)
+- **A description is a trigger contract, not a summary**: what it does + when to use it +
+  phrases a user would actually say. Written for the model scanning a skill list, not for
+  humans browsing. Same contract governs our tool descriptions (`artifact_publish` reads as
+  when-to-publish guidance, not API docs). (Claude Code lessons; Anthropic checklist)
+- **Never state the obvious** — the model already knows how to code and read a repo. Skill
+  content exists to push it out of its default behavior. The highest-signal section is
+  **gotchas**, grown from observed failures over time — ours include "BOOT runs before the
+  serve snippet is injected" and "area charts need clip: true under layered marks".
+  (Claude Code lessons)
+- **Inform, don't railroad**: give the model what it needs and leave adaptation room; skills
+  get reused in contexts you didn't foresee. (Claude Code lessons)
+- **Scripts beat prose for deterministic work**: a validator that runs is better than
+  instructions describing validation. Our `scripts/check-repo.ts` is this principle applied
+  to ourselves. (Anthropic best practices)
+- **One agent first; split only on demonstrated complexity** — conditional-laden prompts or
+  overlapping tools are the split signals, not aesthetics. We ship one skill, not eleven.
+  (OpenAI practical guide)
+- **High-risk actions get human checkpoints** — our `ctx.ask` publish prompt and the guard
+  `force` gate are the intervention points; never route around them silently. (OpenAI
+  guardrails)
+- **AGENTS.md is for agents what README is for humans**: commands early (with flags),
+  concrete examples over prose, stack with versions, and three-tier boundaries
+  (always / ask first / never). Nearest file wins on conflict. (agents.md; GitHub study)
+- **When the agent makes the same mistake twice, retrospective → update the guidance.** Rules
+  grow from real friction, not upfront anticipation. (OpenAI Codex best practices)
