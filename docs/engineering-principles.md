@@ -160,3 +160,45 @@ Sources: [Anthropic — Equipping agents with Agent Skills](https://www.anthropi
   (always / ask first / never). Nearest file wins on conflict. (agents.md; GitHub study)
 - **When the agent makes the same mistake twice, retrospective → update the guidance.** Rules
   grow from real friction, not upfront anticipation. (OpenAI Codex best practices)
+
+### Context engineering for the current model generation
+
+Sources: [Anthropic — Effective context engineering for AI agents (2025-09)](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents),
+[Anthropic — New rules of context engineering (2026-07)](https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models),
+[Anthropic Cookbook — Memory, compaction, and tool clearing (2026-03)](https://platform.claude.com/cookbook/tool-use-context-engineering-context-engineering-tools),
+[LangChain — Context engineering for agents (2025-07)](https://www.langchain.com/blog/context-engineering-for-agents),
+[tianpan.co — Four strategies, with benchmarks (2026-02)](https://tianpan.co/blog/2026-02-28-four-strategies-agent-context-engineering),
+[Anthropic — The unreasonable effectiveness of HTML (2026-05)](https://claude.com/blog/using-claude-code-the-unreasonable-effectiveness-of-html).
+
+**The master principle**: context is a finite attention budget subject to context rot; find
+the smallest set of high-signal tokens that maximize the likelihood of the desired outcome.
+Everything we inject into a session — tool descriptions, skill bodies, proactive guidance,
+artifact content returned by tools — is audited against this. (Anthropic 2025-09)
+
+Applied to this repo:
+
+- **Judgment over rules; expressive interfaces over examples.** Anthropic removed 80% of
+  Claude Code's system prompt with no eval loss. Add a rule when a failure is observed;
+  re-evaluate rules when the harness model generation changes. Two held tensions: GitHub's
+  agents.md study says code examples beat explanations (true for style/persona), while
+  Anthropic says examples constrain tool exploration (true for tool surfaces — our enum-typed
+  args and digest/verbose flags do this). (2026-07)
+- **Altitude**: specific enough to guide, flexible enough to adapt — no brittle if-else
+  logic, no vague aspiration. Applies to every description we ship. (2025-09)
+- **One fact, one home**: the tool description owns how, the skill owns when/why, AGENTS.md
+  owns repo facts. Repetition was an old-model workaround; deleted here. (2026-07)
+- **Just-in-time over front-loading**: lightweight identifiers in context (paths, slugs,
+  hashes), content loaded on demand — our `reference/` files, capped 16 KB stale-guard
+  preview, and `digest: true` comment triage all follow this. (2025-09)
+- **Token-efficient tool returns**: compact pointers by default (path + hash), full content
+  only on explicit request; evidence shows observation masking beats summarization (~50% cost
+  cut on SWE-bench-class workloads) — large returns must justify themselves. (2026-02)
+- **Durable external state over in-context accumulation**: our artifact pages are rich
+  references for later sessions (better than prose specs), and `.state`/`.db` stores double
+  as agent scratchpads that survive compaction and session resets. Compaction/memory/
+  sub-agent strategy belongs to the harness; our job is to be good storage. (2025-09, 2026-05)
+- **Prefix stability is a feature**: the proactive injection is a static string computed once
+  at plugin init, never rebuilt per turn — reordering or rebuilding context silently breaks
+  prompt caching. (2026-02)
+- **Anti-patterns we refuse**: whole-document dumps into context, unbounded transcripts,
+  stale memory without a supersede path, deferred-loading nothing. (2026-05 guide)
