@@ -133,6 +133,12 @@ values fall back to `default`. Themes are deliberately single-look (like Claude 
 Evidence: `docs/evidence/patterns/funnel-{report,ops,editorial}.png` — one source, three
 identities, browser-verified.
 
+Default (unnamed) pages follow the three-state theme model from Claude Code's artifact-design
+skill: bare `:root` is the full light palette, the dark media query is guarded by
+`:root:not([data-theme="light"])`, and `:root[data-theme="dark"]` wins for explicit dark. A
+header toggle cycles system → dark → light and persists to localStorage
+(`docs/evidence/theme-toggle-dark.png`). Named themes are single-look and hide the toggle.
+
 ## Markdown-level additions
 
 - GitHub alerts: `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`, `> [!IMPORTANT]`, `> [!CAUTION]`

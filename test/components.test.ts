@@ -160,12 +160,25 @@ test("theme frontmatter applies a curated override, unknown themes fall back", (
   const themed = renderArtifact("---\ntitle: T\ntheme: report\n---\nx\n").html;
   assert.ok(themed.includes("--page-bg:#f6f0e4"));
   assert.ok(themed.includes("Georgia"));
+  assert.ok(themed.includes('<html lang="en" data-page-theme="report">'));
 
   const unknown = renderArtifact("---\ntitle: T\ntheme: neon-arcade\n---\nx\n").html;
   assert.ok(!unknown.includes("--page-bg:#f6f0e4"));
+  assert.ok(!unknown.includes('<html lang="en" data-page-theme='));
 
   const plain = renderArtifact("---\ntitle: T\n---\nx\n").html;
   assert.ok(!plain.includes("Georgia"));
+});
+
+test("pages follow the three-state theme pattern with a toggle", () => {
+  const { html } = renderArtifact("plain\n");
+  assert.ok(html.includes('@media (prefers-color-scheme: dark){:root:not([data-theme="light"])'));
+  assert.ok(html.includes(':root[data-theme="dark"]'));
+  assert.ok(html.includes("theme-toggle"));
+  assert.ok(html.includes("artifact-theme"));
+
+  const themed = renderArtifact("---\ntitle: T\ntheme: ops\n---\nx\n").html;
+  assert.ok(themed.includes('hasAttribute("data-page-theme")'));
 });
 
 test("decisions renders option rows with question/option data attributes", () => {  const html = renderComponent(

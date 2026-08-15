@@ -4,7 +4,18 @@ Publish OpenCode session output as self-contained, interactive HTML artifact pag
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-![An incident artifact: stat cards, a timeline, a live chart, and a root-cause callout](docs/evidence/patterns/incident.png)
+![A funnel-analysis artifact in the report theme: emphasized stat cards, an annotated area chart marking the v4.2 drop, an insight callout, and a before/after comparison](docs/evidence/patterns/funnel-report.png)
+
+One Markdown source, four curated looks — the same page in `ops` and `editorial`:
+
+<table><tr>
+<td><img src="docs/evidence/patterns/funnel-ops.png" alt="The same artifact in the ops theme: dark-first, terminal green"></td>
+<td><img src="docs/evidence/patterns/funnel-editorial.png" alt="The same artifact in the editorial theme: white, serif display type"></td>
+</tr></table>
+
+More verified pages — dashboard, incident, PR walkthrough, checklist, compare, workshop,
+tuning playground — in [`docs/evidence/patterns/`](docs/evidence/patterns/), each rendered
+from [`examples/patterns/`](examples/patterns/) and browser-tested with zero console errors.
 
 Inspired by [Claude Code Artifacts](https://code.claude.com/docs/en/artifacts), rebuilt as a
 local-first, open-source [OpenCode](https://opencode.ai) plugin. The model writes Markdown + JSON specs; a fixed
@@ -28,7 +39,7 @@ output stays diff-friendly and cheap in tokens.
 ## Features
 
 - **Dashboards, PR walkthroughs, incident timelines, checklists, comparisons** — component fences (`stats`, `timeline`, `findings`, `compare`, `callout`, `progress`, `diff`, `copy`, `mermaid`, `decisions`) plus Vega-Lite / Vega / ECharts / Mermaid charts, all inlined into one strict-CSP file
-- **Curated themes**: frontmatter `theme: report | ops | editorial` restyles the whole page — [one source, three identities](docs/evidence/patterns/funnel-report.png)
+- **Curated themes**: frontmatter `theme: report | ops | editorial` restyles the whole page — [one source, three identities](docs/evidence/patterns/funnel-report.png); unnamed pages follow system dark/light with a three-state header toggle
 - **Gallery + versions**: every publish updates `.opencode/artifacts/index.html`; `version: true` keeps numbered history; `restore` rolls back; a stale-version hash guard prevents blind overwrites
 - **Interactive**: chart-bound controls (vega-lite `params.bind`, echarts `dataZoom`), text-selection comments, workshop decision pages the session can read back
 - **Live reload**: `opencode-artifacts serve` refreshes open pages on every republish

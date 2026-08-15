@@ -46,19 +46,26 @@ export const CSP = [
   "connect-src 'none'",
 ].join("; ");
 
-export const ARTIFACT_CSS = `:root{color-scheme:light dark;
+export const ARTIFACT_CSS = `:root{color-scheme:light;
 --page-bg:#e9edf2;--card-bg:#ffffff;--ink:#111827;--ink-2:#4b5563;--ink-3:#9ca3af;--line:#e5e7eb;
 --accent:#6d6bd6;--good:#2f9e6e;--good-bg:#e4f4ec;--bad:#d64550;--bad-bg:#fdeeee;
 --warn:#b45309;--warn-bg:#fdf0dc;--info:#33526e;--info-bg:#dce6f2;
 --card-info-bg:#e3eaf4;--card-warn-bg:#fdeccd;--code-bg:#f3f4f6;
 --radius:16px;--shadow:0 1px 3px rgb(15 23 42/.06)}
-@media (prefers-color-scheme: dark){:root{
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;
 --page-bg:#151a21;--card-bg:#1f2630;--ink:#e5e7eb;--ink-2:#9ca3af;--ink-3:#6b7280;--line:#333d4d;
 --good:#4ade80;--good-bg:#14312a;--bad:#f87171;--bad-bg:#3a2226;--warn:#fbbf24;--warn-bg:#3a2f16;
 --info:#7ea4c7;--info-bg:#1e2c3d;--card-info-bg:#1e2c3d;--card-warn-bg:#3a2f16;--code-bg:#262e3a;
 --shadow:0 1px 3px rgb(0 0 0/.4)}}
+:root[data-theme="dark"]{color-scheme:dark;
+--page-bg:#151a21;--card-bg:#1f2630;--ink:#e5e7eb;--ink-2:#9ca3af;--ink-3:#6b7280;--line:#333d4d;
+--good:#4ade80;--good-bg:#14312a;--bad:#f87171;--bad-bg:#3a2226;--warn:#fbbf24;--warn-bg:#3a2f16;
+--info:#7ea4c7;--info-bg:#1e2c3d;--card-info-bg:#1e2c3d;--card-warn-bg:#3a2f16;--code-bg:#262e3a;
+--shadow:0 1px 3px rgb(0 0 0/.4)}
 body{margin:0;background:var(--page-bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6}
 .artifact-header{display:flex;align-items:center;gap:.6rem;padding:.9rem 1.5rem;background:var(--card-bg);border-bottom:1px solid var(--line)}
+.theme-toggle{margin-left:auto;background:none;border:1px solid var(--line);border-radius:999px;padding:.25rem .8rem;font-size:.75rem;font-weight:600;color:var(--ink-2);cursor:pointer}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
 .artifact-header h1{font-size:1.1rem;margin:0;letter-spacing:-.01em}
 .artifact-icon{font-size:1.25rem}
 .artifact-body{max-width:1080px;margin:0 auto;padding:1.5rem 1.5rem 3rem}
@@ -67,6 +74,8 @@ body{margin:0;background:var(--page-bg);color:var(--ink);font-family:system-ui,-
 .artifact-footer a{color:inherit}
 .section-card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem 1.75rem;margin:1.25rem 0}
 .section-card> :first-child{margin-top:0}
+.section-card p,.section-card li{max-width:68ch}
+td,.stat-value,.tl-time,.progress-label,.delta{font-variant-numeric:tabular-nums}
 h2{font-size:1.35rem;font-weight:700;letter-spacing:-.015em;margin:0 0 1rem}
 h3{font-size:1.05rem;margin:1.25rem 0 .5rem}
 p{margin:.6rem 0}
@@ -203,6 +212,38 @@ h2{font-family:Georgia,Charter,"Times New Roman",serif;font-size:1.6rem;font-wei
 };
 
 const BOOT = `(function () {
+  var root = document.documentElement;
+  if (!root.hasAttribute("data-page-theme")) {
+    var header = document.querySelector(".artifact-header");
+    if (header) {
+      var toggle = document.createElement("button");
+      toggle.className = "theme-toggle";
+      toggle.type = "button";
+      function paintToggle() {
+        var t = root.getAttribute("data-theme");
+        toggle.textContent = t === "dark" ? "Dark" : t === "light" ? "Light" : "Auto";
+        toggle.setAttribute("aria-label", "Theme: " + (t || "system") + ". Activate to switch.");
+      }
+      try {
+        var stored = localStorage.getItem("artifact-theme");
+        if (stored === "dark" || stored === "light") root.setAttribute("data-theme", stored);
+      } catch (e) {}
+      toggle.addEventListener("click", function () {
+        var t = root.getAttribute("data-theme");
+        if (t === "dark") root.setAttribute("data-theme", "light");
+        else if (t === "light") root.removeAttribute("data-theme");
+        else root.setAttribute("data-theme", "dark");
+        var now = root.getAttribute("data-theme");
+        try {
+          if (now) localStorage.setItem("artifact-theme", now);
+          else localStorage.removeItem("artifact-theme");
+        } catch (e) {}
+        paintToggle();
+      });
+      paintToggle();
+      header.appendChild(toggle);
+    }
+  }
   var charts = window.__ARTIFACT_CHARTS__ || [];
   charts.forEach(function (entry, i) {
     var el = document.querySelector('[data-chart-index="' + i + '"]');
@@ -526,9 +567,14 @@ function assemblePage(input: AssembleInput): string {
     runtimes.add("echarts");
   }
 
+  const themeAttr =
+    input.theme !== undefined && THEME_CSS[input.theme] !== undefined
+      ? ` data-page-theme="${input.theme}"`
+      : "";
+
   const parts: string[] = [
     "<!doctype html>",
-    '<html lang="en">',
+    `<html lang="en"${themeAttr}>`,
     "<head>",
     '<meta charset="utf-8">',
     `<meta http-equiv="Content-Security-Policy" content="${CSP}">`,

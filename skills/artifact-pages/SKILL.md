@@ -32,6 +32,26 @@ Publish proactively when output is easier to look at than to read line by line:
 
 Do NOT publish for quick answers, code snippets, or anything terminal text handles fine.
 
+## Calibrate the treatment
+
+Decide the treatment before writing — the theme is part of the read, not an afterthought:
+
+- `default` — tooling, dashboards, PR walkthroughs: dense and scannable
+- `report` — analysis, postmortems, decision docs: warm paper, serif headings
+- `ops` — incidents, runbooks, on-call pages: dark-first, terminal voice
+- `editorial` — launch notes, narratives: display type, room to breathe
+
+Set it in frontmatter (`theme: report`). When nothing fits, `default` is always respectable —
+an over-styled page is worse than a plain one.
+
+## Pre-publish checklist
+
+1. The title names the page like a product (2–4 words, no appended explainer)
+2. Summary before detail — the first card answers "so what"
+3. Every chart's title states the finding, not the axes
+4. Components carry `tone` where attention matters
+5. No error boxes survive to publish — fix and re-render first
+
 ## Naming (adapted from Claude Code's artifact-design skill)
 
 Name the page like a product, not a caption: a short noun phrase, typically two to four
