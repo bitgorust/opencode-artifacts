@@ -82,6 +82,28 @@ test("artifact_publish blocks credential-looking content unless forced", async (
   });
 });
 
+test("artifact_publish scans a title override for sensitive content", async () => {
+  const publish = (await ArtifactsPlugin({} as unknown as PluginInput)).tool?.artifact_publish;
+  assert.ok(publish);
+  await withWorktree(async (dir) => {
+    const ctx: ToolContext = {
+      sessionID: "s1",
+      messageID: "m1",
+      agent: "test",
+      directory: dir,
+      worktree: dir,
+      abort: new AbortController().signal,
+      metadata: () => {},
+      ask: async () => {},
+    };
+    const result = await publish.execute(
+      { markdown: "# Clean", title: "ghp_0123456789abcdefABCDEF0123456789" },
+      ctx,
+    );
+    assert.match(String(result), /Publish blocked/);
+  });
+});
+
 test("proactive option injects the guidance into the system transform", async () => {
   const off = await ArtifactsPlugin({} as unknown as PluginInput);
   assert.equal(off["experimental.chat.system.transform"], undefined);
@@ -193,6 +215,29 @@ test("artifact_db reads and writes collection documents", async () => {
       String(await db.execute({ slug: "board", collection: "notes", op: "get", id: "n1" }, ctx)),
       /No document/,
     );
+  });
+});
+
+test("artifact_db rejects path traversal before filesystem access", async () => {
+  const db = (await ArtifactsPlugin({} as unknown as PluginInput)).tool?.artifact_db;
+  assert.ok(db);
+  await withWorktree(async (dir) => {
+    const ctx: ToolContext = {
+      sessionID: "s1",
+      messageID: "m1",
+      agent: "test",
+      directory: dir,
+      worktree: dir,
+      abort: new AbortController().signal,
+      metadata: () => {},
+      ask: async () => {},
+    };
+    const result = await db.execute(
+      { slug: "board", collection: "../../../escaped", op: "set", id: "n1", doc: {} },
+      ctx,
+    );
+    assert.match(String(result), /slug and collection must/);
+    await assert.rejects(readFile(join(dir, ".opencode", "escaped.json"), "utf8"));
   });
 });
 

@@ -1,3 +1,6 @@
+import { readFile, readdir } from "node:fs/promises";
+import { join } from "node:path";
+
 export interface SensitiveFinding {
   kind: string;
   match: string;
@@ -26,4 +29,19 @@ export function scanSensitive(content: string): SensitiveFinding[] {
 
 export function formatFindings(findings: SensitiveFinding[]): string {
   return findings.map((f) => `${f.kind} (${f.match})`).join(", ");
+}
+
+export interface SensitiveFileFinding {
+  file: string;
+  findings: SensitiveFinding[];
+}
+
+export async function scanArtifactDirectory(dir: string): Promise<SensitiveFileFinding[]> {
+  const results: SensitiveFileFinding[] = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    if (!entry.isFile() || !entry.name.endsWith(".html")) continue;
+    const findings = scanSensitive(await readFile(join(dir, entry.name), "utf8"));
+    if (findings.length > 0) results.push({ file: entry.name, findings });
+  }
+  return results;
 }

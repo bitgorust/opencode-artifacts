@@ -84,20 +84,26 @@ export class CloudflarePublisher implements Publisher {
   }
 
   private async ensureKvNamespace(): Promise<string> {
-    const idFile = join(this.stagingDir, "kv-id.txt");
+    const namespaceTitle = `ARTIFACTS_KV_${this.workerName}`;
+    const idFile = join(this.stagingDir, "kv-id-scoped.txt");
     const cached = await readFile(idFile, "utf8").then(
       (value) => value.trim(),
       () => "",
     );
-    if (/^[0-9a-f]{32}$/.test(cached)) return cached;
+    const cachedPrefix = `${namespaceTitle}:`;
+    const cachedId = cached.startsWith(cachedPrefix) ? cached.slice(cachedPrefix.length) : "";
+    if (/^[0-9a-f]{32}$/.test(cachedId)) return cachedId;
     const list = await this.runner("npx", ["wrangler", "kv", "namespace", "list"]);
+    const escapedTitle = namespaceTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const existing = list.match(
-      /\{[^{}]*"title":\s*"ARTIFACTS_KV"[^{}]*"id":\s*"([0-9a-f]{32})"[^{}]*\}|\{[^{}]*"id":\s*"([0-9a-f]{32})"[^{}]*"title":\s*"ARTIFACTS_KV"[^{}]*\}/,
+      new RegExp(
+        `\\{[^{}]*"title":\\s*"${escapedTitle}"[^{}]*"id":\\s*"([0-9a-f]{32})"[^{}]*\\}|\\{[^{}]*"id":\\s*"([0-9a-f]{32})"[^{}]*"title":\\s*"${escapedTitle}"[^{}]*\\}`,
+      ),
     );
     const existingId = existing?.[1] ?? existing?.[2];
     if (existingId) {
       await mkdir(this.stagingDir, { recursive: true });
-      await writeFile(idFile, existingId, "utf8");
+      await writeFile(idFile, `${namespaceTitle}:${existingId}`, "utf8");
       return existingId;
     }
 
@@ -106,7 +112,7 @@ export class CloudflarePublisher implements Publisher {
       "kv",
       "namespace",
       "create",
-      "ARTIFACTS_KV",
+      namespaceTitle,
     ]);
     const match =
       output.match(/"id":\s*"([0-9a-f]{32})"/) ?? output.match(/id\s*=\s*"([0-9a-f]{32})"/);
@@ -116,7 +122,7 @@ export class CloudflarePublisher implements Publisher {
       );
     }
     await mkdir(this.stagingDir, { recursive: true });
-    await writeFile(idFile, match[1], "utf8");
+    await writeFile(idFile, `${namespaceTitle}:${match[1]}`, "utf8");
     return match[1];
   }
 }

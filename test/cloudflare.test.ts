@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { handleApiRequest, type KVStore } from "../src/cloudflare/handler.ts";
@@ -122,7 +122,7 @@ test("cloudflare publisher stages worker, parses kv id, deploys, and returns the
   const result = await publisher.publish({ slug: "demo", html: "<h1>hi</h1>", title: "Demo" });
 
   assert.equal(result.url, "https://opencode-artifacts.bitgorust.workers.dev/demo.html");
-  assert.ok(calls.some((c) => c.includes("kv namespace create ARTIFACTS_KV")));
+  assert.ok(calls.some((c) => c.includes("kv namespace create ARTIFACTS_KV_opencode-artifacts")));
   assert.ok(calls.some((c) => c.includes("wrangler deploy")));
 
   const toml = await readFile(join(stagingDir, "wrangler.toml"), "utf8");
@@ -137,4 +137,26 @@ test("cloudflare publisher stages worker, parses kv id, deploys, and returns the
   await assert.rejects(readFile(join(stagingDir, "assets", ".state", "answers.json"), "utf8"));
 
   await rm(dir, { recursive: true, force: true });
+});
+
+test("cloudflare publishers use worker-specific KV namespace titles", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "cf-kv-"));
+  try {
+    await mkdir(join(dir, "local"));
+    const calls: string[] = [];
+    const runner: Runner = async (command, args) => {
+      calls.push(`${command} ${args.join(" ")}`);
+      if (args.includes("create")) return 'id = "0123456789abcdef0123456789abcdef"';
+      if (args.includes("deploy")) return "deployed";
+      return "[]";
+    };
+    await new CloudflarePublisher(join(dir, "local"), {
+      workerName: "team-site",
+      stagingDir: join(dir, "staging"),
+      runner,
+    }).deploy();
+    assert.ok(calls.some((call) => call.includes("namespace create ARTIFACTS_KV_team-site")));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });

@@ -1,9 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { access, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { FilePublisher, StaleArtifactError, type Manifest } from "../src/publisher.ts";
+import { ArtifactTooLargeError, DEFAULT_MAX_BYTES, FOOTER_PLACEHOLDER } from "../src/render.ts";
 
 async function withTempDir(run: (dir: string) => Promise<void>): Promise<void> {
   const dir = await mkdtemp(join(tmpdir(), "artifacts-"));
@@ -124,5 +125,42 @@ test("stale guard refuses to publish over an unseen version", async () => {
     });
     assert.notEqual(second.hash, first.hash);
     assert.equal(await readFile(join(dir, "report.html"), "utf8"), "two");
+  });
+});
+
+test("concurrent stale-guarded publishes allow exactly one update", async () => {
+  await withTempDir(async (dir) => {
+    const first = await new FilePublisher(dir).publish({ slug: "report", html: "one" });
+    const results = await Promise.allSettled([
+      new FilePublisher(dir).publish({ slug: "report", html: "two", expectedHash: first.hash }),
+      new FilePublisher(dir).publish({ slug: "report", html: "three", expectedHash: first.hash }),
+    ]);
+    assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
+    const rejected = results.find((result) => result.status === "rejected");
+    assert.ok(rejected?.status === "rejected");
+    assert.ok(rejected.reason instanceof StaleArtifactError);
+  });
+});
+
+test("enabling history archives an earlier unversioned publish", async () => {
+  await withTempDir(async (dir) => {
+    const publisher = new FilePublisher(dir);
+    await publisher.publish({ slug: "report", html: "one" });
+    await publisher.publish({ slug: "report", html: "two", version: true });
+    assert.equal(await readFile(join(dir, "report.v1.html"), "utf8"), "one");
+    const restored = await publisher.restore("report", 1);
+    assert.equal(await readFile(restored.path, "utf8"), "one");
+  });
+});
+
+test("footer expansion cannot exceed the rendered byte cap", async () => {
+  await withTempDir(async (dir) => {
+    const html =
+      "x".repeat(DEFAULT_MAX_BYTES - Buffer.byteLength(FOOTER_PLACEHOLDER)) + FOOTER_PLACEHOLDER;
+    await assert.rejects(
+      new FilePublisher(dir).publish({ slug: "report", html }),
+      ArtifactTooLargeError,
+    );
+    await assert.rejects(access(join(dir, "report.html")));
   });
 });

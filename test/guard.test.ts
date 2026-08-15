@@ -1,6 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { formatFindings, scanSensitive } from "../src/guard.ts";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { formatFindings, scanArtifactDirectory, scanSensitive } from "../src/guard.ts";
 
 test("clean content produces no findings", () => {
   assert.deepEqual(scanSensitive("# Report\n\nAll values here are fake."), []);
@@ -29,4 +32,17 @@ test("formatFindings redacts the matched secret", () => {
   const text = formatFindings(findings);
   assert.ok(text.includes("aws-access-key"));
   assert.ok(!text.includes("AKIAIOSFODNN7EXAMPLE"));
+});
+
+test("deploy scanning checks every HTML artifact in a directory", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "guard-"));
+  try {
+    await writeFile(join(dir, "clean.html"), "<h1>clean</h1>");
+    await writeFile(join(dir, "copied.html"), "ghp_0123456789abcdefABCDEF0123456789");
+    await writeFile(join(dir, "ignored.json"), "ghp_0123456789abcdefABCDEF0123456789");
+    const results = await scanArtifactDirectory(dir);
+    assert.deepEqual(results.map((result) => result.file), ["copied.html"]);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });

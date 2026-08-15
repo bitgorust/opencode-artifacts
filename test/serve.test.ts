@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { get } from "node:http";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -46,6 +47,19 @@ test("blocks path traversal outside the served directory", async () => {
   await withServer({ "a.html": "x" }, async (url) => {
     const res = await fetch(`${url}/..%2f..%2fetc%2fpasswd`);
     assert.equal(res.status, 403);
+  });
+});
+
+test("malformed percent escapes return 400 without stopping the server", async () => {
+  await withServer({ "a.html": "x" }, async (url) => {
+    const status = await new Promise<number | undefined>((resolveStatus, reject) => {
+      get(`${url}/%`, (response) => {
+        response.resume();
+        response.on("end", () => resolveStatus(response.statusCode));
+      }).on("error", reject);
+    });
+    assert.equal(status, 400);
+    assert.equal((await fetch(`${url}/a.html`)).status, 200);
   });
 });
 

@@ -213,8 +213,16 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
 
   const server = createServer((req, res) => {
     const url = new URL(req.url ?? "/", "http://localhost");
+    let decodedPathname: string;
+    try {
+      decodedPathname = decodeURIComponent(url.pathname);
+    } catch {
+      res.writeHead(400);
+      res.end("bad path encoding");
+      return;
+    }
 
-    if (url.pathname === "/__sse") {
+    if (decodedPathname === "/__sse") {
       res.writeHead(200, {
         "content-type": "text/event-stream",
         "cache-control": "no-cache",
@@ -226,8 +234,8 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
       return;
     }
 
-    if (url.pathname.startsWith("/__data/")) {
-      const rest = decodeURIComponent(url.pathname.slice("/__data/".length));
+    if (decodedPathname.startsWith("/__data/")) {
+      const rest = decodedPathname.slice("/__data/".length);
       const [slug, name] = rest.split("/");
       if (!slug || !name || !NAME_RE.test(slug) || !NAME_RE.test(name)) {
         res.writeHead(400);
@@ -242,8 +250,8 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
       return;
     }
 
-    if (url.pathname.startsWith("/__db/")) {
-      const segments = decodeURIComponent(url.pathname.slice("/__db/".length)).split("/");
+    if (decodedPathname.startsWith("/__db/")) {
+      const segments = decodedPathname.slice("/__db/".length).split("/");
       const [slug, collection, id] = segments;
       if (
         !slug ||
@@ -319,8 +327,8 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
       return;
     }
 
-    if (url.pathname.startsWith("/__comments/")) {
-      const slug = decodeURIComponent(url.pathname.slice("/__comments/".length));
+    if (decodedPathname.startsWith("/__comments/")) {
+      const slug = decodedPathname.slice("/__comments/".length);
       if (!STATE_SLUG_RE.test(slug)) {
         res.writeHead(400);
         res.end("bad slug");
@@ -360,8 +368,8 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
       return;
     }
 
-    if (url.pathname.startsWith("/__state/")) {
-      const slug = decodeURIComponent(url.pathname.slice("/__state/".length));
+    if (decodedPathname.startsWith("/__state/")) {
+      const slug = decodedPathname.slice("/__state/".length);
       if (!STATE_SLUG_RE.test(slug)) {
         res.writeHead(400);
         res.end("bad slug");
@@ -416,7 +424,7 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
       return;
     }
 
-    const pathname = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
+    const pathname = decodedPathname === "/" ? "/index.html" : decodedPathname;
     const filePath = normalize(join(root, pathname));
     if (filePath !== root && !filePath.startsWith(root + sep)) {
       res.writeHead(403);

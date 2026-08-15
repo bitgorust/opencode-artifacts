@@ -13,7 +13,7 @@ import {
   type ArtifactsConfig,
   type DeployTarget,
 } from "./config.ts";
-import { formatFindings, scanSensitive } from "./guard.ts";
+import { formatFindings, scanArtifactDirectory, scanSensitive } from "./guard.ts";
 import { serveArtifacts } from "./serve.ts";
 import { openFile } from "./open.ts";
 
@@ -26,8 +26,8 @@ function usage(): never {
   opencode-artifacts restore <slug> --version <n> [--dir <artifacts-dir>]
   opencode-artifacts latest [--dir <artifacts-dir>] [--open]
   opencode-artifacts state <slug> [--dir <artifacts-dir>]
-  opencode-artifacts deploy --repo <owner/name> [--dir <artifacts-dir>] [--branch <name>]
-  opencode-artifacts deploy --target cloudflare --name <worker> [--dir <artifacts-dir>]
+  opencode-artifacts deploy --repo <owner/name> [--dir <artifacts-dir>] [--branch <name>] [--force]
+  opencode-artifacts deploy --target cloudflare --name <worker> [--dir <artifacts-dir>] [--force]
   opencode-artifacts init [--global] [--target github|cloudflare] [--repo <owner/name>] [--worker-name <name>] [--yes]`);
   process.exit(2);
 }
@@ -62,7 +62,7 @@ async function renderCommand(args: string[]): Promise<void> {
   if (format !== "markdown" && format !== "html") usage();
 
   const markdown = await readFile(input, "utf8");
-  const findings = scanSensitive(markdown);
+  const findings = scanSensitive(`${markdown}\n${title ?? ""}`);
   if (findings.length > 0 && !force) {
     console.error(
       `publish blocked: credential-looking strings found: ${formatFindings(findings)}. Re-run with --force to publish anyway.`,
@@ -152,6 +152,15 @@ async function deployCommand(args: string[]): Promise<void> {
   const target = optionValue(args, "--target") ?? "github";
   const dir = resolve(optionValue(args, "--dir") ?? DEFAULT_DIR);
   const home = process.env["HOME"] ?? ".";
+  const sensitiveFiles = await scanArtifactDirectory(dir);
+  if (sensitiveFiles.length > 0 && !args.includes("--force")) {
+    const details = sensitiveFiles
+      .map(({ file, findings }) => `${file}: ${formatFindings(findings)}`)
+      .join("; ");
+    throw new Error(
+      `deploy blocked: credential-looking strings found: ${details}. Re-run with --force to deploy anyway.`,
+    );
+  }
 
   if (target === "cloudflare") {
     const name = optionValue(args, "--name");

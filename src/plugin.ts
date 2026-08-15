@@ -14,7 +14,7 @@ import { GitHubPagesPublisher } from "./github-pages.ts";
 import { CloudflarePublisher } from "./cloudflare-publisher.ts";
 import { loadConfig, resolveDeploy } from "./config.ts";
 import { formatFindings, scanSensitive } from "./guard.ts";
-import { readCollection, writeCollection } from "./serve.ts";
+import { NAME_RE, readCollection, writeCollection } from "./serve.ts";
 import { openFile } from "./open.ts";
 
 function ghPagesCloneDir(repo: string): string {
@@ -130,7 +130,7 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             const title = args.title ?? rendered.meta.title ?? "Artifact";
             slug = slugify(title);
 
-            const findings = scanSensitive(args.markdown);
+            const findings = scanSensitive(`${args.markdown}\n${title}`);
             if (findings.length > 0 && args.force !== true) {
               return `Publish blocked: the content contains credential-looking strings: ${formatFindings(findings)}. If these are intentional (e.g. redacted examples), call again with force: true.`;
             }
@@ -249,6 +249,9 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             .describe("Equality filter for list, as field:value"),
         },
         async execute(args, ctx) {
+          if (!NAME_RE.test(args.slug) || !NAME_RE.test(args.collection)) {
+            return "slug and collection must contain only lowercase letters, numbers, and hyphens";
+          }
           const root = join(workRoot(ctx), ".opencode", "artifacts");
           const store = await readCollection(root, args.slug, args.collection);
           switch (args.op) {
