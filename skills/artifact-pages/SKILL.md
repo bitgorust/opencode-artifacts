@@ -80,3 +80,15 @@ When a served artifact has readers, close the loop: `artifact_comments` with `di
 for a triage view (unresolved first, age-marked), act on each thread, then resolve by id with
 `resolveId`. If acting changed the page, republish. Leave a thread open only while the
 conversation is genuinely still active.
+
+## Gotchas
+
+Grown from observed failures; add new ones as they bite:
+
+- Vega-Lite `text` channels need `{"field": "..."}` objects, not bare strings.
+- Area charts under layered marks need `"clip": true` or the fill escapes the plot.
+- A chart spec containing `</script>` is safe (payload is `\u003c`-escaped) — don't "fix" it.
+- Malformed component JSON renders an inline error box and the page still ships; fix the spec
+  and republish rather than working around the box.
+- `serve`-mode extras (live reload, decisions persistence, comments) exist only on served
+  pages; a `file://` artifact keeps its strict CSP and localStorage-only state.

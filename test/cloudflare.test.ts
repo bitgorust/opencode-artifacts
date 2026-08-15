@@ -129,5 +129,12 @@ test("cloudflare publisher stages worker, parses kv id, deploys, and returns the
   assert.match(toml, /id = "0123456789abcdef0123456789abcdef"/);
   assert.match(toml, /main = "main\/cloudflare\/worker\.js"/);
   assert.match(await readFile(join(stagingDir, "assets", "demo.html"), "utf8"), /<h1>hi<\/h1>/);
+
+  const { mkdir: mkdirp, writeFile: writeF } = await import("node:fs/promises");
+  await mkdirp(join(dir, "local", ".state"), { recursive: true });
+  await writeF(join(dir, "local", ".state", "answers.json"), "{}");
+  await publisher.deploy();
+  await assert.rejects(readFile(join(stagingDir, "assets", ".state", "answers.json"), "utf8"));
+
   await rm(dir, { recursive: true, force: true });
 });

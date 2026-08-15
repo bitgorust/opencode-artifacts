@@ -1,4 +1,4 @@
-# Component Authoring Spec (v0.3)
+# Component Authoring Spec
 
 Goal: reach Claude Code Artifacts **page** quality while keeping our authoring model
 (model writes Markdown + JSON specs, fixed renderer owns the HTML/CSS).
@@ -42,86 +42,16 @@ via `color-scheme: light dark` + `@media (prefers-color-scheme: dark)` overrides
 - h2 = narrative headline style: 22px/700, tight letter-spacing.
 - Every heading gets an `id` anchor (slugified text) — pages are single-file, in-page anchors only.
 
-## Components (new fenced block types, JSON payload)
+## Components
 
-### ```stats — metric cards row (the hero component in the screenshot)
-```json
-[
-  { "label": "EDITOR SESSIONS", "value": "8.41M", "delta": "3.1%", "direction": "up", "tone": "good" },
-  { "label": "EXPORT COMPLETION", "value": "27.8%", "delta": "9.4pt", "direction": "down", "tone": "bad", "emphasis": true }
-]
-```
-Renders: grid of cards; big bold value, small-caps gray label, delta pill (▲/▼) in
-tone color; `tone: "bad"` tints the whole card `--card-bad-bg`. Fields `delta/direction/tone/emphasis` optional.
+Component JSON schemas have exactly one home: `skills/artifact-pages/reference/components.md`
+(it ships in the npm package and is what agents read). This document keeps the design
+rationale; never copy schema tables into it.
 
-### ```timeline — vertical incident timeline
-```json
-[{ "time": "13:54", "title": "Alert fires", "detail": "p99 > 2.5s for 5m", "tone": "bad" }]
-```
-Renders: left rail with dots, time in mono, title bold, detail gray; tone colors the dot.
-
-### ```findings — severity-coded findings (PR walkthrough / security review)
-```json
-[{ "severity": "high", "title": "Sync fraud check on hot path", "location": "src/payments/checkout.ts:88", "detail": "..." }]
-```
-Renders: rows with severity pill (critical `#7f1d1d/#fee2e2`, high bad, medium warn, low info),
-location in mono.
-
-### ```compare — variant cards side by side
-```json
-[{ "title": "4.2 — Current", "pill": "red", "annotations": ["Pro preselected", "CTA sells the plan"], "tradeoff": "Higher intent, darker pattern" }]
-```
-Renders: equal-width cards; pill tag, numbered annotations (❶❷), one-line tradeoff in italic gray.
-`body` optional for a mock/description block (raw markdown text, rendered inline).
-
-### ```callout — insight card (colored, like "The funnel didn't sag" / "Cancels are reflexes")
-```json
-{ "tone": "info", "title": "The funnel didn't sag — it snapped", "body": "..." }
-```
-tones: info (blue-gray), warn (amber), good, bad. Bold narrative title + body.
-
-### ```progress — checklist progress bar
-```json
-{ "label": "Migration", "done": 7, "total": 12 }
-```
-
-### ```diff — annotated diff
-Plain unified diff text; lines starting with `## note:` become annotation rows (gray, italic,
-spanning). `+` green bg, `-` red bg, `@@` hunk headers muted.
-
-### ```copy — copy-to-clipboard button (added v0.4)
-```json
-{ "label": "Copy as prompt", "text": "multi-line text, preserved" }
-```
-Text rides in an inert `<template>` element (escaping-safe, newline-preserving); the fixed boot
-script writes it to the clipboard on click and shows a transient confirmation.
-
-### Interactive controls (added v0.4)
-No custom component needed: vega-lite `params` with `bind` render as native sliders/selects and
-re-render the chart live through vega's signal graph (CSP-safe under `ast: true`); echarts
-`dataZoom` / toolbox options work as-is. Anything beyond chart-bound controls → raw HTML mode.
-
-### ```mermaid — diagrams (added v0.5)
-Raw mermaid source (not JSON) in the fence; rendered client-side by the inlined mermaid runtime
-(only when used), themed via `prefers-color-scheme`. Render failures degrade to the error box.
-
-### ```decisions — workshop decision rows (added v0.5)
-```json
-{ "title": "Open decisions", "questions": [{ "id": "layout", "question": "...", "options": [{ "id": "tabs", "label": "...", "note": "..." }] }] }
-```
-Clicking an option marks it selected, persists to localStorage, and — when the page is served
-by `opencode-artifacts serve` — POSTs the full answers map to `/__state/<slug>` (stored at
-`.state/<slug>.json`). The session reads answers back via the `artifact_state` plugin tool or
-`opencode-artifacts state <slug>`. This is the local analog of Claude Code's workshop
-`read_decisions` loop.
-
-### ```table — interactive data table (added v0.13)
-```json
-{ "caption": "npm ls --omit=dev", "columns": [{ "key": "name", "label": "Package" }, { "key": "deps", "label": "Deps", "type": "num" }], "rows": [ { "name": "vega", "deps": 45 } ] }
-```
-Filter input + click-to-sort headers + row count; `num` columns right-align, format with
-thousands separators, and sort by raw value. Row markup is server-rendered; sorting/filtering
-is fixed BOOT JS — no payload duplication.
+Available fences: `stats`, `timeline`, `findings`, `compare`, `callout`, `progress`, `diff`,
+`copy`, `mermaid`, `decisions`, `table`; chart fences `vega-lite` / `vega` / `echarts`;
+interactive controls via vega-lite `params.bind` and echarts `dataZoom` (verified live in
+browser QA); free-form interactivity stays in raw-HTML mode (`format: "html"`).
 
 ### Data honesty rules (from Claude Code's dashboard/dataviz skills)
 
@@ -135,19 +65,19 @@ is fixed BOOT JS — no payload duplication.
 - Never invent values, dates, or a time axis for data that has none; a section without real
   data is removed, not filled.
 
-### Provenance (added v0.13)
+### Provenance
 
 Frontmatter `source:` lands in the page footer as `Data: <source>` — every data page names
 where its numbers came from and when they were captured.
 
-### Stale-version guard (added v0.5)
+### Stale-version guard
 Every publish records a 12-char content hash in the manifest and returns it. Callers pass it
 back as `expectedHash`; a mismatch throws `StaleArtifactError` and nothing is written. The
 plugin wraps refusals with the current page content (head + body, 16 KB cap) so the session
 can merge edits and republish without a separate read — the autoread-recovery pattern from
 Claude Code's stale guard.
 
-### Themes (added v0.11)
+### Themes
 Frontmatter `theme:` selects a curated variant appended after the base stylesheet so it wins
 in both color modes: `default` (gray-blue canvas, white cards), `report` (warm paper, serif
 display headings, terracotta accent), `ops` (dark-first, terminal green, mono headings),
@@ -188,5 +118,5 @@ header toggle cycles system → dark → light and persists to localStorage
 ## Acceptance
 
 - Each component renders from JSON, escapes text, and has a node:test case.
-- Five example pages under `examples/patterns/`: dashboard, incident, pr-walkthrough,
-  release-checklist, compare-layouts — each passing browser QA (screenshot).
+- Every example page under `examples/patterns/` passes browser QA with a screenshot archived
+  in `docs/evidence/patterns/`.

@@ -23,9 +23,10 @@ enforces the machine-checkable subset; CI runs it on every push.
 - Errors are typed (`ArtifactTooLargeError`, `StaleArtifactError`) and surfaced with
   actionable messages — what failed and what to do next.
 - Silent catch only where the operation is genuinely best-effort: client-side
-  `localStorage` persistence inside the artifact BOOT string, and tolerated remote
-  operations during deploy (pull-before-push, Pages-enable retry). Everything else must
-  propagate or be returned.
+  `localStorage` persistence inside the artifact BOOT string; tolerated remote operations
+  during deploy (pull-before-push, Pages-enable retry); and absent-or-unreadable *optional*
+  resources (config files, state stores, caches) that fall back to a documented default.
+  Everything else must propagate or be returned.
 - Substrate constraints of this environment: Node 24 type stripping runs the tests, so no
   constructor parameter properties; `.ts` import specifiers with
   `rewriteRelativeImportExtensions` so the same sources compile to `dist/`.
