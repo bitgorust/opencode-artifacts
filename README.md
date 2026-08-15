@@ -67,8 +67,9 @@ Add to your `opencode.json`:
 }
 ```
 
-OpenCode installs npm plugins (and their dependencies) automatically at startup. Non-registry
-specs work too — for a local checkout (after `npm install && npm run build`):
+OpenCode installs npm plugins (and their dependencies) automatically at startup — the
+registry path above is all a user needs. The `file:` spec is only for developing this plugin
+itself (point OpenCode at your checkout after `npm install && npm run build`):
 
 ```json
 {
