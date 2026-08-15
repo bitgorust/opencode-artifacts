@@ -2,17 +2,35 @@
 
 Full capability inventory with binary evidence: [`docs/claude-code-inventory.md`](claude-code-inventory.md).
 
-Baseline: official docs `https://code.claude.com/docs/en/artifacts` and the launch post
-`https://claude.com/blog/artifacts-in-claude-code` (retrieved 2026-08-14), plus the official
-viewer screenshot (`docs/references/claude-artifact-viewer.png`) and capability strings from
-the Claude Code 2.1.232 binary. Version-specific additions are tracked in git history.
+Normative baseline: the current official
+[Claude Code Artifacts documentation](https://code.claude.com/docs/en/artifacts), its
+[tools](https://code.claude.com/docs/en/tools-reference),
+[settings](https://code.claude.com/docs/en/settings),
+[environment](https://code.claude.com/docs/en/env-vars), and
+[availability](https://code.claude.com/docs/en/feature-availability) references, rechecked
+through the official documentation index on 2026-08-15. The
+[launch post](https://claude.com/blog/artifacts-in-claude-code) is historical context: its
+Team/Enterprise-only, no-public-sharing beta statements have been superseded by the current
+guide.
+The official viewer screenshot is retained at `docs/references/claude-artifact-viewer.png`.
+Binary-string research is supplemental and does not establish official behavior or parity.
+The target contract and honest release levels are in [`docs/product-spec.md`](product-spec.md)
+and [`docs/roadmap.md`](roadmap.md).
+
+Local reference evidence is explicit rather than inferred: OpenCode 1.18.18 loaded this
+checkout and registered all four tools, while a healthy native Claude Code 2.1.233 install
+was inspected without Claude credentials. See the
+[OpenCode host probe](evidence/opencode-host-verification.md) and
+[Claude Code host probe](evidence/claude-code-host-verification.md). Because Claude requires
+`/login` subscription authentication for Artifacts, its hosted publish/share/connector path
+was not exercised on this machine.
 
 ## Page quality
 
-Claude's page quality comes from a built-in design skill producing raw HTML. We reach the same
-visual language with a fixed renderer: card-based layout on a gray-blue canvas, metric stat
+Claude's page quality comes from a built-in design skill producing raw HTML. Our fixed
+renderer covers comparable structured-report patterns: card-based layout on a gray-blue canvas, metric stat
 cards with delta pills, tinted insight callouts, vertical timelines, severity-coded findings,
-annotated diffs, variant comparison cards, progress bars, and GitHub-style alerts. The five
+annotated diffs, variant comparison cards, progress bars, and GitHub-style alerts. The six
 canonical patterns from the official docs are reproduced in `examples/patterns/` and verified
 by browser QA with zero console errors — screenshots in `docs/evidence/patterns/`:
 
@@ -33,20 +51,23 @@ Only free-form per-page JS (e.g. drag-drop boards) stays in raw-HTML mode.
 | Capability | Claude Code | opencode-artifacts | Evidence |
 |---|---|---|---|
 | Single self-contained page (inline CSS/JS, no backend) | ✅ | ✅ | `test/render.test.ts`, `docs/evidence/artifact-page.png` |
-| Strict CSP, no external requests at view time | ✅ | ✅ (`connect-src 'none'` on disk) | render test "plain markdown artifact carries CSP" |
+| Strict CSP and bounded external access | ✅ Google Fonts plus declared connector calls are the documented exceptions | ✅ stricter offline file (`connect-src 'none'`); served bridges are explicit | render test "plain markdown artifact carries CSP" |
 | Size cap | ✅ 16 MiB | ✅ 15 MiB (configurable), hard error before write | render test "size cap throws" |
 | Markdown **and** raw HTML authoring | ✅ | ✅ (`format: markdown \| html`) | render test "renderRawHtml" |
 | Interactive charts | ✅ | ✅ vega-lite / vega / echarts, CSP-safe interpreter (`ast: true`, no `unsafe-eval`) | browser QA: both canvases mounted, 0 console errors |
 | Broken-chart resilience | not documented | ✅ inline error box, page still ships | `artifact-page.png` (red box), render test |
 | Title + emoji picked by the model | ✅ | ✅ + emoji as SVG favicon | `artifact-page.png` header |
-| Republish updates the same URL | ✅ | ✅ stable `<slug>.html` path; `serve` adds SSE live reload (open pages refresh on republish) | QA log: marker text appeared in an already-open page with no manual refresh |
-| Version history + restore | ✅ | ✅ `<slug>.vN.html` + `manifest.json` + `restore` command | `test/gallery.test.ts` |
+| Republish updates the same URL | ✅ | 🟡 stable `<slug>.html` path and local SSE; identity is title/slug-coupled and hosted open pages do not refresh live | local live-reload QA; product spec `LIFE-01`, `HOST-05` |
+| Version history + restore | ✅ every publish is a version | 🟡 numbered files and restore exist, but history is opt-in | `test/gallery.test.ts`; product spec `LIFE-02` |
 | Gallery of all artifacts | ✅ hosted on claude.ai | ✅ local `index.html`, regenerated on every publish | `docs/evidence/gallery.png` |
 | Permission prompt before publishing | ✅ | ✅ `ctx.ask({ permission: "artifact_publish", ... })` | `test/plugin.test.ts` |
 | Reopen latest artifact | ✅ `Ctrl+]` | ✅ `opencode-artifacts latest --open` | CLI smoke run |
-| Auto-open in browser | ✅ | ✅ `open: true` / `--open` | `src/open.ts` |
-| Share links (org / public) | ✅ hosted | ❌ needs hosted backend — roadmap `HostedPublisher` | — |
-| MCP connector live data at view time | ✅ | ❌ structural: requires a hosted viewer account model | — |
+| Auto-open in browser | ✅ by default, environment-configurable | 🟡 explicit `open: true` / `--open`, not the default | `src/open.ts` |
+| Share links (org / public) | ✅ private, org, editor, and public policies | 🟡 explicit public snapshots exist; Cloudflare Access is manual and there is no built-in audience/role/version policy | GitHub/Cloudflare publishers; roadmap phase 5 |
+| MCP connector live data at view time | ✅ viewer-scoped grants and identity | ❌ local fixed-command datasources are not hosted viewer-scoped MCP connectors | product spec `CONN-01`–`CONN-07` |
+| Organization controls and lifecycle API | ✅ independent artifact/connector/public-sharing controls, role scopes, retention, audit events, and Compliance API | ❌ no control plane or administrative API | product spec `HOST-07`, `HOST-09` |
+| Sandboxed hosted content boundary | ✅ viewer content is served from `*.claudeusercontent.com` | 🟡 strong CSP, but the Cloudflare page and control API currently share one Worker origin | product spec `HOST-10` |
+| Embedded local images/assets | ✅ data URIs under the single-page CSP | 🟡 data URIs can render, but there is no safe worktree asset ingestion pipeline | product spec `RENDER-04` |
 | Authoring token cost | high (model writes styled HTML) | lower by design (model writes Markdown + JSON specs; fixed renderer owns the HTML) | spec §Agreed Architecture |
 
 ## Verified QA log (2026-08-14)
@@ -66,15 +87,16 @@ Only free-form per-page JS (e.g. drag-drop boards) stays in raw-HTML mode.
 - `docs/evidence/artifact-page.png` — full artifact page (header, timeline table, both charts, error box, footer).
 - `docs/evidence/gallery.png` — auto-generated gallery.
 
-## Full capability inventory (from the 2.1.232 binary)
+## Supplemental capability inventory (non-normative binary research)
 
-The public docs lag the shipped feature set. Strings extracted from Claude Code 2.1.232
-(the tool registration, built-in skills, and consent machinery) reveal a second generation
-of capabilities beyond the documented ones:
+The current public docs cover the supported publishing, sharing, connector, and governance
+surface. A focused survey of the locally installed Claude Code 2.1.233 binary additionally
+exposes internal or gated action families. These names are useful research leads, not public
+contracts:
 
 | Capability | Evidence in binary | Our status |
 |---|---|---|
-| Publish / update same URL, versions, gallery, share menu, permission prompt, emoji favicon, auto-open, live MCP connectors at view time | public docs + tool strings | ✅ at parity locally; public sharing links via GitHub Pages (v0.7); authenticated hosting via Cloudflare Worker + KV + Access (deploy-verified, see `docs/hosted-cloudflare.md`); viewer-identity connectors stay hosted-only |
+| Publish / update same URL, versions, gallery, share menu, permission prompt, emoji favicon, auto-open, live MCP connectors at view time | public docs + tool strings | 🟡 local publishing/gallery are functional; immutable-by-default versions, audience controls, hosted live updates, and viewer-identity connectors remain roadmap work |
 | **artifact-design skill** (mandatory design pass before every publish) | `artifact-design` SKILL_MD | ✅ adapted into `skills/artifact-pages` |
 | **Mermaid diagrams** | `artifact-diagramming` skill, mermaid composer | ✅ `mermaid` fence (v0.5), runtime inlined on use |
 | **Plan artifacts** (offer to review the implementation plan as a page) | `publishPlanArtifact`, plan consent ask | ✅ publish the plan md — `examples/patterns/plan.md` (v0.5) |
@@ -83,20 +105,18 @@ of capabilities beyond the documented ones:
 | **Shared per-artifact database** (`read_db`/`write_db`, collections/docs/queries; state shared across viewers) | db action strings | 🟡 local collections DB (v0.6): `/__db` endpoints + `opencodeArtifacts.db` bridge; single-user |
 | **Runtime capabilities** (`window.claude.*`: live data, shared state, file downloads, self-update; declared per page, roster-gated) | `artifact-capabilities` skill, capabilities prompt | 🟡 live-data bridge (v0.6): publish-registered datasources polled via `opencodeArtifacts.data`; no downloads/self-update |
 | **watch/unwatch/status** (session gets woken when another session republishes or comments) | webhook triggers, watch actions | 🟡 viewer-side analog exists (`serve` SSE); session-side wake is structural |
-| **Multi-file publish** (`files` map: separate CSS/JS/data/images) | `files` prompt paragraph | ➖ skipped by design — we inline everything into one file |
+| **Multi-file publish experiments** (`files` map: separate CSS/JS/data/images) | rollout/gating strings | ➖ skipped by design — our portable artifact stays one file |
 | **Stale-version guard** (refuse to publish over a version this session hasn't seen) | `stale_version_guard` errors | ✅ content-hash `expectedHash` (v0.5) |
-| **Sensitive-delta guard** (block live-shared republishes that expose new sensitive content) | permission analysis strings | ✅ local version (v0.6): credential/PII regex scan blocks publish unless `force` |
+| **Sensitive-delta guard** (block live-shared republishes that expose new sensitive content) | permission analysis strings | 🟡 credential-pattern scan blocks publish/deploy unless `force`; it is not semantic PII analysis or a sensitive delta review |
 | **live-edit action** | "not available in this build" | ➖ gated upstream too |
 
-## Best path per gap
+## Gap closure
 
-1. **Mermaid fence** — same pattern as vega: inline `mermaid.min.js` only when used, render at view time. Low effort, high value. *Next up.*
-2. **Plan artifacts** — document the pattern + add an `examples/patterns/plan.md`; one line in the skill. Docs-level effort.
-3. **Stale-version guard** — store a content hash in `manifest.json` per publish; `artifact_publish` compares and warns/refuses when overwriting unseen content. Small, self-contained.
-4. **Workshop + comments + shared DB** — all three reduce to one mechanism: the `serve` process gains a per-artifact JSON store (write via POST, read via a declared bridge script injected into served pages) and the plugin gains read-back actions. Local single-user versions of comments/DB are of limited value, but the **workshop decide-and-revise loop is genuinely useful locally** (reader answers on the page, session reads decisions back) — build that one first.
-5. **Runtime capabilities / live data** — a declared bridge (`window.opencodeArtifacts.*`) injected by `serve`, proxying allow-listed reads (e.g. MCP tool calls). Medium-high effort; only worth it after workshop proves the bridge pattern.
-6. **Org sharing, multi-viewer state, comment identity, audit** — structural: require `HostedPublisher` + accounts. Not locally replicable.
-7. **Sensitive-delta guard** — an OpenCode permission hook that diffs republished content against the previous version and escalates on new secrets/PII patterns; regex-level first, LLM-review optional.
+The previous tactical list in this file became stale as features shipped. The active,
+dependency-ordered plan is now [`docs/roadmap.md`](roadmap.md). Its first priorities are
+durable identity and unconditional revisions, cross-process/crash-safe transactions, embedded
+local assets, and packed-package OpenCode compatibility tests. Authenticated sharing and
+viewer-scoped connectors follow only after those foundations pass.
 
 ## Public artifact quality survey (2026-08-15)
 
@@ -115,16 +135,21 @@ limit). Reachable real samples reviewed in a browser:
   buttons. Visually indistinguishable from our `default` theme. The glamour samples are
   curated; the median output looks like this.
 
-Same-task quality verdict:
+Subjective quality assessment from those reachable public samples (not an authenticated
+same-prompt benchmark):
 
 | Task class | Same quality as Claude? |
 |---|---|
-| Dashboards, reports, incidents, timelines, checklists, comparisons, data tables | Yes — with better consistency (fixed renderer floor), see `docs/evidence/patterns/` |
+| Dashboards, reports, incidents, timelines, checklists, comparisons, data tables | Comparable structured coverage with a consistent renderer floor; see `docs/evidence/patterns/` |
 | Explainers with bespoke SVG diagrams | Partially — mermaid yes; hand-tuned SVG needs `format: "html"` |
 | Interactive playgrounds (canvas sims, 3D, pyodide tools, single-purpose editors) | Only via raw-HTML mode; quality then tracks the model, same as theirs |
 | Editorial bespoke pages (claudeatplay class) | Only via raw-HTML mode; our named themes cover part of the intent |
 
-## Remaining gaps (structural, not quality)
-Org/public **sharing links** and **view-time MCP connectors** require hosted infrastructure
-(accounts, org auth, retention, compliance). The `Publisher` interface already isolates that
-work behind `HostedPublisher`; everything user-visible on a single machine is at parity.
+## Remaining gaps
+
+The core page renderer covers the main official artifact patterns, but product parity is not
+complete. Identity is slug-coupled, versions are opt-in, cross-process publication is not yet
+transactional, local assets are not ingested, authenticated sharing is manually assembled,
+hosted pages do not receive live head updates, and viewer-scoped MCP connectors plus
+governance do not exist. These are explicit requirements and gates in the product spec, not
+features implied by the current public-hosting adapters.

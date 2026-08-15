@@ -1,7 +1,11 @@
 # OpenCode Artifacts — Design Spec
 
 Date: 2026-08-14
-Status: Approved (user confirmed direction, requested immediate implementation + open source)
+Status: Historical initial design. Superseded by
+[`docs/product-spec.md`](../../product-spec.md) and [`docs/roadmap.md`](../../roadmap.md).
+
+This file records the original implementation scope. Its future/non-goal statements describe
+that first release and are not the current product contract.
 
 ## Goal
 

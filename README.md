@@ -32,6 +32,7 @@ output stays diff-friendly and cheap in tokens.
 - [Sharing and hosting](#sharing-and-hosting)
 - [Limitations](#limitations)
 - [Development](#development)
+- [Product specification](#product-specification)
 - [Roadmap](#roadmap)
 - [Parity with Claude Code Artifacts](#parity-with-claude-code-artifacts)
 - [Contributing](#contributing)
@@ -52,13 +53,15 @@ output stays diff-friendly and cheap in tokens.
 ## Install
 
 ```bash
-npm install opencode-artifacts
+opencode plugin opencode-artifacts
 ```
 
 Published at [npmjs.com/package/opencode-artifacts](https://www.npmjs.com/package/opencode-artifacts)
 with provenance attestations (trusted publishing, see `docs/release.md`).
 
-Add to your `opencode.json`:
+The official OpenCode plugin command installs the package and updates the project config.
+Alternatively, add the npm package directly to `opencode.json`; OpenCode installs npm plugin
+dependencies automatically at startup:
 
 ```json
 {
@@ -67,9 +70,8 @@ Add to your `opencode.json`:
 }
 ```
 
-OpenCode installs npm plugins (and their dependencies) automatically at startup — the
-registry path above is all a user needs. The `file:` spec is only for developing this plugin
-itself (point OpenCode at your checkout after `npm install && npm run build`):
+The `file:` spec is only for developing this plugin itself (point OpenCode at your checkout
+after `npm install && npm run build`):
 
 ```json
 {
@@ -167,6 +169,11 @@ browser-verified screenshots in [`docs/evidence/patterns/`](docs/evidence/patter
 - Local-first: without a deploy target, artifacts are files on your machine — no share links
 - Viewer-identity MCP data calls (Claude Code's connector model) need hosted infrastructure we don't run; the datasource bridge executes local shell commands only, and only under `serve`
 - Raw per-page JavaScript (drag-drop boards etc.) is only possible in `format: "html"` mode, which opts out of the fixed renderer's guarantees
+- GitHub Pages and an unprotected Workers URL are public snapshots, not Claude-style private
+  sharing. Cloudflare Access is currently a manual deployment prerequisite rather than a
+  verified access policy managed by this package.
+- Hosted pages do not yet push new revisions into already-open browsers, and hosted MCP calls
+  do not run through each viewer's identity.
 
 ## Development
 
@@ -176,15 +183,30 @@ npm test        # node --test, no framework
 npm run build   # tsc -> dist/
 ```
 
+## Product specification
+
+The authoritative target, boundaries, security model, and definition of complete are in
+[`docs/product-spec.md`](docs/product-spec.md). It is grounded in current official Claude Code
+Artifacts and OpenCode documentation and distinguishes portable pages, public snapshots,
+authenticated collaboration, and viewer-scoped connectors.
+
 ## Roadmap
 
-- Comment authorship via Cloudflare Access identity headers
-- Syntax highlighting, PDF export
+The gap-driven phased plan is [`docs/roadmap.md`](docs/roadmap.md). Immediate priorities are
+durable artifact identity and unconditional immutable revisions, cross-process/crash-safe
+publishing, embedded local assets, and packed-package compatibility tests against OpenCode.
+Authenticated sharing and viewer-scoped connectors are later phases with explicit identity,
+consistency, permission, and audit gates.
 
 ## Parity with Claude Code Artifacts
 
-Full capability inventory (extracted from the Claude Code 2.1.232 binary), feature matrix,
-and verified QA log: [`docs/claude-code-comparison.md`](docs/claude-code-comparison.md).
+The official-doc baseline, implementation comparison, and verified QA log are in
+[`docs/claude-code-comparison.md`](docs/claude-code-comparison.md). Reverse-engineered
+inventory is supplemental research, not the source of parity claims.
+[Clean OpenCode host evidence](docs/evidence/opencode-host-verification.md) covers the current
+CLI and previously published 0.14.3 package; the
+[Claude Code host evidence](docs/evidence/claude-code-host-verification.md) covers a healthy
+local 2.1.233 install and its unauthenticated service boundary.
 
 ## Contributing
 

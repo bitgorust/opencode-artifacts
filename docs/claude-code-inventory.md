@@ -1,8 +1,31 @@
-# Claude Code Artifacts — full inventory (from binary 2.1.232 + docs)
+# Claude Code Artifacts — supplemental inventory (Claude Code 2.1.233 + docs)
 
-Distilled from: the official docs (`code.claude.com/docs/en/artifacts`), the launch post,
-and string extraction from the Claude Code 2.1.232 binary (skill registry, tool
-registration, consent machinery). Purpose: the reference inventory for our parity work.
+Status: Supplemental research, not a normative parity source. Current public behavior is
+grounded in the official docs and specified in [`docs/product-spec.md`](product-spec.md).
+Undocumented binary strings may describe gated, experimental, or removed behavior.
+
+Distilled from the current official Artifact guide and linked references, the historical
+launch post, and a focused string survey of the locally installed Claude Code 2.1.233 binary
+(skill registry, tool registration, and consent machinery). Installation, source coverage,
+and authentication limits are recorded in
+[`docs/evidence/claude-code-host-verification.md`](evidence/claude-code-host-verification.md).
+
+The official contract and binary observations are deliberately separated below. The local
+host was not signed in, so no claude.ai publish, share, connector, or administration flow was
+executed.
+
+## Confirmed official surface
+
+- A permissioned `Artifact` tool publishes `.html`, `.htm`, or `.md` as one live page at a
+  private claude.ai URL; every publish is a version and open viewers update in place.
+- Sharing supports public links and, on Team/Enterprise, organization viewers and editors.
+  Public availability and administration depend on plan and organization policy.
+- A declared claude.ai MCP connector runs through each viewer's connection and approval.
+  Connector-backed artifacts cannot be public, and local MCP servers are capture-time only.
+- Pages have no application backend, use a strict CSP, and are limited to 16 MiB rendered.
+- Users can disable the tool through settings, environment, or permission rules. Organization
+  controls cover enablement, connectors, public sharing, role scopes, retention, audit, and
+  Compliance API lifecycle operations.
 
 ## Skill fleet
 
@@ -11,7 +34,6 @@ registration, consent machinery). Purpose: the reference inventory for our parit
 | `artifact-design` | design fundamentals, anti-cliché list, naming rules | mandatory before writing any artifact |
 | `artifact-capabilities` | `window.claude.*` runtime roster | gate: must load before declaring capabilities |
 | `artifact-diagramming` | diagram craft, inline SVG, mermaid | when drawing |
-| `artifact-pr-review` | PR review pages | when reviewing |
 | `artifact-pr-review` | PR review pages | when reviewing |
 | `workshop` | decide-and-revise loop pages | when workshopping |
 | `artifact-dashboard` | KPI tiles + primary chart + breakdown table, slot template | dashboards |
@@ -38,12 +60,14 @@ our palettes are fixed token sets, so there is nothing to validate.
 Plus: plan-artifact flow (offer to review a plan as a page) and a reusable-component skill
 (first entry: the workshop decision component).
 
-## Tool surface
+## Supplemental binary tool surface
 
-One `Artifact` tool, ~12 actions: publish, live-edit (gated), list, read, watch, unwatch,
-status, comments, resolve, read_page_data, read_decisions, read_db, write_db.
+The single public `Artifact` tool contains internal action names for publish, live-edit
+(gated), list, read, watch, unwatch, status, comments, resolve, page data, decisions, and a
+small database. Their presence is not evidence that every action is enabled or supported for
+every account.
 
-## Feature families
+## Supplemental feature families
 
 - Publishing: same-URL redeploy by file path, versions, restore, share menu with version
   picker, gallery, description subtitle, emoji favicon, title scan (first 8KB), auto-open,

@@ -24,12 +24,25 @@ org-grade identity in front of the whole site.
    opencode-artifacts deploy --target cloudflare --name my-artifacts
    ```
 
-   This creates the `ARTIFACTS_KV` namespace (the id is cached in the staging dir), bundles
-   the worker, uploads your gallery, and prints the `workers.dev` URL. Subsequent publishes
+   This creates a worker-scoped `ARTIFACTS_KV_<worker-name>` namespace (the id is cached in
+   the staging dir), bundles the worker, uploads your gallery, and prints the `workers.dev`
+   URL. Subsequent publishes
    from OpenCode: `artifact_publish` with `deploy: true, target: "cloudflare",
    workerName: "my-artifacts"`.
 
+   Published packages through 0.14.3 used one account-wide namespace named `ARTIFACTS_KV`.
+   Existing Workers continue to serve their static pages and remain bound to that namespace
+   until redeployed. The next release creates a worker-scoped namespace instead; it does not
+   automatically copy old decisions, comments, or mini-DB documents. Export or copy any state
+   you need before redeploying an older Worker. Static artifact HTML and the local manifest
+   format are unchanged.
+
 ## Add identity (Cloudflare Access, free ≤ 50 users)
+
+This is currently a manual operator step. Until Access is configured and verified, the
+Workers URL is public; the package does not yet provide Claude-style private-by-default
+sharing, roles, or revocation. See the authenticated-hosting phase in
+[`docs/roadmap.md`](roadmap.md).
 
 1. Cloudflare dashboard → Zero Trust → Access → Applications → Add → Self-hosted.
 2. Point it at `my-artifacts.<your-subdomain>.workers.dev` (or your custom route).
@@ -57,6 +70,7 @@ org-grade identity in front of the whole site.
   it `run_worker_first` is ignored), `run_worker_first = true` (without it assets bypass the
   worker and never get the bridge injected), `html_handling = "none"` (without it `.html` URLs
   redirect-strip and change the slug the bridge derives).
-- KV is eventually consistent (edge-cached up to 60s); fine for comments/decisions, do not
-  use it for counters that need strictness.
+- KV is eventually consistent (edge-cached up to 60s). The current implementation is useful
+  for low-contention annotations but does not meet the product spec's concurrent-write gate;
+  do not use it for counters or collaborative state that must not lose updates.
 - Free-tier write limits make the mini-DB suitable for annotations, not telemetry.
