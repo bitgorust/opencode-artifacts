@@ -25,6 +25,10 @@ function cfStagingDir(workerName: string): string {
   return join(homedir(), ".cache", "opencode-artifacts", "cloudflare", workerName);
 }
 
+function workRoot(ctx: { directory: string; worktree: string }): string {
+  return ctx.worktree === "/" ? ctx.directory : ctx.worktree;
+}
+
 const PROACTIVE_FALLBACK = `## Artifact pages
 You have the artifact_publish tool (opencode-artifacts). A finished deliverable with an
 audience — a report, a plan others will follow, a reference document — is not fully delivered
@@ -138,10 +142,10 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
               metadata: { title, slug },
             });
 
-            const localDir = join(ctx.worktree, ".opencode", "artifacts");
+            const localDir = join(workRoot(ctx), ".opencode", "artifacts");
             const publisher = await (async () => {
               if (!args.deploy) return new FilePublisher(localDir);
-              const config = await loadConfig(ctx.worktree);
+              const config = await loadConfig(workRoot(ctx));
               const resolved = resolveDeploy(
                 { repo: args.repo, target: args.target, workerName: args.workerName },
                 config,
@@ -176,7 +180,7 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             });
             if (args.open) openFile(result.path);
             if (args.dataSources && args.dataSources.length > 0) {
-              const registryDir = join(ctx.worktree, ".opencode", "artifacts", ".datasources");
+              const registryDir = join(workRoot(ctx), ".opencode", "artifacts", ".datasources");
               await mkdir(registryDir, { recursive: true });
               await writeFile(
                 join(registryDir, `${slug}.json`),
@@ -200,7 +204,7 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
               return `Artifact too large: ${err.message}`;
             }
             if (err instanceof StaleArtifactError) {
-              const currentPath = join(ctx.worktree, ".opencode", "artifacts", `${slug}.html`);
+              const currentPath = join(workRoot(ctx), ".opencode", "artifacts", `${slug}.html`);
               let current = "";
               try {
                 current = await readFile(currentPath, "utf8");
@@ -245,7 +249,7 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             .describe("Equality filter for list, as field:value"),
         },
         async execute(args, ctx) {
-          const root = join(ctx.worktree, ".opencode", "artifacts");
+          const root = join(workRoot(ctx), ".opencode", "artifacts");
           const store = await readCollection(root, args.slug, args.collection);
           switch (args.op) {
             case "get": {
@@ -295,7 +299,7 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
         },
         async execute(args, ctx) {
           const statePath = join(
-            ctx.worktree,
+            workRoot(ctx),
             ".opencode",
             "artifacts",
             ".state",
@@ -324,7 +328,7 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
         },
         async execute(args, ctx) {
           const threadsPath = join(
-            ctx.worktree,
+            workRoot(ctx),
             ".opencode",
             "artifacts",
             ".state",

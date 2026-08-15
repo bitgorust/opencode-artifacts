@@ -133,6 +133,28 @@ test("stale conflict returns the live content for immediate merge", async () => 
   });
 });
 
+test("artifact_publish falls back to directory when worktree is /", async () => {
+  const hooks = await ArtifactsPlugin({} as unknown as PluginInput);
+  const publish = hooks.tool?.artifact_publish;
+  assert.ok(publish);
+
+  await withWorktree(async (dir) => {
+    const ctx: ToolContext = {
+      sessionID: "s1",
+      messageID: "m1",
+      agent: "test",
+      directory: dir,
+      worktree: "/",
+      abort: new AbortController().signal,
+      metadata: () => {},
+      ask: async () => {},
+    };
+    const result = String(await publish.execute({ markdown: "# root probe\n" }, ctx));
+    assert.match(result, /Artifact published to/);
+    assert.match(result, new RegExp(dir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  });
+});
+
 test("artifact_db reads and writes collection documents", async () => {
   const hooks = await ArtifactsPlugin({} as unknown as PluginInput);
   const db = hooks.tool?.artifact_db;
