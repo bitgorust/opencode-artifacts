@@ -40,6 +40,7 @@
     "check": "node scripts/check-repo.ts",
     "check:links": "node scripts/check-links.ts",
     "check:governance": "node scripts/governance-policy.ts",
+    "check:licenses": "node scripts/release-integrity.ts licenses package-lock.json",
     "study": "node scripts/journey-study.ts",
     "spec": "node scripts/spec-workflow.ts",
     "prepare": "git config core.hooksPath .githooks || true",

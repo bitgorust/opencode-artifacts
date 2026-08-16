@@ -80,7 +80,16 @@ BSD-2-Clause 2; Python-2.0 1; Unlicense 1;
 (MPL-2.0 OR Apache-2.0) 1; (AFL-2.1 OR BSD-3-Clause) 1; missing 1
 ```
 
-`node_modules/khroma` is the missing-license entry. Until its package metadata/redistribution
-authority and the alternative-license selections are reviewed and recorded, the license gate
-fails. The repository source is MIT; full documentation/example/asset/reference attribution
-still requires release-level inspection.
+`node_modules/khroma` is the missing-license entry. `node_modules/dompurify` requires selecting
+MPL-2.0 or Apache-2.0, and `node_modules/json-schema` requires selecting AFL-2.1 or BSD-3-Clause.
+Until those dispositions are reviewed and recorded, the license gate fails. The repository
+source is MIT; full documentation/example/asset/reference attribution still requires release-
+level inspection.
+
+## Release automation status
+
+The tag workflow now runs these four gates before publication, hashes their files, packs once,
+publishes that exact tarball, and compares registry integrity/shasum while requiring signature
+and provenance metadata. The dependency-free verifier has deterministic pass/failure tests.
+Because the current audit and license gates fail, a tag workflow would stop before packaging
+or publication. No tag, registry write, or provider-setting change was performed.

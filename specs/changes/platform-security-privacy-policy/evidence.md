@@ -97,19 +97,23 @@ unverified results keep the packet open and block the Phase 0 gate.
 - Verification: npm 10 generated CycloneDX and exact tarball digests were inspected; current
   npm verified 220 signatures and 22 attestations, while audit found 8 vulnerabilities.
   Published 0.14.3 provenance was verified for its own tag/commit. Trusted-publisher
-  configuration, final-byte binding and future-candidate provenance remain unverified.
+  configuration and future-candidate provenance remain unverified. The tag workflow now
+  fails closed on all four prepublish outputs, publishes one coordinated tarball, and verifies
+  registry bytes/signature/provenance after publish.
 - Result: fail for production readiness.
 - Evidence: [@manual](docs/evidence/governance/supply-chain-2026-08-16.md),
-  [@manual](docs/evidence/governance/provider-status-2026-08-16.md)
+  [@manual](docs/evidence/governance/provider-status-2026-08-16.md),
+  [@test](test/release-integrity.test.ts)
 
 ## Requirement: DIST-05
 - Validation: license, vulnerability, network/CSP, weight, owner and removal rules were
   approved.
 - Verification: the lockfile inventory has one missing license entry and `npm audit` reports
-  seven high and one moderate finding; complete runtime disposition is absent.
+  seven high and one moderate finding; two compound-license branches also lack explicit
+  selection, and complete runtime disposition is absent.
 - Result: fail for production readiness.
 - Evidence: [@manual](docs/evidence/governance/supply-chain-2026-08-16.md),
-  [@test](test/render.test.ts)
+  [@test](test/release-integrity.test.ts), [@test](test/render.test.ts)
 
 ## Requirement: DIST-06
 - Validation: the current-minor window and one-supported-release notice/active-exploit

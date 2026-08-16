@@ -77,6 +77,11 @@ publicly verified, and that prior attestation cannot cover future candidate byte
 still needs its own post-publish verification. Generated SBOM/provenance describes composition/
 origin; it does not prove safety.
 
+The tag workflow generates CycloneDX, audit, signature and license outputs before packing,
+fails before publication when any gate fails, publishes the exact generated tarball, and then
+compares registry integrity/shasum while requiring a signature and provenance. No tag was
+created or release attempted by this policy change.
+
 Dependencies and vendored runtimes must remain lockfile-pinned and receive license,
 vulnerability, view-time network, CSP, browser-weight, update-owner, and removal-path review.
 Permissive licenses are the default. Reciprocal, source-available, unknown, or conflicting
