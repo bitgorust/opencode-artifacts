@@ -410,18 +410,23 @@ export function candidateProvenance(
 
 export function verifyPublishedDistribution(pack: unknown, dist: unknown): string[] {
   const errors: string[] = [];
-  if (!isRecord(pack) || !isRecord(dist)) return ["pack coordinate and registry dist must be objects"];
+  const registryDist = Array.isArray(dist) && dist.length === 1 && isRecord(dist[0])
+    ? dist[0]
+    : dist;
+  if (!isRecord(pack) || !isRecord(registryDist)) {
+    return ["pack coordinate and registry dist must be objects or a singleton registry array"];
+  }
   for (const field of ["integrity", "shasum"]) {
-    if (typeof pack[field] !== "string" || dist[field] !== pack[field]) {
+    if (typeof pack[field] !== "string" || registryDist[field] !== pack[field]) {
       errors.push(`registry ${field} does not match the packed bytes`);
     }
   }
-  const attestations = dist["attestations"];
+  const attestations = registryDist["attestations"];
   if (!isRecord(attestations) || !isRecord(attestations["provenance"]) ||
       typeof attestations["provenance"]["predicateType"] !== "string") {
     errors.push("registry provenance attestation is missing");
   }
-  if (!Array.isArray(dist["signatures"]) || dist["signatures"].length === 0) {
+  if (!Array.isArray(registryDist["signatures"]) || registryDist["signatures"].length === 0) {
     errors.push("registry package signature is missing");
   }
   return errors;

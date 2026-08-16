@@ -245,6 +245,14 @@ test("registry verification requires matching bytes, signature, and provenance",
     [],
   );
   assert.deepEqual(
+    verifyPublishedDistribution(pack, [{
+      ...pack,
+      attestations: { provenance: { predicateType: "https://slsa.dev/provenance/v1" } },
+      signatures: [{ keyid: "key", sig: "signature" }],
+    }]),
+    [],
+  );
+  assert.deepEqual(
     verifyPublishedDistribution(pack, { integrity: "wrong", shasum: "def", signatures: [] }),
     [
       "registry integrity does not match the packed bytes",
