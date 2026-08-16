@@ -15,3 +15,11 @@ The system shell is below the Node 24 support floor, the local Node 24 binary is
 lockfile install, and no target browser exists. This environment is useful for repository
 diagnostics only and is not a D-01 platform pass. The prior host probe records OpenCode plugin
 registration but did not record a complete exact OS/Node/browser journey.
+
+## Later exact-candidate checkpoint
+
+This file preserves the initial observation. A later approved run used a complete Node 24
+distribution, the exact CI tarball, real OpenCode, and an available cached Chromium build.
+See the [Ubuntu packed-candidate observation](ubuntu-packed-observation-2026-08-16.md). That
+stronger technical observation still does not promote the target cell because Firefox,
+latest-two-browser, and consented first-use evidence remain absent.

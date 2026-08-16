@@ -29,13 +29,13 @@
       "id": "observed-linux-opencode",
       "class": "tested",
       "status": "tested",
-      "os": "Linux x64 (distribution not recorded)",
-      "node": "not recorded by the host probe",
+      "os": "Ubuntu 24.04.4 LTS, Linux 6.8.0-106-generic, x86_64",
+      "node": "24.19.0",
       "opencode": "1.18.18",
-      "browser": "not exercised",
-      "scope": "Checkout and registry-package plugin registration only",
-      "testedAt": "2026-08-15",
-      "evidence": "docs/evidence/opencode-host-verification.md"
+      "browser": "Chrome for Testing 145.0.7632.6 only; Firefox and latest-two coverage absent",
+      "scope": "Exact CI tarball install, real plugin tool discovery, CLI render, offline file interaction, and package-tree removal; human first-use absent",
+      "testedAt": "2026-08-16",
+      "evidence": "docs/evidence/governance/ubuntu-packed-observation-2026-08-16.md"
     },
     {
       "id": "ubuntu-lts-desktop",

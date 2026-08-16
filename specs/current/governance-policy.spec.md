@@ -14,7 +14,9 @@
 - `COMPAT-01`: Node 24 is the support floor. Target coverage is Ubuntu 24.04 LTS, current and
   previous macOS, Windows 11 native/WSL, current and oldest-supported stable OpenCode 1.x,
   latest-two desktop Chromium/Firefox/Safari and mobile Android Chrome/iOS Safari where
-  available. There are zero supported complete cells; all target cells are unverified.
+  available. An exact Ubuntu/Node/OpenCode/single-Chromium packed-candidate observation is
+  tested but incomplete. There are zero supported complete cells; all target cells are
+  unverified.
 - `SEC-01`: current, partial, and planned trust boundaries have owners, threats, controls,
   tests, residual risk and review triggers. Planned identity/connectors do not become shipped.
 - `SEC-10`: private GitHub vulnerability reporting is disabled, so sensitive private intake

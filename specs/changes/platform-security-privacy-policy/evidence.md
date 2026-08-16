@@ -80,12 +80,13 @@ unverified results keep the packet open and block the Phase 0 gate.
 ## Requirement: COMPAT-01
 - Validation: Node 24, the target OS/browser envelope and exact-evidence promotion rule were
   approved.
-- Verification: OpenCode 1.18.18 has dated Linux registration evidence; the exact OS/Node/
-  browser journey was not recorded. Every target cell is unverified and there are zero
-  supported complete cells.
+- Verification: an exact Ubuntu 24.04.4/Node 24.19.0/OpenCode 1.18.18/Chromium technical run
+  covers the retained CI tarball, tool discovery, CLI render, offline interaction, and package
+  removal. It lacks Firefox, latest-two-browser, and consented first-use coverage. Every target
+  cell remains unverified and there are zero supported complete cells.
 - Result: fail for the target matrix.
 - Evidence: [@test](test/governance-policy.test.ts),
-  [@manual](docs/evidence/governance/local-environment-2026-08-16.md)
+  [@manual](docs/evidence/governance/ubuntu-packed-observation-2026-08-16.md)
 
 ## Requirement: DIST-03
 - Validation: capability-level, SemVer, notes/migration/limits and claim-narrowing rules were

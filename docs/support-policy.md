@@ -7,16 +7,16 @@ The machine-readable status record is [`governance-policy.json`](governance-poli
 
 ## Current support status
 
-There are currently **no fully supported platform/browser cells**. The exact stable OpenCode
-version in the dated host probe was tested for plugin registration on Linux x64, but that
-probe did not record the distribution,
-Node version, clean user journey, or browser scope required for support. CI separately runs
-repository checks on Node 24/Ubuntu. Those observations cannot be combined into one platform
-pass. The target matrix therefore remains unverified and blocks a production-readiness claim.
+There are currently **no fully supported platform/browser cells**. A dated Ubuntu observation
+installed an exact CI tarball, discovered all tools through real OpenCode, rendered and
+reopened an offline page in one Chromium build, and repeated the reopen after package-tree
+removal. It did not exercise Firefox, the latest two stable browser generations, or a
+consented first-time user following only the README. The target matrix therefore remains
+unverified and blocks a production-readiness claim.
 
 | Cell | Target | Current status | Evidence or missing scope |
 |---|---|---|---|
-| OpenCode host observation | Linux x64, exact version in dated probe | Tested, not supported | [Host probe](evidence/opencode-host-verification.md); distribution/Node/browser/journey absent |
+| Ubuntu technical observation | Ubuntu 24.04.4, Node 24.19.0, OpenCode 1.18.18, Chrome for Testing 145.0.7632.6 | Tested, not supported | [Exact packed observation](evidence/governance/ubuntu-packed-observation-2026-08-16.md); Firefox/latest-two/human first-use absent |
 | Ubuntu desktop | Ubuntu 24.04 LTS, Node 24, stable OpenCode 1.x, latest two Chromium/Firefox | Unverified | Exact combined run absent |
 | macOS desktop | Current and previous macOS, Node 24, stable OpenCode 1.x, latest two Safari/Chromium/Firefox | Unverified | Machines/runs absent |
 | Windows desktop | Windows 11 native and WSL 2, Node 24, stable OpenCode 1.x, latest two Chromium/Firefox | Unverified | Machines/runs absent |
