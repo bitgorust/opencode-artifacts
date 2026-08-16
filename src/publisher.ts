@@ -1,7 +1,12 @@
-import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { renderGallery } from "./gallery.ts";
+import {
+  recoverFileTransactions,
+  runFileTransaction,
+  type FileTransactionContext,
+} from "./file-transaction.ts";
 import {
   ArtifactTooLargeError,
   DEFAULT_MAX_BYTES,
@@ -69,24 +74,6 @@ export interface Publisher {
 
 const MANIFEST_FILE = "manifest.json";
 const GALLERY_FILE = "index.html";
-const directoryWrites = new Map<string, Promise<void>>();
-
-async function serializeDirectory<T>(dir: string, operation: () => Promise<T>): Promise<T> {
-  const key = resolve(dir);
-  const previous = directoryWrites.get(key) ?? Promise.resolve();
-  let release: () => void = () => {};
-  const current = new Promise<void>((done) => {
-    release = done;
-  });
-  directoryWrites.set(key, current);
-  await previous;
-  try {
-    return await operation();
-  } finally {
-    release();
-    if (directoryWrites.get(key) === current) directoryWrites.delete(key);
-  }
-}
 
 async function readManifest(dir: string): Promise<Manifest> {
   try {
@@ -118,11 +105,13 @@ export class FilePublisher implements Publisher {
   }
 
   async publish(input: PublishInput): Promise<PublishResult> {
-    return serializeDirectory(this.dir, () => this.publishSerialized(input));
+    return runFileTransaction(this.dir, (transaction) => this.publishSerialized(input, transaction));
   }
 
-  private async publishSerialized(input: PublishInput): Promise<PublishResult> {
-    await mkdir(this.dir, { recursive: true });
+  private async publishSerialized(
+    input: PublishInput,
+    transaction: FileTransactionContext,
+  ): Promise<PublishResult> {
     const manifest = await readManifest(this.dir);
     const existing = manifest.artifacts[input.slug];
     const now = new Date().toISOString();
@@ -175,30 +164,44 @@ export class FilePublisher implements Publisher {
       hash,
     };
 
-    const stable = join(this.dir, `${input.slug}.html`);
+    const stableName = `${input.slug}.html`;
+    const stable = join(this.dir, stableName);
+    const files = new Map<string, string | Uint8Array>();
     if (input.version) {
       if (existing && existing.versions.includes(existing.current)) {
-        const currentArchive = join(this.dir, `${input.slug}.v${existing.current}.html`);
-        try {
-          await access(currentArchive);
-        } catch (err) {
-          if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
-          await writeFile(currentArchive, await readFile(stable));
-        }
+        const currentArchiveName = `${input.slug}.v${existing.current}.html`;
+        const currentArchive = join(this.dir, currentArchiveName);
+        const alreadyArchived = await readFile(currentArchive).then(
+          () => true,
+          (error: unknown) => {
+            if (
+              typeof error === "object" &&
+              error !== null &&
+              "code" in error &&
+              error.code === "ENOENT"
+            ) {
+              return false;
+            }
+            throw error;
+          },
+        );
+        if (!alreadyArchived) files.set(currentArchiveName, await readFile(stable));
       }
-      await writeFile(join(this.dir, `${input.slug}.v${nextVersion}.html`), html, "utf8");
+      files.set(`${input.slug}.v${nextVersion}.html`, html);
     }
-    await writeFile(stable, html, "utf8");
+    files.set(stableName, html);
 
     manifest.artifacts[input.slug] = meta;
-    await writeFile(join(this.dir, MANIFEST_FILE), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+    files.set(MANIFEST_FILE, `${JSON.stringify(manifest, null, 2)}\n`);
     const gallery = join(this.dir, GALLERY_FILE);
-    await writeFile(gallery, renderGallery(manifest), "utf8");
+    files.set(GALLERY_FILE, renderGallery(manifest));
+    await transaction.commit(files);
 
     return { path: stable, version: nextVersion, gallery, hash };
   }
 
   async latest(): Promise<ArtifactMeta | undefined> {
+    await recoverFileTransactions(this.dir);
     const manifest = await readManifest(this.dir);
     return Object.values(manifest.artifacts).sort((a, b) =>
       b.updatedAt.localeCompare(a.updatedAt),
@@ -206,10 +209,16 @@ export class FilePublisher implements Publisher {
   }
 
   async restore(slug: string, version: number): Promise<PublishResult> {
-    return serializeDirectory(this.dir, () => this.restoreSerialized(slug, version));
+    return runFileTransaction(this.dir, (transaction) =>
+      this.restoreSerialized(slug, version, transaction),
+    );
   }
 
-  private async restoreSerialized(slug: string, version: number): Promise<PublishResult> {
+  private async restoreSerialized(
+    slug: string,
+    version: number,
+    transaction: FileTransactionContext,
+  ): Promise<PublishResult> {
     const manifest = await readManifest(this.dir);
     const meta = manifest.artifacts[slug];
     if (!meta) throw new Error(`unknown artifact: ${slug}`);
@@ -219,15 +228,19 @@ export class FilePublisher implements Publisher {
 
     const stable = join(this.dir, `${slug}.html`);
     const content = await readFile(join(this.dir, `${slug}.v${version}.html`), "utf8");
-    await writeFile(stable, content, "utf8");
 
     meta.current = version;
     meta.updatedAt = new Date().toISOString();
     meta.hash = contentHash(content);
     manifest.artifacts[slug] = meta;
-    await writeFile(join(this.dir, MANIFEST_FILE), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
     const gallery = join(this.dir, GALLERY_FILE);
-    await writeFile(gallery, renderGallery(manifest), "utf8");
+    await transaction.commit(
+      new Map([
+        [`${slug}.html`, content],
+        [MANIFEST_FILE, `${JSON.stringify(manifest, null, 2)}\n`],
+        [GALLERY_FILE, renderGallery(manifest)],
+      ]),
+    );
 
     return { path: stable, version, gallery, hash: meta.hash };
   }

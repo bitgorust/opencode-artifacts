@@ -3,7 +3,7 @@
   "id": "artifact-publication-transaction",
   "title": "Make artifact publication crash-safe across processes",
   "lane": "high-risk",
-  "status": "approved",
+  "status": "implementing",
   "affectedRequirements": [
     "LIFE-04",
     "SEC-07",

@@ -1,11 +1,11 @@
 # Tasks: Make artifact publication crash-safe across processes
 
-- [ ] Confirm proposal validation and human approval.
-- [ ] Implement the bounded fenced inter-process lock and typed lock outcomes.
-- [ ] Implement same-filesystem staging, durable journal, verified backups, commit, recovery,
+- [x] Confirm proposal validation and human approval.
+- [x] Implement the bounded fenced inter-process lock and typed lock outcomes.
+- [x] Implement same-filesystem staging, durable journal, verified backups, commit, recovery,
   cleanup, and public-staging exclusions.
-- [ ] Route create, update, restore, and managed reads through recovery and the transaction.
-- [ ] Add deterministic fault injection and the bounded transaction state model.
+- [x] Route create, update, restore, and managed reads through recovery and the transaction.
+- [x] Add deterministic fault injection and the bounded transaction state model.
 - [ ] Add independent-process same-head/different-artifact races, stale takeover, retry, path,
   corruption, cancellation, and resource-limit tests.
 - [ ] Retain exact supported-filesystem results and explicit unavailable cells.
