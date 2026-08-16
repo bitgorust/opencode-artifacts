@@ -6,7 +6,7 @@ export const CHANGE_ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const REQUIREMENT_ID_RE = /^[A-Z][A-Z0-9]*-[0-9]{2,}$/;
 
 export type ChangeLane = "standard" | "high-risk";
-export type ChangeStatus = "draft" | "approved" | "implementing" | "verified" | "archived";
+export type ChangeStatus = "draft" | "approved" | "implementing" | "verified" | "withdrawn" | "archived";
 export type ValidationPhase = "structure" | "proposal" | "implementation" | "archive";
 
 export interface ChangeMetadata {
@@ -22,6 +22,11 @@ export interface ChangeMetadata {
     by: string;
     at: string;
   };
+  withdrawal: {
+    by: string;
+    at: string;
+    reason: string;
+  };
   createdAt: string;
   archivedAt: string | null;
 }
@@ -33,6 +38,7 @@ const VALID_STATUSES = new Set<ChangeStatus>([
   "approved",
   "implementing",
   "verified",
+  "withdrawn",
   "archived",
 ]);
 const VALID_PHASES = new Set<ValidationPhase>([
@@ -115,6 +121,31 @@ function parseMetadata(content: string, source: string): { metadata?: ChangeMeta
   } else if (typeof value["approval"]["by"] !== "string" || typeof value["approval"]["at"] !== "string") {
     errors.push(`${source} approval.by and approval.at must be strings`);
   }
+  let withdrawal = { by: "", at: "", reason: "" };
+  if (value["withdrawal"] !== undefined) {
+    if (!isRecord(value["withdrawal"])) {
+      errors.push(`${source} withdrawal must be an object`);
+    } else if (
+      typeof value["withdrawal"]["by"] !== "string" ||
+      typeof value["withdrawal"]["at"] !== "string" ||
+      typeof value["withdrawal"]["reason"] !== "string"
+    ) {
+      errors.push(`${source} withdrawal.by, withdrawal.at, and withdrawal.reason must be strings`);
+    } else {
+      withdrawal = {
+        by: value["withdrawal"]["by"],
+        at: value["withdrawal"]["at"],
+        reason: value["withdrawal"]["reason"],
+      };
+    }
+  }
+  if (value["status"] === "withdrawn") {
+    if (withdrawal.by.trim() === "") errors.push(`${source} withdrawn packet needs an actor`);
+    if (withdrawal.reason.trim() === "") errors.push(`${source} withdrawn packet needs a reason`);
+    if (Number.isNaN(Date.parse(withdrawal.at))) {
+      errors.push(`${source} withdrawn packet needs a valid withdrawal date or timestamp`);
+    }
+  }
   if (typeof value["createdAt"] !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value["createdAt"])) {
     errors.push(`${source} createdAt must use YYYY-MM-DD`);
   }
@@ -122,7 +153,7 @@ function parseMetadata(content: string, source: string): { metadata?: ChangeMeta
     errors.push(`${source} archivedAt must be null or YYYY-MM-DD`);
   }
   if (errors.length > 0) return { errors };
-  return { metadata: value as unknown as ChangeMetadata, errors };
+  return { metadata: { ...value, withdrawal } as unknown as ChangeMetadata, errors };
 }
 
 async function readPacketFile(directory: string, name: string, errors: string[]): Promise<string> {
@@ -183,7 +214,9 @@ async function validatePacket(
 
   if (metadata.id !== expectedId) errors.push(`change.json id ${metadata.id} does not match directory ${expectedId}`);
   if (archivedPacket) {
-    if (metadata.status !== "archived") errors.push("archived packet status must be archived");
+    if (metadata.status !== "archived" && metadata.status !== "withdrawn") {
+      errors.push("archived packet status must be archived or withdrawn");
+    }
     if (metadata.archivedAt === null) errors.push("archived packet archivedAt must be set");
   } else if (metadata.status === "archived") {
     errors.push("active packet status cannot be archived");
@@ -198,6 +231,13 @@ async function validatePacket(
     }
   }
   if (phase === "structure") return [...new Set(errors)];
+
+  if (phase === "archive" && metadata.status === "withdrawn") {
+    if (metadata.currentSpecsUpdated || metadata.currentSpecs.length > 0) {
+      errors.push("withdrawn packet cannot claim current-spec updates");
+    }
+    return [...new Set(errors)];
+  }
 
   if (metadata.title.trim() === "" || hasClarificationMarker(metadata.title)) {
     errors.push("change title must be resolved before proposal approval");
@@ -313,6 +353,7 @@ export async function scaffoldChange(
     currentSpecs: [],
     currentSpecsUpdated: false,
     approval: { by: "", at: "" },
+    withdrawal: { by: "", at: "", reason: "" },
     createdAt: today(now),
     archivedAt: null,
   };
@@ -343,9 +384,43 @@ export async function archiveChange(root: string, id: string, now = new Date()):
   const metadataPath = join(destination, "change.json");
   const parsed = parseMetadata(await readFile(metadataPath, "utf8"), relative(root, metadataPath));
   if (!parsed.metadata) throw new Error(parsed.errors.join("; "));
-  const metadata: ChangeMetadata = { ...parsed.metadata, status: "archived", archivedAt: today(now) };
+  const status: ChangeStatus = parsed.metadata.status === "withdrawn" ? "withdrawn" : "archived";
+  const metadata: ChangeMetadata = { ...parsed.metadata, status, archivedAt: today(now) };
   await writeFile(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
   return destination;
+}
+
+export async function withdrawChange(
+  root: string,
+  id: string,
+  by: string,
+  reason: string,
+  now = new Date(),
+): Promise<string> {
+  if (by.trim() === "") throw new Error("withdrawal actor must not be empty");
+  if (reason.trim() === "") throw new Error("withdrawal reason must not be empty");
+  const directory = changeDirectory(root, id);
+  const structureErrors = await validatePacket(root, directory, id, "structure");
+  if (structureErrors.length > 0) {
+    throw new Error(`change ${id} cannot be withdrawn:\n- ${structureErrors.join("\n- ")}`);
+  }
+  const metadataPath = join(directory, "change.json");
+  const parsed = parseMetadata(await readFile(metadataPath, "utf8"), relative(root, metadataPath));
+  if (!parsed.metadata) throw new Error(parsed.errors.join("; "));
+  if (parsed.metadata.status === "verified" || parsed.metadata.status === "archived") {
+    throw new Error(`change ${id} with status ${parsed.metadata.status} cannot be withdrawn`);
+  }
+  if (parsed.metadata.currentSpecsUpdated) {
+    throw new Error(`change ${id} claims current-spec updates and cannot be withdrawn`);
+  }
+  const metadata: ChangeMetadata = {
+    ...parsed.metadata,
+    status: "withdrawn",
+    currentSpecs: [],
+    withdrawal: { by: by.trim(), at: now.toISOString(), reason: reason.trim() },
+  };
+  await writeFile(metadataPath, `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
+  return archiveChange(root, id, now);
 }
 
 export async function validateSpecRepository(root: string): Promise<string[]> {

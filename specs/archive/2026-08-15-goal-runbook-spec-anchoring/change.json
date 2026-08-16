@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "goal-runbook-spec-anchoring",
+  "title": "Keep goal orchestration anchored to canonical specs",
+  "lane": "standard",
+  "status": "archived",
+  "affectedRequirements": [
+    "OUT-06",
+    "QUAL-01"
+  ],
+  "currentSpecs": [
+    "specs/current/spec-workflow.spec.md"
+  ],
+  "currentSpecsUpdated": true,
+  "approval": {
+    "by": "user",
+    "at": "2026-08-15"
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-15",
+  "archivedAt": "2026-08-15"
+}

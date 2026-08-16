@@ -9,6 +9,7 @@ import {
   scaffoldChange,
   validateChange,
   validateSpecRepository,
+  withdrawChange,
   type ChangeMetadata,
 } from "../scripts/spec-workflow-lib.ts";
 
@@ -42,6 +43,7 @@ test("scaffold creates lane-specific packets and rejects unsafe IDs", async () =
     const standardMetadata = JSON.parse(await readFile(join(standard, "change.json"), "utf8")) as ChangeMetadata;
     assert.equal(standardMetadata.createdAt, "2026-08-15");
     assert.equal(standardMetadata.status, "draft");
+    assert.deepEqual(standardMetadata.withdrawal, { by: "", at: "", reason: "" });
 
     const highRisk = await scaffoldChange(root, "atomic-publish", "high-risk", "Serialize publication", templatesRoot);
     assert.equal(existsSync(join(highRisk, "design.md")), true);
@@ -53,6 +55,81 @@ test("scaffold creates lane-specific packets and rejects unsafe IDs", async () =
       scaffoldChange(root, "clear-errors", "standard", "Duplicate", templatesRoot),
       /already exists/,
     );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("withdrawal retains rejected proposals without claiming delivered behavior", async () => {
+  const root = await temporaryRepository();
+  try {
+    const directory = await scaffoldChange(
+      root,
+      "rejected-direction",
+      "standard",
+      "Try a rejected direction",
+      templatesRoot,
+    );
+    await assert.rejects(
+      withdrawChange(root, "rejected-direction", "", "Not the right outcome"),
+      /actor must not be empty/,
+    );
+    await assert.rejects(
+      withdrawChange(root, "rejected-direction", "maintainer", ""),
+      /reason must not be empty/,
+    );
+
+    const destination = await withdrawChange(
+      root,
+      "rejected-direction",
+      "maintainer",
+      "Conflicts with the canonical requirement",
+      new Date("2026-08-17T10:30:00Z"),
+    );
+    assert.equal(existsSync(directory), false);
+    assert.equal(destination, join(root, "specs", "archive", "2026-08-17-rejected-direction"));
+    const metadata = JSON.parse(await readFile(join(destination, "change.json"), "utf8")) as ChangeMetadata;
+    assert.equal(metadata.status, "withdrawn");
+    assert.equal(metadata.archivedAt, "2026-08-17");
+    assert.deepEqual(metadata.currentSpecs, []);
+    assert.equal(metadata.currentSpecsUpdated, false);
+    assert.deepEqual(metadata.withdrawal, {
+      by: "maintainer",
+      at: "2026-08-17T10:30:00.000Z",
+      reason: "Conflicts with the canonical requirement",
+    });
+
+    const verified = await scaffoldChange(root, "verified-direction", "standard", "Verified", templatesRoot);
+    const verifiedMetadata = JSON.parse(await readFile(join(verified, "change.json"), "utf8")) as ChangeMetadata;
+    verifiedMetadata.status = "verified";
+    await writeFile(join(verified, "change.json"), `${JSON.stringify(verifiedMetadata, null, 2)}\n`, "utf8");
+    await assert.rejects(
+      withdrawChange(root, "verified-direction", "maintainer", "Too late"),
+      /with status verified cannot be withdrawn/,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("legacy schema-one packets without withdrawal metadata remain valid", async () => {
+  const root = await temporaryRepository();
+  try {
+    const directory = await scaffoldChange(root, "legacy-packet", "standard", "Legacy packet", templatesRoot);
+    const metadata = JSON.parse(await readFile(join(directory, "change.json"), "utf8")) as Record<string, unknown>;
+    delete metadata["withdrawal"];
+    await writeFile(join(directory, "change.json"), `${JSON.stringify(metadata, null, 2)}\n`, "utf8");
+    assert.deepEqual(await validateChange(root, "legacy-packet", "structure"), []);
+    const destination = await withdrawChange(
+      root,
+      "legacy-packet",
+      "maintainer",
+      "Superseded before implementation",
+      new Date("2026-08-18T00:00:00Z"),
+    );
+    const withdrawn = JSON.parse(await readFile(join(destination, "change.json"), "utf8")) as ChangeMetadata;
+    assert.equal(withdrawn.status, "withdrawn");
+    assert.equal(withdrawn.withdrawal.reason, "Superseded before implementation");
   } finally {
     await rm(root, { recursive: true, force: true });
   }

@@ -210,6 +210,9 @@ durable artifact identity and unconditional immutable revisions, cross-process/c
 publishing, embedded local assets, and packed-package compatibility tests against OpenCode.
 Authenticated sharing and viewer-scoped connectors are later phases with explicit identity,
 consistency, permission, and audit gates.
+For long-running execution, [`docs/goal-runbook.md`](docs/goal-runbook.md) provides the full
+ordered `/goal` sequence, copy-ready objectives, human/external prerequisites, packet
+decomposition, stopping conditions, and handoff to the next release level.
 
 ## Parity with Claude Code Artifacts
 

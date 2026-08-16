@@ -12,7 +12,8 @@ Every requirement is mapped in
 [`docs/requirements-traceability.md`](requirements-traceability.md); phase ranges below name
 the primary implementation work, while cross-cutting acceptance requirements apply wherever
 their condition exists. Standard and high-risk work is delivered through the approved
-[spec-anchored change workflow](../specs/README.md), not directly from roadmap prose.
+[spec-anchored change workflow](../specs/README.md), not directly from roadmap prose. The
+ordered, copy-ready Codex execution sequence is the [`/goal` runbook](goal-runbook.md).
 
 ## Planning model
 

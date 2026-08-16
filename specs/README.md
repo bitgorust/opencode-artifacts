@@ -33,6 +33,7 @@ npm run spec -- validate <change-id> --phase proposal
 npm run spec -- validate <change-id> --phase implementation
 npm run spec -- validate <change-id> --phase archive
 npm run spec -- archive <change-id>
+npm run spec -- withdraw <change-id> --by "<actor>" --reason "<reason>"
 ```
 
 Use a lowercase kebab-case change ID. A high-risk packet also contains `design.md`.
@@ -43,10 +44,16 @@ Use a lowercase kebab-case change ID. A high-risk packet also contains `design.m
 2. Fill proposal and delta scenarios. Keep unresolved decisions marked
    `[NEEDS CLARIFICATION]`.
 3. Run proposal validation and obtain human approval by editing `change.json`.
-4. Run implementation validation, then implement the approved tasks with tests.
+4. Run implementation validation, then implement the approved tasks with tests. If a draft,
+   approved, or implementing direction is abandoned before it updates current truth, withdraw
+   it with an actor and reason instead of labeling it verified.
 5. Add exact validation and verification evidence for every affected requirement.
 6. Update the affected current-spec files and list them in `change.json`.
 7. Set status to `verified`, check every task, validate the archive phase, and archive.
+
+A withdrawn packet is retained with status `withdrawn` and an archive date. It does not need
+completed deltas, tasks, evidence, or current-spec updates, and it never counts as delivered
+behavior. Verified packets cannot be withdrawn.
 
 If implementation evidence contradicts the packet, amend and reapprove the packet. Do not
 quietly change either the code or target to make the mismatch disappear.

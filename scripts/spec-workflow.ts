@@ -5,6 +5,7 @@ import {
   archiveChange,
   scaffoldChange,
   validateChange,
+  withdrawChange,
   type ChangeLane,
   type ValidationPhase,
 } from "./spec-workflow-lib.ts";
@@ -15,7 +16,8 @@ function usage(): never {
   console.error(`Usage:
   npm run spec -- new <change-id> --lane <standard|high-risk> [--title <title>]
   npm run spec -- validate <change-id> [--phase <structure|proposal|implementation|archive>]
-  npm run spec -- archive <change-id>`);
+  npm run spec -- archive <change-id>
+  npm run spec -- withdraw <change-id> --by <actor> --reason <reason>`);
   process.exit(2);
 }
 
@@ -55,6 +57,14 @@ async function main(): Promise<void> {
   if (command === "archive") {
     const directory = await archiveChange(root, id);
     console.log(`archived ${relative(root, directory)}`);
+    return;
+  }
+  if (command === "withdraw") {
+    const by = flag(args, "--by");
+    const reason = flag(args, "--reason");
+    if (!by || !reason) usage();
+    const directory = await withdrawChange(root, id, by, reason);
+    console.log(`withdrew and archived ${relative(root, directory)}`);
     return;
   }
   usage();

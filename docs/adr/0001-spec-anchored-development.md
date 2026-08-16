@@ -77,6 +77,10 @@ not allowed.
 6. **Update current truth and archive.** Update the affected `specs/current/` documents in the
    same change, mark tasks complete, set the packet to verified, validate it, and archive it.
 
+A proposal abandoned before it changes current truth is withdrawn with an actor, timestamp,
+and rationale and retained in the archive. Withdrawal never satisfies implementation,
+evidence, current-spec, or release gates; verified work cannot be relabeled withdrawn.
+
 Archived packets are decision history, not a second current specification. When history and
 the current spec disagree, the latest approved current spec governs.
 

@@ -29,7 +29,8 @@ fails if either side is missing.
   - `test/` — one file per unit, `node:test` + `assert/strict`.
   - `skills/artifact-pages/` — the agent skill (SKILL.md + reference/, progressive
     disclosure per docs/engineering-principles.md §11).
-  - `docs/` — spec, component reference, parity docs; `docs/evidence/` — QA screenshots.
+  - `docs/` — spec, component reference, parity docs; `docs/evidence/` — QA screenshots;
+    `docs/goal-runbook.md` — ordered long-running `/goal` execution sequence.
   - `specs/current/` — behavior known to ship; `specs/changes/` — active deltas;
     `specs/archive/` — verified decision history. See `specs/README.md`.
 - **Import style:** relative imports carry the `.ts` extension; tsc rewrites them on build.
@@ -66,3 +67,6 @@ fails if either side is missing.
   before human approval is recorded in `change.json`.
 - If evidence contradicts a packet, amend and reapprove it. Update the affected
   `specs/current/*.spec.md` in the same change, record exact evidence, then archive.
+- Withdraw an abandoned, undelivered packet with
+  `npm run spec -- withdraw <id> --by "<actor>" --reason "<reason>"`; never use withdrawal to
+  bypass verification after current truth changed.
