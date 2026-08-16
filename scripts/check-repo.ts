@@ -5,6 +5,7 @@ import { CHECKS, type Check } from "./checks.ts";
 import { validateRequirementsTraceability } from "./requirements-traceability.ts";
 import { validateLocalDocumentationLinks } from "./documentation-links.ts";
 import { validateSpecRepository } from "./spec-workflow-lib.ts";
+import { validateGovernanceRepository } from "./governance-policy.ts";
 
 const root = join(import.meta.dirname, "..");
 let failures = 0;
@@ -84,6 +85,11 @@ async function evaluate(check: Check): Promise<void> {
           .map((error) => `${error.sourcePath}:${error.line} ${error.target} [${error.reason}]`)
           .join("; "),
       );
+      return;
+    }
+    case "governance-policy": {
+      const errors = await validateGovernanceRepository(root);
+      report(errors.length === 0, check.id, errors.join("; "));
       return;
     }
     case "spec-workflow": {

@@ -16,6 +16,9 @@ The official viewer screenshot is retained at `docs/references/claude-artifact-v
 Binary-string research is supplemental and does not establish official behavior or parity.
 The target contract and honest release levels are in [`docs/product-spec.md`](product-spec.md)
 and [`docs/roadmap.md`](roadmap.md).
+Current [support](support-policy.md), [security](security.md), and
+[data-governance](data-governance.md) policies make the remaining platform, private-reporting,
+authenticated-lifecycle, and supply-chain evidence gaps explicit.
 
 Local reference evidence is explicit rather than inferred: OpenCode 1.18.18 loaded this
 checkout and registered all four tools, while a healthy native Claude Code 2.1.233 install

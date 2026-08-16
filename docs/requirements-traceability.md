@@ -71,11 +71,12 @@ results. A release checklist resolves each class to dated files and command outp
 | Browser and visual evidence | `docs/evidence/` |
 | Page-quality comparison | `docs/page-quality-benchmark.md`, dated `docs/evidence/page-quality/` reports |
 | OpenCode/Claude host probes | `docs/evidence/opencode-host-verification.md`, `docs/evidence/claude-code-host-verification.md` |
-| Threat model and security cases | planned `docs/threat-model.md`, security-focused tests |
+| Threat model and security cases | `docs/threat-model.md`, `docs/security.md`, `SECURITY.md`, security-focused tests |
 | Performance/capacity/cost | planned `docs/evidence/performance/` reports and reference-host cost model |
-| Privacy/data governance | planned data inventory, retention/deletion and public-abuse policies |
+| Privacy/data governance | `docs/data-governance.md`, `docs/governance-policy.json`, dated governance reports |
 | Operations | planned runbooks and dated restore/rollout/incident drills |
 | Release decision | `docs/release-evidence-template.md`; completed copies under `docs/evidence/releases/` |
+| Platform and supply-chain support | `docs/support-policy.md`, `docs/governance-policy.json`, dated `docs/evidence/governance/` reports |
 
 ## Change control
 

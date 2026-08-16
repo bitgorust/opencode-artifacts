@@ -3,7 +3,7 @@
   "id": "platform-security-privacy-policy",
   "title": "Publish platform, security, privacy, and release policy",
   "lane": "high-risk",
-  "status": "approved",
+  "status": "implementing",
   "affectedRequirements": [
     "SEC-01",
     "SEC-10",
@@ -24,7 +24,7 @@
   "currentSpecs": [
     "specs/current/governance-policy.spec.md"
   ],
-  "currentSpecsUpdated": false,
+  "currentSpecsUpdated": true,
   "approval": {
     "by": "bitgorust",
     "at": "2026-08-16T08:17:19Z"

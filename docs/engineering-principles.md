@@ -208,7 +208,9 @@ collectively exhausted by [`docs/product-spec.md`](product-spec.md), not repeate
   tarball. [check:pkg-metadata] [check:pkg-files-skills] [check:file-license]
 - Releases are built and tested from the exact packed bytes in clean supported hosts. They
   produce dependency/license/vulnerability evidence, SBOM, and provenance suitable for
-  consumer integrity verification.
+  consumer integrity verification. Platform, provider, privacy, and provenance claims may
+  pass only from exact dated evidence; absent or separately scoped observations stay
+  unverified. [check:governance-policy]
 - Dependencies default to zero additions. A dependency must justify capability, browser
   weight, CSP/network behavior, license, vulnerability surface, update ownership, and removal
   path. Conditional inlining is the exception that permits existing heavy visual runtimes.

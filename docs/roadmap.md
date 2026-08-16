@@ -56,11 +56,11 @@ Evidence from the repository and clean local host probes:
 | Authenticated team sharing | Missing | Cloudflare Access is a manual guide, not verified/configured product behavior; no roles, audience UI, or revocation model |
 | Hosted live updates | Missing | already-open hosted pages are not notified of a new head |
 | Viewer-scoped MCP connectors | Missing | local fixed-command datasource bridge is not a hosted per-viewer connector broker |
-| Governance | Missing | no retention policy, deletion lifecycle, compliance API, or artifact audit log |
+| Governance | Partial | Phase 0 security/data/support policies exist; authenticated lifecycle API, production evidence, and artifact audit log remain missing |
 | Packaged-host compatibility CI | Missing | unit plugin tests exist; the packed tarball is not loaded into a clean current OpenCode host in CI |
 | Product outcomes and usability evidence | Missing | target users and measurable journeys are now specified, but no journey study has been run |
-| Privacy/operations/performance governance | Missing | requirements and owners exist; inventories, runbooks, harnesses, SLO evidence, and cost models do not |
-| Supply-chain release evidence | Partial | lockfile and pack inspection exist; SBOM, provenance, license/vulnerability evidence, and support policy do not |
+| Privacy/operations/performance governance | Partial | privacy inventory/policy exists; operations runbooks, SLO evidence, performance harnesses, and cost models do not |
+| Supply-chain release evidence | Partial | support/release policy, lockfile and pack inspection exist; complete SBOM/license/vulnerability evidence and registry provenance verification remain open |
 
 “Shipped” means the current behavior exists; it does not waive any stronger acceptance rule in
 the product spec.
@@ -92,7 +92,7 @@ users, support envelope, data handling, or acceptance evidence cannot be named.
   behavior, proposed deltas, and validation/verification evidence.
 - [ ] Check in the create/revise/review/share journey corpus and run the first OUT-02/OUT-03
   study with consented representative users.
-- [ ] Publish the supported-platform matrix, threat model, data inventory, telemetry stance,
+- [x] Publish the supported-platform matrix, threat model, data inventory, telemetry stance,
   retention/deletion/public-abuse policies, vulnerability contact/response policy, and
   supported-version/deprecation policy.
 

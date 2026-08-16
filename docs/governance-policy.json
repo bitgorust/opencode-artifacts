@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": 1,
+  "reviewedAt": "2026-08-16",
+  "owners": {
+    "security": "Security maintainer",
+    "privacy": "Privacy maintainer",
+    "compatibility": "Compatibility maintainer",
+    "release": "Release maintainer"
+  },
+  "providerPrerequisites": [
+    {
+      "id": "github-private-vulnerability-reporting",
+      "status": "failed",
+      "checkedAt": "2026-08-16",
+      "evidence": "docs/evidence/governance/provider-status-2026-08-16.md",
+      "claim": "Private vulnerability reporting is disabled; sensitive report intake is unavailable."
+    },
+    {
+      "id": "npm-trusted-publishing",
+      "status": "unverified",
+      "checkedAt": "2026-08-16",
+      "evidence": "docs/evidence/governance/provider-status-2026-08-16.md",
+      "claim": "Published 0.14.3 has registry provenance bound to its GitHub Actions tag/commit; trusted-publisher configuration and provenance for this unreleased candidate remain unverified."
+    }
+  ],
+  "supportCells": [
+    {
+      "id": "observed-linux-opencode",
+      "class": "tested",
+      "status": "tested",
+      "os": "Linux x64 (distribution not recorded)",
+      "node": "not recorded by the host probe",
+      "opencode": "1.18.18",
+      "browser": "not exercised",
+      "scope": "Checkout and registry-package plugin registration only",
+      "testedAt": "2026-08-15",
+      "evidence": "docs/evidence/opencode-host-verification.md"
+    },
+    {
+      "id": "ubuntu-lts-desktop",
+      "class": "target",
+      "status": "unverified",
+      "os": "Ubuntu 24.04 LTS",
+      "node": "24.x",
+      "opencode": "current stable 1.x; oldest-supported equals the same tested version initially",
+      "browser": "latest two stable Chromium and Firefox generations",
+      "scope": "Clean packed install, create/reopen, plugin tools, offline pages, and browser interaction",
+      "testedAt": null,
+      "evidence": null
+    },
+    {
+      "id": "macos-current-desktop",
+      "class": "target",
+      "status": "unverified",
+      "os": "current macOS",
+      "node": "24.x",
+      "opencode": "current and oldest-supported stable 1.x",
+      "browser": "latest two stable Safari, Chromium, and Firefox generations",
+      "scope": "Clean packed install, create/reopen, plugin tools, offline pages, and browser interaction",
+      "testedAt": null,
+      "evidence": null
+    },
+    {
+      "id": "macos-previous-desktop",
+      "class": "target",
+      "status": "unverified",
+      "os": "previous macOS",
+      "node": "24.x",
+      "opencode": "current and oldest-supported stable 1.x",
+      "browser": "latest two stable Safari, Chromium, and Firefox generations",
+      "scope": "Clean packed install, create/reopen, plugin tools, offline pages, and browser interaction",
+      "testedAt": null,
+      "evidence": null
+    },
+    {
+      "id": "windows-11-native-desktop",
+      "class": "target",
+      "status": "unverified",
+      "os": "Windows 11 native",
+      "node": "24.x",
+      "opencode": "current and oldest-supported stable 1.x",
+      "browser": "latest two stable Chromium and Firefox generations",
+      "scope": "Clean packed install, create/reopen, plugin tools, offline pages, and browser interaction",
+      "testedAt": null,
+      "evidence": null
+    },
+    {
+      "id": "windows-11-wsl-desktop",
+      "class": "target",
+      "status": "unverified",
+      "os": "Windows 11 with WSL 2 and Ubuntu 24.04",
+      "node": "24.x",
+      "opencode": "current and oldest-supported stable 1.x",
+      "browser": "latest two stable Windows Chromium and Firefox generations opening WSL-created files",
+      "scope": "Clean packed install, create/reopen, plugin tools, offline pages, and browser interaction",
+      "testedAt": null,
+      "evidence": null
+    },
+    {
+      "id": "android-chrome-viewer",
+      "class": "target",
+      "status": "unverified",
+      "os": "current supported Android",
+      "node": "not applicable (viewer only)",
+      "opencode": "not applicable (viewer only)",
+      "browser": "latest two stable Android Chrome generations",
+      "scope": "Open, read, navigate, and interact with a deployed portable page",
+      "testedAt": null,
+      "evidence": null
+    },
+    {
+      "id": "ios-safari-viewer",
+      "class": "target",
+      "status": "unverified",
+      "os": "current and previous supported iOS",
+      "node": "not applicable (viewer only)",
+      "opencode": "not applicable (viewer only)",
+      "browser": "latest two stable iOS Safari generations",
+      "scope": "Open, read, navigate, and interact with a deployed portable page",
+      "testedAt": null,
+      "evidence": null
+    },
+    {
+      "id": "node-before-24",
+      "class": "unsupported",
+      "status": "unsupported",
+      "os": "any",
+      "node": "before 24",
+      "opencode": "any",
+      "browser": "any",
+      "scope": "Package execution",
+      "testedAt": null,
+      "evidence": null
+    }
+  ],
+  "dataInventory": [
+    {
+      "mode": "portable-local",
+      "availability": "current",
+      "fields": "Authored Markdown, title/description/source metadata, rendered HTML, manifest, versions, localStorage decisions/comments",
+      "purpose": "Create, reopen, version, and interact with a self-contained local artifact",
+      "controllerOperator": "User and machine owner",
+      "recipientLocation": "User-selected local filesystem and browser profile; no project telemetry recipient",
+      "sensitivity": "User-authored content; may be confidential",
+      "retention": "Until the user removes artifact, manifest/version files, and browser site data",
+      "deletion": "Delete the artifact directory and relevant browser file-origin/site data; backups remain under the user's own policy"
+    },
+    {
+      "mode": "loopback-service",
+      "availability": "current",
+      "fields": "Artifact bytes, comments, decisions, mini-DB documents, registered datasource output, local request metadata",
+      "purpose": "Preview and local collaboration state on 127.0.0.1",
+      "controllerOperator": "User running the process",
+      "recipientLocation": "Local process, project artifact directory, and local browser",
+      "sensitivity": "User-authored content and potentially sensitive command output",
+      "retention": "Files persist until user deletion; transient request data lasts for process/request lifetime",
+      "deletion": "Stop the service and delete .state/.db/datasource configuration and artifact files; remove browser site data separately"
+    },
+    {
+      "mode": "github-pages-public",
+      "availability": "current",
+      "fields": "Artifact/gallery bytes, manifest, git commits and repository metadata",
+      "purpose": "Publish a public static snapshot selected by the user",
+      "controllerOperator": "User or organization controlling the destination repository",
+      "recipientLocation": "GitHub repository, Pages CDN/caches, and public viewers under GitHub terms",
+      "sensitivity": "Public; secrets and private content are prohibited",
+      "retention": "Repository history persists until operator action; forks, clones, caches, and backups may outlive deletion",
+      "deletion": "Operator removes Pages content/history or repository and follows GitHub procedures; global erasure is not guaranteed"
+    },
+    {
+      "mode": "cloudflare-public",
+      "availability": "current",
+      "fields": "Artifact/gallery bytes, Worker configuration, KV decisions/comments/mini-DB documents, provider request metadata",
+      "purpose": "Publish a user-operated Worker and retain interactive state",
+      "controllerOperator": "User or organization controlling the Cloudflare account",
+      "recipientLocation": "Selected Cloudflare account, edge network, KV, caches/logs under the account plan and provider terms",
+      "sensitivity": "Public by default; KV state may contain viewer-authored content",
+      "retention": "Until operator deletes Worker/KV data, subject to provider cache, log, and backup schedules",
+      "deletion": "Operator deletes Worker, KV namespace/keys, routes and provider logs where available; project cannot guarantee provider-wide erasure"
+    },
+    {
+      "mode": "authenticated-hosting",
+      "availability": "planned",
+      "fields": "Planned audience policy, viewer identity/roles, sessions, comments/state, audit and administrative events",
+      "purpose": "Future private collaboration and revocation",
+      "controllerOperator": "Not selected; future deployment operator",
+      "recipientLocation": "Not selected",
+      "sensitivity": "Private identity and artifact data",
+      "retention": "Not implemented",
+      "deletion": "Not implemented; no current product claim"
+    },
+    {
+      "mode": "viewer-connectors",
+      "availability": "planned",
+      "fields": "Planned viewer grants, provider identity, query parameters/results, cache and audit metadata",
+      "purpose": "Future viewer-scoped data access",
+      "controllerOperator": "Not selected; future user/deployment operator",
+      "recipientLocation": "Not selected provider and connector",
+      "sensitivity": "Potentially private third-party data and credentials",
+      "retention": "Not implemented",
+      "deletion": "Not implemented; no current product claim"
+    },
+    {
+      "mode": "journey-study",
+      "availability": "protocol-ready",
+      "fields": "Pseudonymous code, categorical eligibility/conflict, consent/withdrawal, versions/platform, bounded timings, synthetic-fixture answers and scores",
+      "purpose": "Measure Phase 0 first-use and comprehension outcomes",
+      "controllerOperator": "Study maintainer named in the dated private record",
+      "recipientLocation": "Access-controlled maintainer storage; anonymous aggregate in repository",
+      "sensitivity": "Pseudonymous research record; direct identity and private artifact content prohibited",
+      "retention": "Raw data until 30 days after aggregate acceptance; anonymous aggregate retained as decision history",
+      "deletion": "Delete raw record immediately on timely withdrawal and delete all raw data at retention deadline"
+    },
+    {
+      "mode": "release-evidence",
+      "availability": "current",
+      "fields": "Commit/tag/digest, tool/platform versions, test outputs, public fixtures/screenshots, pseudonymous failure summaries",
+      "purpose": "Verify release claims and retain decision history",
+      "controllerOperator": "Project release maintainer",
+      "recipientLocation": "Public repository and CI/provider logs, except explicitly private raw inputs",
+      "sensitivity": "Public technical evidence; secrets, identities, private artifacts and vulnerability details prohibited",
+      "retention": "Retained with release decision history; reviewed when a source or claim changes",
+      "deletion": "Remove unauthorized/private material promptly while preserving a redacted correction and decision record"
+    }
+  ],
+  "threatBoundaries": [
+    { "id": "portable-page", "availability": "current", "evidence": "docs/threat-model.md#portable-declarative-pages" },
+    { "id": "trusted-html", "availability": "current", "evidence": "docs/threat-model.md#trusted-html-mode" },
+    { "id": "filesystem", "availability": "current", "evidence": "docs/threat-model.md#filesystem-and-local-state" },
+    { "id": "loopback", "availability": "current", "evidence": "docs/threat-model.md#loopback-service" },
+    { "id": "deployment", "availability": "current", "evidence": "docs/threat-model.md#deployment-adapters" },
+    { "id": "public-static", "availability": "current", "evidence": "docs/threat-model.md#public-static-targets" },
+    { "id": "hosted-content-control", "availability": "partial", "evidence": "docs/threat-model.md#hosted-content-and-control-plane" },
+    { "id": "audience-identity", "availability": "planned", "evidence": "docs/threat-model.md#audience-and-identity" },
+    { "id": "mutable-state", "availability": "partial", "evidence": "docs/threat-model.md#mutable-collaboration-state" },
+    { "id": "connectors", "availability": "planned", "evidence": "docs/threat-model.md#viewer-scoped-connectors" }
+  ]
+}

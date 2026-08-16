@@ -106,10 +106,12 @@ reduce the claim rather than converting it to a pass.
 
 ## Supply-chain outputs
 
-- Packed filename, digest, and registry provenance:
-- SBOM:
-- Attestation/signature verification:
-- Dependency/license/vulnerability reports:
+- Packed filename, SHA-256, SRI, tag/commit/workflow, and registry integrity cross-check:
+- CycloneDX JSON from the exact lockfile/install:
+- Registry trusted-publisher status and published provenance URL/verification (configuration is not evidence):
+- Registry signature verification:
+- Dependency vulnerability report and disposition:
+- SPDX license/attribution inventory and disposition:
 - Release notes and migration guide:
 
 ## Decision, rollout, and support
