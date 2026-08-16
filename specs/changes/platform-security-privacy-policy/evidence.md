@@ -96,10 +96,10 @@ unverified results keep the packet open and block the Phase 0 gate.
   were approved.
 - Verification: the baseline found 8 vulnerabilities. The approved remediation candidate now
   reports zero audit findings, exact hash-bound license dispositions, 212 verified signatures,
-  22 attestations, a CycloneDX SBOM, and candidate provenance bound to packed bytes. Exact-
-  commit CI retention is pending. Published 0.14.3 provenance remains verified only for its
-  own tag/commit, while trusted-publisher configuration and a future registry release remain
-  unverified.
+  22 attestations, a CycloneDX SBOM, and candidate provenance bound to packed bytes. Run
+  31956792983 retained the exact merge-candidate tarball and evidence. Published 0.14.3
+  provenance remains verified only for its own tag/commit, while trusted-publisher
+  configuration and a future registry release remain unverified.
 - Result: fail for production readiness.
 - Evidence: [@manual](docs/evidence/governance/supply-chain-2026-08-16.md),
   [@manual](docs/evidence/governance/renderer-remediation-2026-08-16.md),

@@ -1,8 +1,8 @@
 # Renderer dependency remediation — 2026-08-16
 
-Status: implementation checkpoint. Local candidate gates pass; exact-commit GitHub Actions
-candidate provenance and artifact retention are pending the first pushed implementation commit.
-This is not a package release or a supported-platform claim.
+Status: verified implementation checkpoint. Local gates and the exact pull-request merge
+candidate passed; GitHub Actions retained the packed candidate and its evidence. This is not a
+package release or a supported-platform claim.
 
 ## Approval and dependency identity
 
@@ -83,12 +83,40 @@ bytes. Its SHA-256 was
 `eb926c9073efd6f90b44cd8dfd5c1fed49ad1ec695744a71259dbb3aca42c103`; pack SRI was
 `sha512-njtqMVW0AEDSFO+n7mnLvYflUar1yeGUHzvP55RpqQPb9sQoVeFCbhGF6Yql26kKNT4v4ZLwebNrPS3oZ2vYAA==`.
 Because gzip output can vary by npm tool version, CI binds and retains its own exact tarball
-rather than comparing this local digest to a later run.
+rather than assuming a local digest will match. In this run the CI tarball independently matched
+the local SHA-256 exactly.
 
 A clean temporary install generated the interactive page from that candidate tarball. The
 entire installed `node_modules` tree was then moved away. Chromium still rendered both charts
 with zero requests or errors; the retained HTML SHA-256 was
 `ecd54d8a7d6eee16251a4f275c297692e18abdf413572707bc1da9b201f0a9e9`.
+
+## Exact GitHub Actions checkpoint
+
+[GitHub Actions run 31956792983](https://github.com/bitgorust/opencode-artifacts/actions/runs/31956792983)
+passed all build, 121-test, structural, and candidate-evidence steps. The run identifies branch
+head `0bf6798ac436c858a3cc2535744753a4bd2ee7f0`; the packed pull-request merge candidate and its
+provenance identify merge commit `4e5d8d8f70e756787ec3be14932ab5b775ae57cb` and workflow ref
+`bitgorust/opencode-artifacts/.github/workflows/ci.yml@refs/pull/1/merge`.
+
+Artifact `exact-candidate-evidence` (ID `9266157283`, 91,260 compressed bytes) was retained on
+2026-08-16 with expiry 2026-08-30. It contains the 50,141-byte tarball plus audit, license,
+pack-coordinate, provenance, CycloneDX, and signature files. Downloaded-file SHA-256 values were:
+
+| Retained file | SHA-256 |
+| --- | --- |
+| `opencode-artifacts-0.14.3.tgz` | `eb926c9073efd6f90b44cd8dfd5c1fed49ad1ec695744a71259dbb3aca42c103` |
+| `audit.json` | `1a6880655b7fe998c3f6cb838d1afedac09b478a552e3f1f38bff5a0416b74b8` |
+| `licenses.json` | `4bc307c41b17ccdc6e6590f6f940939033b86cf3444617abeb2b0f356e101cea` |
+| `pack.json` | `11bf62fe9f5311248352cc5b059f11fa99c9f60aa90eb5005224a47f67bbf959` |
+| `provenance.intoto.json` | `50bd6362f450b6f7d3932c405e584b3254bd1afc3bac5e075840ce5205803e29` |
+| `sbom.cdx.json` | `39d87520d98f073f0675a1444795fd250dc6c45a038c528795c0d916f5c73d58` |
+| `signatures.txt` | `96dbc2926fd8b9c4d367ef9d0b827d3c6ad9301a3aba7b872601edb3d234df12` |
+
+The retained audit reports zero findings at every severity. The retained signature output
+reports 212 verified registry signatures and 22 verified attestations. The provenance subject
+names the retained tarball and carries its exact SHA-256, merge commit, workflow ref, run ID,
+and attempt.
 
 ## SBOM, signatures, and provenance boundary
 
@@ -101,14 +129,14 @@ with zero requests or errors; the retained HTML SHA-256 was
 - License output SHA-256:
   `4bc307c41b17ccdc6e6590f6f940939033b86cf3444617abeb2b0f356e101cea`.
 
-CI now accepts both npm pack JSON shapes used by current tooling, generates a SLSA v1
+CI accepts both npm pack JSON shapes used by current tooling, generates a SLSA v1
 candidate provenance statement bound to tarball SHA-256, source commit, workflow reference,
 and run attempt, and uploads the statement, SBOM, audit, signature, license, pack coordinate,
 and tarball together. Release CI packs before those gates, publishes that exact tarball only
 after they pass, and still verifies registry signature/provenance afterward.
 
-No registry package or provider setting was changed. The local checkpoint cannot prove the
-future exact-commit CI run or npm registry provenance; those remain visibly pending.
+No registry package or provider setting was changed. This checkpoint does not prove npm
+registry provenance for an unpublished future release; that remains visibly pending.
 
 ## Retained failed and excluded observations
 
@@ -117,9 +145,8 @@ future exact-commit CI run or npm registry provenance; those remain visibly pend
   the supported Node 24.19.0 binary, all renderer, release-integrity, build, and structural
   checks passed. The local filesystem sandbox suppressed child-process stderr in the two CLI
   tests and triggered a native Node async assertion in the server test; both anomalies reproduce
-  unchanged at base commit `a6f983c`, while the exact same Node version passed the full suite in
-  the preceding GitHub Actions run. The pushed exact-commit run remains the authoritative full-
-  suite verdict for this checkpoint.
+  unchanged at base commit `a6f983c`. The repository pre-push hook outside that constrained
+  sandbox and the exact GitHub run both passed all 121 tests under Node 24.19.0.
 - A new Chromium download stalled without output and was stopped. The smoke used the exact
   pre-existing cached browser identified above.
 - Browser launch inside the filesystem sandbox failed on Linux sandbox syscalls. The approved
