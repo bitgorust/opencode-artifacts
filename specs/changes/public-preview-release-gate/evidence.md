@@ -2,8 +2,9 @@
 
 The product owner approved the proposal on 2026-08-16 after explicitly declining the human
 study for this preview. The implementation retains missing and excluded results rather than
-treating public preview as certification. The exact npm provider and post-publication results
-remain pending and therefore keep the transition in `development`.
+treating public preview as certification. Authenticated provider readback verifies the exact
+npm trusted publisher; post-publication results remain pending, so the transition is
+`preview-candidate` rather than `public-preview`.
 
 ## Requirement: OUT-02
 
@@ -56,9 +57,11 @@ remain pending and therefore keep the transition in `development`.
 - Verification: property tests reject every failed gate at its applicable transition; the tag
   workflow verifies tag/version agreement and retains exact release artifacts. Local tests,
   build, structural checks, package review, audit, licenses, and redistribution pass for the
-  candidate. Exact npm trusted-publisher, registry-byte, signature, and provenance evidence is
-  still pending.
-- Result: partial; the candidate remains `development` and publication is blocked.
+  candidate. Authenticated npm readback verifies repository `bitgorust/opencode-artifacts`,
+  workflow `publish.yml`, and permission `createPackage`; registry-byte, signature, and
+  provenance evidence is still pending.
+- Result: pass for `preview-candidate`; `public-preview` remains blocked pending the exact tag
+  workflow and registry verification.
 - Evidence: [@test](test/release-integrity.test.ts),
   [@manual](docs/evidence/releases/2026-08-16-v0.14.4-preview.md)
 

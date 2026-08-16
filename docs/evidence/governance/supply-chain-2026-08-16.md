@@ -67,8 +67,10 @@ its [verification guide](https://docs.npmjs.com/viewing-package-provenance/).
 that the already-published 0.14.3 digest has SLSA provenance from tag `v0.14.3`, commit
 `58f1976b745ec488cfe6dd301a972a3eeb17e10a`, `.github/workflows/publish.yml`, and GitHub
 Actions run `31890844916` attempt 1. That is a pass for those published bytes only. npm
-trusted-publisher configuration and provenance for this unreleased candidate remain
-unverified. No registry setting or package was changed.
+trusted-publisher configuration was not changed during this original observation. A later
+authorized package-owner session on the same date verified the exact
+`bitgorust/opencode-artifacts` / `publish.yml` / `createPackage` binding, as retained in
+`provider-status-2026-08-16.md`; provenance for this unreleased candidate remains pending.
 
 ## License inventory
 

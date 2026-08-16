@@ -8,8 +8,9 @@ automatically (public repo + public package).
 
 The package was first published manually (`npm publish --otp`), then the trusted publisher
 was linked on npmjs.com (GitHub Actions: `bitgorust/opencode-artifacts`, workflow
-`publish.yml`, action `npm publish`). These steps never need repeating; they are recorded
-here for forks:
+`publish.yml`, action `npm publish`). An authenticated `npm trust list` readback verified that
+exact repository/workflow binding and `createPackage` permission on 2026-08-16. These setup
+steps do not normally need repeating; they are recorded here for forks:
 
 1. First publish is manual (the package must exist before a trusted publisher can be linked):
 

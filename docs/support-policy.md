@@ -85,17 +85,15 @@ requires all of the following for the exact packed bytes:
 - attribution for source, dependencies, documentation, examples, embedded assets/fonts, and
   public benchmark references.
 
-The [dated provider report](evidence/governance/provider-status-2026-08-16.md) verifies
-provenance for the then-current published release and binds it to its GitHub Actions workflow,
-tag, and source commit. Registry trusted-publisher configuration is not
-publicly verified, and that prior attestation cannot cover future candidate bytes. A release
-still needs its own post-publish verification. Generated SBOM/provenance describes composition/
-origin; it does not prove safety.
+The [dated provider report](evidence/governance/provider-status-2026-08-16.md) verifies both
+the exact trusted-publisher repository/workflow binding and provenance for the prior published
+release. That prior attestation cannot cover future candidate bytes: every release still
+needs its own post-publish registry integrity, signature, and provenance verification.
+Generated SBOM/provenance describes composition/origin; it does not prove safety.
 
 The tag workflow generates CycloneDX, audit, signature and license outputs before packing,
 fails before publication when any gate fails, publishes the exact generated tarball, and then
-compares registry integrity/shasum while requiring a signature and provenance. No tag was
-created or release attempted by this policy change.
+compares registry integrity/shasum while requiring a signature and provenance.
 
 Dependencies and vendored runtimes must remain lockfile-pinned and receive license,
 vulnerability, view-time network, CSP, browser-weight, update-owner, and removal-path review.

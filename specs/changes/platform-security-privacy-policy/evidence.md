@@ -111,10 +111,13 @@ target-matrix gaps do not block unsupported preview distribution.
 - Verification: the baseline found 8 vulnerabilities. The approved remediation candidate now
   reports zero audit findings, exact hash-bound license dispositions, 212 verified signatures,
   22 attestations, a CycloneDX SBOM, and candidate provenance bound to packed bytes. Run
-  31956792983 retained the exact merge-candidate tarball and evidence. Published 0.14.3
-  provenance remains verified only for its own tag/commit, while trusted-publisher
-  configuration and a future registry release remain unverified.
-- Result: fail for production readiness.
+  31956792983 retained the exact merge-candidate tarball and evidence. After explicit
+  authorization and npm package-owner authentication, provider readback verified the exact
+  `bitgorust/opencode-artifacts` / `publish.yml` trusted publisher with `createPackage`
+  permission. Published 0.14.3 provenance remains verified only for its own tag/commit; exact
+  0.14.4 registry integrity, signature, and provenance remain pending publication.
+- Result: pass for the public-preview pre-publish supply-chain prerequisite; incomplete for
+  0.14.4 post-publish evidence and production readiness.
 - Evidence: [@manual](docs/evidence/governance/supply-chain-2026-08-16.md),
   [@manual](docs/evidence/governance/renderer-remediation-2026-08-16.md),
   [@manual](docs/evidence/governance/provider-status-2026-08-16.md),

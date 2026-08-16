@@ -18,10 +18,10 @@
     },
     {
       "id": "npm-trusted-publishing",
-      "status": "unverified",
+      "status": "pass",
       "checkedAt": "2026-08-16",
       "evidence": "docs/evidence/governance/provider-status-2026-08-16.md",
-      "claim": "Published 0.14.3 has registry provenance bound to its GitHub Actions tag/commit; trusted-publisher configuration and provenance for this unreleased candidate remain unverified."
+      "claim": "The exact GitHub repository/workflow trusted publisher is authenticated and provider-verified for createPackage; 0.14.4 registry integrity, signature, and provenance remain pending until publication."
     }
   ],
   "supportCells": [
