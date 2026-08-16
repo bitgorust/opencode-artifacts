@@ -3,7 +3,7 @@
   "id": "artifact-lifecycle-surfaces",
   "title": "Expose complete artifact lifecycle operations",
   "lane": "high-risk",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": [
     "LIFE-03",
     "LIFE-05",
@@ -20,8 +20,8 @@
   "currentSpecs": [],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-16T20:32:04Z"
   },
   "withdrawal": {
     "by": "",
