@@ -193,6 +193,9 @@ collectively exhausted by [`docs/product-spec.md`](product-spec.md), not repeate
   local `npm run check` uses the same structural assertions. [check:file-ci]
 - Failed, excluded, flaky, unsupported, and not-applicable outcomes are visible beside passes.
   Evidence is never cherry-picked to protect a claim.
+- Contract Markdown links to repository files and headings are validated deterministically;
+  authoritative external-source checks are bounded, dated, and report skipped or failed
+  network results instead of treating configuration as evidence. [check:docs-link-integrity]
 
 ## 9. Distribution and supply-chain integrity
 

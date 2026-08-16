@@ -85,7 +85,7 @@ users, support envelope, data handling, or acceptance evidence cannot be named.
   account-authentication boundary separately from verified behavior.
 - [x] Add a release-evidence template that names the claimed level and resolves every
   requirement to evidence, failure, or reasoned non-applicability.
-- [ ] Add a documentation link checker for official source URLs and internal spec anchors.
+- [x] Add a documentation link checker for official source URLs and internal spec anchors.
 - [x] Define a MECE requirement taxonomy and map every requirement to a phase, owner role,
   evidence contract, release applicability, and status.
 - [x] Adopt a risk-scaled spec-anchored workflow that separates target intent, current shipped

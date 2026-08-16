@@ -66,6 +66,7 @@ results. A release checklist resolves each class to dated files and command outp
 |---|---|
 | Unit/integration tests | `test/` and CI output |
 | Structural/release assertions | `scripts/check-repo.ts`, `scripts/checks.ts`, CI, `npm pack --dry-run` |
+| Contract link integrity | `scripts/check-links.ts`, `test/documentation-links.test.ts`, dated `docs/evidence/contract/` reports |
 | Browser and visual evidence | `docs/evidence/` |
 | Page-quality comparison | `docs/page-quality-benchmark.md`, dated `docs/evidence/page-quality/` reports |
 | OpenCode/Claude host probes | `docs/evidence/opencode-host-verification.md`, `docs/evidence/claude-code-host-verification.md` |
