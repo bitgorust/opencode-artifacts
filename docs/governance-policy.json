@@ -11,10 +11,10 @@
   "providerPrerequisites": [
     {
       "id": "github-private-vulnerability-reporting",
-      "status": "failed",
+      "status": "pass",
       "checkedAt": "2026-08-16",
       "evidence": "docs/evidence/governance/provider-status-2026-08-16.md",
-      "claim": "Private vulnerability reporting is disabled; sensitive report intake is unavailable."
+      "claim": "Private vulnerability reporting is enabled and verified; sensitive reports use the repository's private advisory path."
     },
     {
       "id": "npm-trusted-publishing",

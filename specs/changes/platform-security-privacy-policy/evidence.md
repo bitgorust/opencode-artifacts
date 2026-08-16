@@ -14,9 +14,12 @@ unverified results keep the packet open and block the Phase 0 gate.
 ## Requirement: SEC-10
 - Validation: the severity, response, disclosure, rotation and compromised-release policy was
   approved on 2026-08-16, including refusal while private intake is absent.
-- Verification: GitHub private vulnerability reporting returned `enabled: false` on
-  2026-08-16; the public policy exposes that failure and does not solicit sensitive issues.
-- Result: fail; there is no verified private reporting path.
+- Verification: after explicit authorization on 2026-08-16, authenticated repository
+  administrator `bitgorust` enabled GitHub private vulnerability reporting; a separate
+  provider read returned `enabled: true`, and the public policy links the private advisory
+  form while continuing to prohibit sensitive public issues.
+- Result: pass for the Phase 0 private-intake policy and provider prerequisite; release-level
+  response ownership and the remaining production gates are evaluated separately.
 - Evidence: [@test](test/governance-policy.test.ts),
   [@manual](docs/evidence/governance/provider-status-2026-08-16.md)
 

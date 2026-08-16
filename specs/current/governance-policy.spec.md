@@ -19,9 +19,10 @@
   unverified.
 - `SEC-01`: current, partial, and planned trust boundaries have owners, threats, controls,
   tests, residual risk and review triggers. Planned identity/connectors do not become shipped.
-- `SEC-10`: private GitHub vulnerability reporting is disabled, so sensitive private intake
-  is unavailable and production readiness fails. Severity/response, rotation and compromised-
-  release processes are published for use after an accountable private path is operational.
+- `SEC-10`: private GitHub vulnerability reporting is enabled and provider-verified, so the
+  public security policy directs sensitive reports to the private advisory path and refuses
+  sensitive public issues. Severity/response, rotation and compromised-release processes are
+  published; release-level response targets still require a named accountable owner.
 - `PRIV-01`–`PRIV-07`: the mode inventory and governance policy separate local, loopback,
   user-operated public targets, planned authenticated/connectors, journey studies and release
   evidence. Local creation has no default project telemetry. Provider-wide erasure, residency,

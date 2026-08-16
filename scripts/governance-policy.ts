@@ -434,8 +434,8 @@ export function validateGovernanceClaims(inputs: GovernanceClaimInputs): string[
   for (const link of ["docs/support-policy.md", "docs/security.md", "docs/data-governance.md"]) {
     if (!inputs.readme.includes(link)) errors.push(`README is missing governance link ${link}`);
   }
-  if (!inputs.security.includes("Private vulnerability reporting is currently **unavailable**")) {
-    errors.push("SECURITY.md must expose unavailable private reporting");
+  if (!inputs.security.includes("Private vulnerability reporting is currently **available**")) {
+    errors.push("SECURITY.md must expose verified private reporting");
   }
   if (!inputs.support.includes("no fully supported platform/browser cells")) {
     errors.push("support policy must expose the empty supported matrix");

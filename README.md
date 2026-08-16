@@ -188,7 +188,8 @@ Current policy is explicit about incomplete evidence:
 - [support and release policy](docs/support-policy.md) — Node 24 floor, zero currently
   supported full matrix cells, current-minor fix window, deprecation and D-06 supply chain;
 - [security model and response](docs/security.md) and [public reporting status](SECURITY.md) —
-  threat boundaries and response process; private vulnerability reporting is unavailable;
+  threat boundaries and response process; private vulnerability reporting is enabled and
+  verified;
 - [data governance](docs/data-governance.md) — no default local telemetry, mode-specific
   inventory, operator/controller boundaries, retention/deletion and public abuse handling.
 
