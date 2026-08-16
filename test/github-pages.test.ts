@@ -75,6 +75,29 @@ test("local state directories are never published", async () => {
   await rm(dir, { recursive: true, force: true });
 });
 
+test("sync blocks sensitive stale files already present in the destination clone", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "ghpages-stale-"));
+  try {
+    const cloneDir = join(dir, "clone");
+    const localDir = join(dir, "local");
+    await mkdir(join(cloneDir, ".git"), { recursive: true });
+    await mkdir(localDir);
+    await writeFile(join(cloneDir, "stale.html"), "ghp_0123456789abcdefABCDEF0123456789");
+    await writeFile(join(localDir, "clean.html"), "<h1>clean</h1>");
+    const calls: string[] = [];
+    const publisher = new GitHubPagesPublisher(localDir, {
+      repo: "bitgorust/artifacts",
+      cloneDir,
+      runner: fakeRunner(calls),
+    });
+    await assert.rejects(publisher.sync("deploy"), /deploy blocked.*stale\.html/);
+    assert.ok(!calls.some((call) => call.includes("add -A")));
+    assert.ok(!calls.some((call) => call.includes("push origin")));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
 test("a missing repo is created then cloned", async () => {
   const dir = await mkdtemp(join(tmpdir(), "ghpages-"));
   const calls: string[] = [];

@@ -155,12 +155,14 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
                   repo: resolved.repo,
                   branch: resolved.branch,
                   cloneDir: ghPagesCloneDir(resolved.repo),
+                  allowSensitive: args.force === true,
                 });
               }
               if (resolved.target === "cloudflare" && resolved.workerName) {
                 return new CloudflarePublisher(localDir, {
                   workerName: resolved.workerName,
                   stagingDir: cfStagingDir(resolved.workerName),
+                  allowSensitive: args.force === true,
                 });
               }
               throw new Error(

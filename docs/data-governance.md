@@ -60,6 +60,11 @@ trees, browser configuration, diagnostics, exports, or public evidence. Redact o
 before they leave their boundary. The journey-specific consent and withdrawal contract is in
 [`journeys/README.md`](journeys/README.md).
 
+Current CLI and plugin publication scans authored content, frontmatter metadata, and title
+overrides. GitHub Pages and Cloudflare deployment adapters rescan every current top-level
+public file, provider target configuration, and reused clone/staging tree before provider
+mutation. The explicit force override is scoped to one invocation and is not remembered.
+
 ## Public abuse, takedown, and intellectual property
 
 The complete repository disposition is in the machine-checked

@@ -37,10 +37,14 @@ unverified results keep the packet open and block the Phase 0 gate.
 
 ## Requirement: PRIV-03
 - Validation: secret/output exclusions and narrow override wording were approved.
-- Verification: existing guard and deploy tests cover content/title and staged HTML scanning,
-  but do not prove every future metadata/evidence/provider boundary.
-- Result: partial.
+- Verification: deterministic tests cover authored content, title overrides, frontmatter
+  metadata before manifest/gallery writes, all current top-level public files including JSON,
+  provider target configuration, and stale files in reused GitHub/Cloudflare staging trees.
+  The exact-invocation force override is never persisted.
+- Result: pass for current portable and public-deployment surfaces; unshipped authenticated,
+  connector, export, and support-bundle boundaries remain planned rather than inferred.
 - Evidence: [@test](test/guard.test.ts), [@test](test/plugin.test.ts),
+  [@test](test/cli.test.ts), [@test](test/github-pages.test.ts),
   [@test](test/cloudflare.test.ts)
 
 ## Requirement: PRIV-04

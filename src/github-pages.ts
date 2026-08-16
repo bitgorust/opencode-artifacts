@@ -3,6 +3,7 @@ import { cp, mkdir, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { FilePublisher, type PublishInput, type PublishResult, type Publisher } from "./publisher.ts";
+import { assertSafeDeployment } from "./guard.ts";
 
 export type Runner = (command: string, args: string[], cwd?: string) => Promise<string>;
 
@@ -20,6 +21,7 @@ export interface GitHubPagesOptions {
   branch?: string;
   cloneDir: string;
   runner?: Runner;
+  allowSensitive?: boolean;
 }
 
 export function pagesBaseUrl(repo: string): string {
@@ -45,6 +47,7 @@ export class GitHubPagesPublisher implements Publisher {
   private readonly branch: string;
   private readonly cloneDir: string;
   private readonly runner: Runner;
+  private readonly allowSensitive: boolean;
 
   constructor(localDir: string, options: GitHubPagesOptions) {
     this.local = new FilePublisher(localDir);
@@ -53,6 +56,7 @@ export class GitHubPagesPublisher implements Publisher {
     this.branch = options.branch ?? "main";
     this.cloneDir = options.cloneDir;
     this.runner = options.runner ?? runProcess;
+    this.allowSensitive = options.allowSensitive ?? false;
   }
 
   async publish(input: PublishInput): Promise<PublishResult> {
@@ -62,9 +66,19 @@ export class GitHubPagesPublisher implements Publisher {
   }
 
   async sync(commitMessage: string): Promise<string> {
+    await assertSafeDeployment(
+      this.localDir,
+      `repository=${this.repo}\nbranch=${this.branch}`,
+      this.allowSensitive,
+    );
     await this.ensureClone();
     await this.runner("git", ["-C", this.cloneDir, "pull", "--ff-only"]).catch(() => {});
     await copyArtifacts(this.localDir, this.cloneDir);
+    await assertSafeDeployment(
+      this.cloneDir,
+      `repository=${this.repo}\nbranch=${this.branch}`,
+      this.allowSensitive,
+    );
     await this.runner("git", ["-C", this.cloneDir, "add", "-A"]);
     const status = await this.runner("git", ["-C", this.cloneDir, "status", "--porcelain"]);
     if (status.trim() !== "") {

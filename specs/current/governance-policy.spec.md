@@ -26,6 +26,9 @@
   user-operated public targets, planned authenticated/connectors, journey studies and release
   evidence. Local creation has no default project telemetry. Provider-wide erasure, residency,
   backups, SLA, legal compliance and project-operated hosting are not claimed. The
+  current publication/deployment paths scan content, frontmatter/title metadata, every
+  current top-level public file, provider target configuration, and reused staging trees
+  before audience expansion; a force override is invocation-scoped. The
   redistribution inventory binds every retained binary asset to exact project provenance and
   hash, verifies that no font files are embedded, and keeps external benchmark media link-only.
 - `DIST-03`–`DIST-07`: only the current package minor receives fixes; deprecations receive at

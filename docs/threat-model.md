@@ -60,8 +60,10 @@ boundaries describe required future work and are never evidence of shipped prote
   and provider account.
 - Untrusted input/threats: target confusion, credential leakage, staging private state,
   command/output spoofing, partial publish, or accidental audience expansion.
-- Controls/tests: explicit target selection/config, final artifact scanning, fixed argument
-  arrays, state-directory exclusion, scoped Worker KV names, and staged-deploy unit tests.
+- Controls/tests: explicit target selection/config; scans of every current top-level public
+  file, provider target configuration, and reused destination/staging trees before network
+  mutation; fixed argument arrays; state-directory exclusion; scoped Worker KV names; and
+  staged-deploy unit tests. A force override applies only to that exact deploy invocation.
 - Residual risk: provider CLIs/settings and account permissions are external; confirmation and
   dry-run semantics are incomplete and provider rollback/deletion are not transactional.
 
@@ -70,8 +72,9 @@ boundaries describe required future work and are never evidence of shipped prote
 - Assets/authority: public artifact bytes, repository/history/CDN and user-controlled audience.
 - Untrusted input/threats: permanent private-data disclosure, malicious content, lost
   attribution, cache/fork persistence, abuse and ambiguous target visibility.
-- Controls/tests: public target is explicit, secret scan precedes deploy, GitHub state dirs are
-  excluded, and policies disclose operator/removal limitations.
+- Controls/tests: public target is explicit, content/frontmatter/title scanning precedes local
+  publication, the complete current public tree and provider target are rescanned before
+  deploy, GitHub state dirs are excluded, and policies disclose operator/removal limitations.
 - Residual risk: scanners miss sensitive content, global deletion is impossible, and public
   consumers can copy bytes. GitHub Pages has no mutable state channel.
 

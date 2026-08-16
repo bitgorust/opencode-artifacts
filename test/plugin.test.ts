@@ -104,6 +104,38 @@ test("artifact_publish scans a title override for sensitive content", async () =
   });
 });
 
+test("artifact_publish scans frontmatter metadata before writing manifests or galleries", async () => {
+  const publish = (await ArtifactsPlugin({} as unknown as PluginInput)).tool?.artifact_publish;
+  assert.ok(publish);
+  await withWorktree(async (dir) => {
+    const ctx: ToolContext = {
+      sessionID: "s1",
+      messageID: "m1",
+      agent: "test",
+      directory: dir,
+      worktree: dir,
+      abort: new AbortController().signal,
+      metadata: () => {},
+      ask: async () => {},
+    };
+    const result = await publish.execute(
+      {
+        markdown: [
+          "---",
+          "title: Clean title",
+          "description: ghp_0123456789abcdefABCDEF0123456789",
+          "source: synthetic",
+          "---",
+          "# Clean body",
+        ].join("\n"),
+      },
+      ctx,
+    );
+    assert.match(String(result), /Publish blocked/);
+    await assert.rejects(readFile(join(dir, ".opencode", "artifacts", "manifest.json"), "utf8"));
+  });
+});
+
 test("proactive option injects the guidance into the system transform", async () => {
   const off = await ArtifactsPlugin({} as unknown as PluginInput);
   assert.equal(off["experimental.chat.system.transform"], undefined);

@@ -36,3 +36,23 @@ test("deploy scans existing artifact files before invoking a host", async () => 
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("deploy scans provider configuration before invoking a host", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "cli-deploy-config-"));
+  try {
+    await writeFile(join(dir, "clean.html"), "<h1>clean</h1>");
+    await assert.rejects(
+      run(process.execPath, [
+        CLI,
+        "deploy",
+        "--dir",
+        dir,
+        "--repo",
+        "owner/ghp_0123456789abcdefABCDEF0123456789",
+      ]),
+      (err: Error & { stderr?: string }) => /deploy blocked.*deployment-config/.test(err.stderr ?? ""),
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
