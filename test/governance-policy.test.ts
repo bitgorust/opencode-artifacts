@@ -5,10 +5,20 @@ import {
   validateGovernanceClaims,
   validateGovernancePolicy,
   validateGovernanceRepository,
+  validateRedistributionInventory,
 } from "../scripts/governance-policy.ts";
 
 const root = new URL("..", import.meta.url).pathname;
 const policy = JSON.parse(await readFile(new URL("../docs/governance-policy.json", import.meta.url), "utf8")) as Record<string, unknown>;
+const redistribution = JSON.parse(
+  await readFile(new URL("../docs/redistribution-inventory.json", import.meta.url), "utf8"),
+) as Record<string, unknown>;
+
+function inventoriedAssets(value: Record<string, unknown>): Record<string, string> {
+  return Object.fromEntries(
+    (value["binaryAssets"] as Array<Record<string, string>>).map((item) => [item["path"], item["sha256"]]),
+  );
+}
 
 test("checked-in governance policy is complete and claim-consistent", async () => {
   assert.deepEqual(validateGovernancePolicy(policy), []);
@@ -46,4 +56,25 @@ test("inflated README provenance and mismatched Node claims fail consistency", (
   assert.match(errors, /claims provenance attestations/);
   assert.match(errors, /engines.node must match/);
   assert.match(errors, /unavailable private reporting/);
+});
+
+test("redistribution inventory binds every retained binary and keeps official references link-only", () => {
+  const actualAssets = inventoriedAssets(redistribution);
+  assert.deepEqual(validateRedistributionInventory(redistribution, actualAssets), []);
+
+  const missing = structuredClone(redistribution);
+  (missing["binaryAssets"] as unknown[]).pop();
+  assert.match(validateRedistributionInventory(missing, actualAssets).join("\n"), /binaryAssets is missing/);
+
+  const changed = structuredClone(redistribution);
+  ((changed["binaryAssets"] as Array<Record<string, unknown>>)[0])["sha256"] = "a".repeat(64);
+  ((changed["externalBenchmarkReferences"] as Array<Record<string, unknown>>)[0])["localCopy"] = "copied.png";
+  const changedErrors = validateRedistributionInventory(changed, actualAssets).join("\n");
+  assert.match(changedErrors, /sha256 does not match retained bytes/);
+  assert.match(changedErrors, /localCopy must be null/);
+
+  const withFont = { ...actualAssets, "docs/fonts/unreviewed.woff2": "b".repeat(64) };
+  const fontErrors = validateRedistributionInventory(redistribution, withFont).join("\n");
+  assert.match(fontErrors, /binaryAssets is missing docs\/fonts\/unreviewed\.woff2/);
+  assert.match(fontErrors, /embeds an undisposed font/);
 });

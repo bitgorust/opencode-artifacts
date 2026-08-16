@@ -68,10 +68,14 @@ unverified results keep the packet open and block the Phase 0 gate.
 - Validation: user-operator responsibility, attribution and remaining-copy limits were
   approved.
 - Verification: a public abuse/IP process is published; no project-operated target or global
-  deletion authority is claimed.
-- Result: partial; real operator handling and a complete asset inventory remain unverified.
+  deletion authority is claimed. The machine-checked redistribution inventory binds all 21
+  retained project-generated assets to exact hashes and MIT provenance, verifies zero embedded
+  fonts, keeps external benchmark material link-only, and removed the unlicensed local copy.
+- Result: pass for Phase 0 public-sharing policy and current repository disposition; real
+  operator handling remains future operational evidence.
 - Evidence: [@manual](docs/data-governance.md),
-  [@manual](docs/evidence/governance/supply-chain-2026-08-16.md)
+  [@manual](docs/evidence/governance/redistribution-2026-08-16.md),
+  [@test](test/governance-policy.test.ts)
 
 ## Requirement: COMPAT-01
 - Validation: Node 24, the target OS/browser envelope and exact-evidence promotion rule were
@@ -129,9 +133,11 @@ unverified results keep the packet open and block the Phase 0 gate.
 ## Requirement: DIST-07
 - Validation: redistribution authority, attribution and private-reference handling were
   approved.
-- Verification: repository MIT license exists and runtime dependency disposition now passes,
-  but complete docs/assets/fonts/reference disposition is absent.
-- Result: fail for a release readiness claim.
+- Verification: repository MIT and runtime dependency dispositions pass. The complete current
+  documentation/example/asset/font/reference inventory is machine-checked; every retained
+  binary is hash-bound, there are no embedded fonts, external benchmarks are link-only, and
+  the ambiguously licensed local official screenshot was removed.
+- Result: pass for the current repository distribution inventory.
 - Evidence: [@manual](LICENSE),
-  [@manual](docs/evidence/governance/supply-chain-2026-08-16.md),
-  [@manual](docs/evidence/governance/renderer-remediation-2026-08-16.md)
+  [@manual](docs/evidence/governance/redistribution-2026-08-16.md),
+  [@test](test/governance-policy.test.ts)

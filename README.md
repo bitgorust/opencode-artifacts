@@ -254,4 +254,6 @@ visual, attach a browser screenshot. Standard and high-risk behavior changes als
 
 ## License
 
-[MIT](LICENSE) © bitgorust
+[MIT](LICENSE) © bitgorust. Documentation, examples, retained screenshots, dependency
+dispositions, and link-only benchmark references are covered by the
+[redistribution inventory](docs/redistribution-policy.md).

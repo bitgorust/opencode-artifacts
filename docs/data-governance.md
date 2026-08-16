@@ -62,6 +62,9 @@ before they leave their boundary. The journey-specific consent and withdrawal co
 
 ## Public abuse, takedown, and intellectual property
 
+The complete repository disposition is in the machine-checked
+[`redistribution inventory`](redistribution-policy.md).
+
 Before public deployment, the operator must confirm the material is intended for a public
 audience, references are unambiguous, and source/assets/fonts/examples have redistribution
 authority and required attribution. Private, unlicensed, ambiguously licensed, or secret

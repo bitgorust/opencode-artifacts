@@ -1,5 +1,6 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { createHash } from "node:crypto";
+import { readdir, readFile } from "node:fs/promises";
+import { extname, join, relative, sep } from "node:path";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -62,6 +63,211 @@ const REQUIRED_BOUNDARIES = [
   "mutable-state",
   "connectors",
 ];
+
+const REQUIRED_AUTHORED_SCOPES = [
+  ".github/",
+  ".gitignore",
+  "AGENTS.md",
+  "LICENSE",
+  "README.md",
+  "SECURITY.md",
+  "agents/",
+  "docs/",
+  "examples/",
+  "package-lock.json",
+  "package.json",
+  "scripts/",
+  "skills/",
+  "src/",
+  "test/",
+  "tsconfig.json",
+];
+
+const REQUIRED_BENCHMARK_REFERENCES = [
+  "https://code.claude.com/docs/en/artifacts",
+  "https://www.youtube.com/watch?v=m7TJqx8CYG8",
+];
+
+const ASSET_EXTENSIONS = new Set([
+  ".avif", ".eot", ".gif", ".ico", ".jpeg", ".jpg", ".mp3", ".mp4", ".otf",
+  ".pdf", ".png", ".svg", ".ttf", ".wav", ".webm", ".webp", ".woff", ".woff2",
+]);
+
+const FONT_EXTENSIONS = new Set([".eot", ".otf", ".ttf", ".woff", ".woff2"]);
+
+export function validateRedistributionInventory(
+  value: unknown,
+  actualAssets: Readonly<Record<string, string>>,
+): string[] {
+  const errors: string[] = [];
+  if (!isRecord(value)) return ["redistribution inventory must be an object"];
+  exactKeys(
+    value,
+    [
+      "schemaVersion",
+      "reviewedAt",
+      "repositoryLicense",
+      "authoredScopes",
+      "binaryAssets",
+      "embeddedFonts",
+      "externalBenchmarkReferences",
+      "removedMaterials",
+      "dependencyEvidence",
+    ],
+    "redistribution",
+    errors,
+  );
+  if (value["schemaVersion"] !== 1) errors.push("redistribution.schemaVersion must be 1");
+  if (typeof value["reviewedAt"] !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value["reviewedAt"])) {
+    errors.push("redistribution.reviewedAt must be an ISO date");
+  }
+  if (value["repositoryLicense"] !== "MIT") errors.push("redistribution.repositoryLicense must be MIT");
+
+  const scopes = value["authoredScopes"];
+  const scopePaths = new Set<string>();
+  if (!Array.isArray(scopes)) {
+    errors.push("redistribution.authoredScopes must be an array");
+  } else {
+    for (let index = 0; index < scopes.length; index++) {
+      const item = scopes[index];
+      const path = `redistribution.authoredScopes[${index}]`;
+      if (!isRecord(item)) {
+        errors.push(`${path} must be an object`);
+        continue;
+      }
+      exactKeys(item, ["path", "provenance", "license"], path, errors);
+      if (textField(item["path"], `${path}.path`, errors)) {
+        if (scopePaths.has(item["path"])) errors.push(`${path}.path is duplicated`);
+        scopePaths.add(item["path"]);
+      }
+      if (item["provenance"] !== "repository-authored") errors.push(`${path}.provenance must be repository-authored`);
+      if (item["license"] !== "MIT") errors.push(`${path}.license must be MIT`);
+    }
+    for (const required of REQUIRED_AUTHORED_SCOPES) {
+      if (!scopePaths.has(required)) errors.push(`redistribution.authoredScopes is missing ${required}`);
+    }
+  }
+
+  const assets = value["binaryAssets"];
+  const inventoriedAssets = new Set<string>();
+  if (!Array.isArray(assets)) {
+    errors.push("redistribution.binaryAssets must be an array");
+  } else {
+    for (let index = 0; index < assets.length; index++) {
+      const item = assets[index];
+      const path = `redistribution.binaryAssets[${index}]`;
+      if (!isRecord(item)) {
+        errors.push(`${path} must be an object`);
+        continue;
+      }
+      exactKeys(item, ["path", "sha256", "provenance", "source", "license", "attribution", "status"], path, errors);
+      const assetPath = item["path"];
+      if (textField(assetPath, `${path}.path`, errors)) {
+        if (inventoriedAssets.has(assetPath)) errors.push(`${path}.path is duplicated`);
+        inventoriedAssets.add(assetPath);
+        if (!(assetPath in actualAssets)) errors.push(`${path}.path is not a retained binary asset`);
+        if (actualAssets[assetPath] !== item["sha256"]) errors.push(`${path}.sha256 does not match retained bytes`);
+      }
+      if (typeof item["sha256"] !== "string" || !/^[a-f0-9]{64}$/.test(item["sha256"])) {
+        errors.push(`${path}.sha256 must be a lowercase SHA-256 digest`);
+      }
+      for (const field of ["provenance", "source", "attribution"]) {
+        textField(item[field], `${path}.${field}`, errors);
+      }
+      if (item["license"] !== "MIT") errors.push(`${path}.license must be MIT`);
+      if (item["status"] !== "approved") errors.push(`${path}.status must be approved`);
+    }
+  }
+  for (const assetPath of Object.keys(actualAssets)) {
+    if (!inventoriedAssets.has(assetPath)) errors.push(`redistribution.binaryAssets is missing ${assetPath}`);
+  }
+
+  if (!Array.isArray(value["embeddedFonts"])) {
+    errors.push("redistribution.embeddedFonts must be an array");
+  } else if (value["embeddedFonts"].length !== 0) {
+    errors.push("redistribution.embeddedFonts must remain empty until an exact font disposition is implemented");
+  }
+  for (const assetPath of Object.keys(actualAssets)) {
+    if (FONT_EXTENSIONS.has(extname(assetPath).toLowerCase())) {
+      errors.push(`redistribution embeds an undisposed font: ${assetPath}`);
+    }
+  }
+
+  const references = value["externalBenchmarkReferences"];
+  const referenceUrls = new Set<string>();
+  if (!Array.isArray(references)) {
+    errors.push("redistribution.externalBenchmarkReferences must be an array");
+  } else {
+    for (let index = 0; index < references.length; index++) {
+      const item = references[index];
+      const path = `redistribution.externalBenchmarkReferences[${index}]`;
+      if (!isRecord(item)) {
+        errors.push(`${path} must be an object`);
+        continue;
+      }
+      exactKeys(item, ["url", "role", "localCopy", "redistribution"], path, errors);
+      if (textField(item["url"], `${path}.url`, errors)) referenceUrls.add(item["url"]);
+      textField(item["role"], `${path}.role`, errors);
+      if (item["localCopy"] !== null) errors.push(`${path}.localCopy must be null`);
+      if (item["redistribution"] !== "link-only") errors.push(`${path}.redistribution must be link-only`);
+    }
+    for (const url of REQUIRED_BENCHMARK_REFERENCES) {
+      if (!referenceUrls.has(url)) errors.push(`redistribution.externalBenchmarkReferences is missing ${url}`);
+    }
+  }
+
+  const removed = value["removedMaterials"];
+  if (!Array.isArray(removed)) {
+    errors.push("redistribution.removedMaterials must be an array");
+  } else {
+    for (let index = 0; index < removed.length; index++) {
+      const item = removed[index];
+      const path = `redistribution.removedMaterials[${index}]`;
+      if (!isRecord(item)) {
+        errors.push(`${path} must be an object`);
+        continue;
+      }
+      exactKeys(item, ["path", "sha256", "source", "reason", "status"], path, errors);
+      for (const field of ["path", "source", "reason"]) textField(item[field], `${path}.${field}`, errors);
+      if (typeof item["path"] === "string" && item["path"] in actualAssets) {
+        errors.push(`${path}.path is still retained`);
+      }
+      if (typeof item["sha256"] !== "string" || !/^[a-f0-9]{64}$/.test(item["sha256"])) {
+        errors.push(`${path}.sha256 must be a lowercase SHA-256 digest`);
+      }
+      if (item["status"] !== "removed") errors.push(`${path}.status must be removed`);
+    }
+  }
+
+  const dependencyEvidence = value["dependencyEvidence"];
+  if (!Array.isArray(dependencyEvidence) || dependencyEvidence.some((item) => typeof item !== "string" || item.trim() === "")) {
+    errors.push("redistribution.dependencyEvidence must be an array of non-empty paths");
+  } else {
+    for (const required of ["package-lock.json", "docs/license-dispositions.json", "docs/evidence/governance/renderer-remediation-2026-08-16.md"]) {
+      if (!dependencyEvidence.includes(required)) errors.push(`redistribution.dependencyEvidence is missing ${required}`);
+    }
+  }
+  return errors;
+}
+
+async function redistributedAssetHashes(root: string): Promise<Record<string, string>> {
+  const assets: Record<string, string> = {};
+  const ignored = new Set([".git", "dist", "node_modules"]);
+  async function walk(directory: string): Promise<void> {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      if (entry.isDirectory() && ignored.has(entry.name)) continue;
+      const absolute = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        await walk(absolute);
+      } else if (entry.isFile() && ASSET_EXTENSIONS.has(extname(entry.name).toLowerCase())) {
+        const path = relative(root, absolute).split(sep).join("/");
+        assets[path] = createHash("sha256").update(await readFile(absolute)).digest("hex");
+      }
+    }
+  }
+  await walk(root);
+  return assets;
+}
 
 export function validateGovernancePolicy(value: unknown): string[] {
   const errors: string[] = [];
@@ -250,18 +456,22 @@ export function validateGovernanceClaims(inputs: GovernanceClaimInputs): string[
 export async function validateGovernanceRepository(root: string): Promise<string[]> {
   const read = (path: string): Promise<string> => readFile(join(root, path), "utf8");
   try {
-    const [policyText, readme, security, support, dataGovernance, hosted, packageText] = await Promise.all([
+    const [policyText, redistributionText, readme, security, support, dataGovernance, hosted, packageText, assets] = await Promise.all([
       read("docs/governance-policy.json"),
+      read("docs/redistribution-inventory.json"),
       read("README.md"),
       read("SECURITY.md"),
       read("docs/support-policy.md"),
       read("docs/data-governance.md"),
       read("docs/hosted-cloudflare.md"),
       read("package.json"),
+      redistributedAssetHashes(root),
     ]);
     const policy = JSON.parse(policyText) as unknown;
+    const redistribution = JSON.parse(redistributionText) as unknown;
     return [
       ...validateGovernancePolicy(policy),
+      ...validateRedistributionInventory(redistribution, assets),
       ...validateGovernanceClaims({
         readme,
         security,

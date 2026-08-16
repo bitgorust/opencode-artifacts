@@ -23,7 +23,9 @@
 - `PRIV-01`–`PRIV-07`: the mode inventory and governance policy separate local, loopback,
   user-operated public targets, planned authenticated/connectors, journey studies and release
   evidence. Local creation has no default project telemetry. Provider-wide erasure, residency,
-  backups, SLA, legal compliance and project-operated hosting are not claimed.
+  backups, SLA, legal compliance and project-operated hosting are not claimed. The
+  redistribution inventory binds every retained binary asset to exact project provenance and
+  hash, verifies that no font files are embedded, and keeps external benchmark media link-only.
 - `DIST-03`–`DIST-07`: only the current package minor receives fixes; deprecations receive at
   least one supported-release notice except active exploits. D-06 selects npm trusted
   publishing/provenance, npm CycloneDX, audit/signatures, license disposition and exact packed-
@@ -31,7 +33,8 @@
   own tag/commit; trusted-
   publisher configuration and future registry provenance are not. The approved renderer
   remediation clears the current audit and hash-bound license gates and adds exact candidate
-  SBOM/provenance artifact retention. Provider and platform evidence remains incomplete, so no
-  production-readiness claim is permitted. The tag workflow fails closed on prepublish
-  evidence, publishes the coordinated tarball, and verifies registry integrity/signature/
-  provenance afterward.
+  SBOM/provenance artifact retention. Current source, documentation, example, asset, font, and
+  reference redistribution disposition also passes. Provider and platform evidence remains
+  incomplete, so no production-readiness claim is permitted. The tag workflow fails closed on
+  prepublish evidence, publishes the coordinated tarball, and verifies registry integrity/
+  signature/provenance afterward.
