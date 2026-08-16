@@ -3,7 +3,7 @@
   "id": "artifact-state-cas-limits",
   "title": "Make mutable artifact state atomic and bounded",
   "lane": "high-risk",
-  "status": "approved",
+  "status": "implementing",
   "affectedRequirements": [
     "LOCAL-04",
     "SEC-07",

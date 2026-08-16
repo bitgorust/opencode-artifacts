@@ -5,6 +5,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { serveArtifacts } from "../src/serve.ts";
+import { FilePublisher } from "../src/publisher.ts";
 
 async function withServer(
   files: Record<string, string>,
@@ -181,6 +182,80 @@ test("db endpoint stores, queries, and deletes documents", async () => {
     assert.equal(deleted.status, 200);
     const gone = await fetch(`${url}/__db/board/notes/n1`);
     assert.equal(gone.status, 404);
+  });
+});
+
+test("schema-2 HTTP state uses CAS, replay IDs, bounded conflicts, and document merges", async () => {
+  await withServer({}, async (url, dir) => {
+    await new FilePublisher(dir, {
+      schemaVersion: 2,
+      artifactIdFactory: () => "11111111-1111-4111-8111-111111111111",
+    }).publish({ slug: "board", html: "<html><body>board</body></html>" });
+
+    const initial = (await (await fetch(`${url}/__state/board`)).json()) as { revision: number; contentHash: string };
+    assert.equal(initial.revision, 0);
+    const committed = await fetch(`${url}/__state/board`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        answers: { layout: "tabs" },
+        expectedRevision: 0,
+        expectedHash: initial.contentHash,
+        operationId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      }),
+    });
+    assert.equal(committed.status, 200);
+    assert.ok(committed.headers.get("etag"));
+    const replay = await fetch(`${url}/__state/board`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        answers: { layout: "tabs" },
+        expectedRevision: 0,
+        expectedHash: initial.contentHash,
+        operationId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      }),
+    });
+    assert.equal((await replay.json() as { status: string }).status, "replayed");
+    const stale = await fetch(`${url}/__state/board`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        answers: { layout: "dense" },
+        expectedRevision: 0,
+        operationId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      }),
+    });
+    assert.equal(stale.status, 409);
+    assert.equal((await stale.json() as { revision: number }).revision, 1);
+
+    const comment = await fetch(`${url}/__comments/board`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        threads: [{ id: "t1", quote: "board", text: "review", createdAt: "2026-08-16T20:00:00Z", resolved: false }],
+        expectedRevision: 0,
+        operationId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      }),
+    });
+    assert.equal(comment.status, 200);
+
+    const put = (id: string, operationId: string) => fetch(`${url}/__db/board/notes/${id}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json", "if-none-match": "*" },
+      body: JSON.stringify({ document: { text: id }, expectedRevision: 0, operationId }),
+    });
+    const [one, two] = await Promise.all([
+      put("one", "dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
+      put("two", "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"),
+    ]);
+    assert.equal(one.status, 200);
+    assert.equal(two.status, 200);
+    const listed = (await (await fetch(`${url}/__db/board/notes`)).json()) as { docs: Array<{ id: string }>; revision: number };
+    assert.deepEqual(listed.docs.map((entry) => entry.id).sort(), ["one", "two"]);
+    assert.equal(listed.revision, 2);
+    const same = await put("one", "ffffffff-ffff-4fff-8fff-ffffffffffff");
+    assert.equal(same.status, 409);
   });
 });
 

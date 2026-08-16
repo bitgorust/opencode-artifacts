@@ -166,22 +166,34 @@ function replaceFooter(html: string, footer: string): string {
 
 export class FilePublisher implements Publisher {
   private readonly dir: string;
-  private readonly schemaVersion: 1 | 2;
+  private readonly schemaVersion: 1 | 2 | undefined;
   private readonly artifactIdFactory: () => string;
 
   constructor(dir: string, options: FilePublisherOptions = {}) {
     this.dir = dir;
-    this.schemaVersion = options.schemaVersion ?? 1;
+    this.schemaVersion = options.schemaVersion;
     this.artifactIdFactory = options.artifactIdFactory ?? randomUUID;
   }
 
   async publish(input: PublishInput): Promise<PublishResult> {
-    if (this.schemaVersion === 2) {
-      return runFileTransaction(this.dir, (transaction) =>
-        this.publishV2Serialized(input, transaction),
-      );
+    return runFileTransaction(this.dir, async (transaction) =>
+      (await this.selectedSchemaVersionLocked()) === 2
+        ? this.publishV2Serialized(input, transaction)
+        : this.publishSerialized(input, transaction),
+    );
+  }
+
+  private async selectedSchemaVersionLocked(): Promise<1 | 2> {
+    if (this.schemaVersion !== undefined) return this.schemaVersion;
+    try {
+      const value = JSON.parse(await readFile(join(this.dir, ARTIFACT_MANIFEST_FILE), "utf8")) as unknown;
+      return typeof value === "object" && value !== null && "schemaVersion" in value && value.schemaVersion === 2
+        ? 2
+        : 1;
+    } catch (error) {
+      if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return 1;
+      throw error;
     }
-    return runFileTransaction(this.dir, (transaction) => this.publishSerialized(input, transaction));
   }
 
   private async publishV2Serialized(
@@ -377,7 +389,7 @@ export class FilePublisher implements Publisher {
 
   async latest(): Promise<ArtifactMeta | undefined> {
     await recoverFileTransactions(this.dir);
-    if (this.schemaVersion === 2) {
+    if ((await this.selectedSchemaVersionLocked()) === 2) {
       const manifest = await readManifestV2Locked(this.dir);
       return Object.values(manifestV2GalleryView(manifest).artifacts).sort((left, right) =>
         right.updatedAt.localeCompare(left.updatedAt),
@@ -390,13 +402,10 @@ export class FilePublisher implements Publisher {
   }
 
   async restore(slug: string, version: number): Promise<PublishResult> {
-    if (this.schemaVersion === 2) {
-      return runFileTransaction(this.dir, (transaction) =>
-        this.restoreV2Serialized(slug, version, transaction),
-      );
-    }
-    return runFileTransaction(this.dir, (transaction) =>
-      this.restoreSerialized(slug, version, transaction),
+    return runFileTransaction(this.dir, async (transaction) =>
+      (await this.selectedSchemaVersionLocked()) === 2
+        ? this.restoreV2Serialized(slug, version, transaction)
+        : this.restoreSerialized(slug, version, transaction),
     );
   }
 

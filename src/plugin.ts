@@ -1,7 +1,7 @@
 import { join, dirname } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { tool, type Hooks, type Plugin } from "@opencode-ai/plugin";
 import {
   ArtifactTooLargeError,
@@ -16,6 +16,21 @@ import { loadConfig, resolveDeploy } from "./config.ts";
 import { formatFindings, scanSensitive } from "./guard.ts";
 import { NAME_RE, readCollection, writeCollection } from "./serve.ts";
 import { openFile } from "./open.ts";
+import {
+  ArtifactStateError,
+  STATE_KEY_RE,
+  artifactDocumentHash,
+  mutateCollectionDocument,
+  readArtifactState,
+  replaceArtifactState,
+  type CollectionPayload,
+  type CommentPayload,
+  type DecisionPayload,
+} from "./artifact-state.ts";
+import {
+  ArtifactMigrationRequiredError,
+  readArtifactManifestV2,
+} from "./artifact-schema.ts";
 
 function ghPagesCloneDir(repo: string): string {
   return join(homedir(), ".cache", "opencode-artifacts", "ghpages", repo.replace("/", "__"));
@@ -27,6 +42,31 @@ function cfStagingDir(workerName: string): string {
 
 function workRoot(ctx: { directory: string; worktree: string }): string {
   return ctx.worktree === "/" ? ctx.directory : ctx.worktree;
+}
+
+async function stateArtifactId(root: string, slug: string): Promise<string | undefined> {
+  try {
+    await lstat(join(root, "manifest.json"));
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return undefined;
+    throw error;
+  }
+  try {
+    const manifest = await readArtifactManifestV2(root);
+    const artifactId = manifest.slugIndex[slug];
+    if (!artifactId) throw new ArtifactStateError("invalid", `unknown artifact slug ${slug}`, 0, "list artifacts and use an active reference");
+    return artifactId;
+  } catch (error) {
+    if (error instanceof ArtifactMigrationRequiredError) return undefined;
+    throw error;
+  }
+}
+
+function stateToolFailure(error: unknown): string {
+  if (error instanceof ArtifactStateError) {
+    return JSON.stringify({ error: error.code, revision: error.selectedRevision, message: error.message, nextAction: error.nextAction }, null, 2);
+  }
+  throw error;
 }
 
 const PROACTIVE_FALLBACK = `## Artifact pages
@@ -249,12 +289,59 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             .string()
             .optional()
             .describe("Equality filter for list, as field:value"),
+          expectedRevision: tool.schema.number().optional().describe("Current collection revision for set/delete"),
+          expectedDocumentHash: tool.schema.string().optional().describe("Current document SHA-256 for update/delete"),
+          createOnly: tool.schema.boolean().optional().describe("Require the document ID to be absent"),
+          operationId: tool.schema.string().optional().describe("UUID retained across retries of one mutation"),
         },
         async execute(args, ctx) {
-          if (!NAME_RE.test(args.slug) || !NAME_RE.test(args.collection)) {
-            return "slug and collection must contain only lowercase letters, numbers, and hyphens";
+          if (!STATE_KEY_RE.test(args.slug) || !STATE_KEY_RE.test(args.collection) || (args.id !== undefined && !STATE_KEY_RE.test(args.id))) {
+            return "slug and collection must be safe lowercase identifiers; document id must follow the same rule";
           }
           const root = join(workRoot(ctx), ".opencode", "artifacts");
+          const artifactId = await stateArtifactId(root, args.slug);
+          if (artifactId !== undefined) {
+            try {
+              const envelope = await readArtifactState<CollectionPayload>(root, artifactId, "collection", args.collection);
+              if (args.op === "get") {
+                if (!args.id) return "get requires id";
+                const doc = envelope.payload.docs[args.id];
+                return doc === undefined
+                  ? `No document '${args.id}' in ${args.slug}/${args.collection}. Current revision: ${envelope.revision}.`
+                  : JSON.stringify({ id: args.id, doc, hash: artifactDocumentHash(doc), revision: envelope.revision }, null, 2);
+              }
+              if (args.op === "list") {
+                let entries = Object.entries(envelope.payload.docs);
+                if (args.q) {
+                  const [field, ...rest] = args.q.split(":");
+                  const want = rest.join(":");
+                  entries = entries.filter(([, doc]) => typeof doc === "object" && doc !== null && String((doc as Record<string, unknown>)[field]) === want);
+                }
+                return JSON.stringify({ revision: envelope.revision, contentHash: envelope.contentHash, docs: entries.map(([id, doc]) => ({ id, doc, hash: artifactDocumentHash(doc) })) }, null, 2);
+              }
+              if (!args.id) return `${args.op} requires id`;
+              if (args.expectedRevision === undefined || args.operationId === undefined) {
+                return `${args.op} requires expectedRevision and operationId`;
+              }
+              if (args.createOnly === true && args.expectedDocumentHash !== undefined) {
+                return "createOnly and expectedDocumentHash are mutually exclusive";
+              }
+              const result = await mutateCollectionDocument({
+                root,
+                artifactId,
+                collection: args.collection,
+                id: args.id,
+                operation: args.op,
+                ...(args.op === "set" ? { document: args.doc ?? null } : {}),
+                expectedRevision: args.expectedRevision,
+                expectedDocumentHash: args.createOnly === true ? null : args.expectedDocumentHash ?? null,
+                operationId: args.operationId,
+              });
+              return JSON.stringify({ status: result.status, revision: result.revision, contentHash: result.contentHash, warnings: result.warnings }, null, 2);
+            } catch (error) {
+              return stateToolFailure(error);
+            }
+          }
           const store = await readCollection(root, args.slug, args.collection);
           switch (args.op) {
             case "get": {
@@ -303,10 +390,19 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
           slug: tool.schema.string().describe("Artifact slug (the filename without .html)"),
         },
         async execute(args, ctx) {
+          if (!STATE_KEY_RE.test(args.slug)) return "slug must be a safe lowercase identifier";
+          const root = join(workRoot(ctx), ".opencode", "artifacts");
+          const artifactId = await stateArtifactId(root, args.slug);
+          if (artifactId !== undefined) {
+            try {
+              const envelope = await readArtifactState<DecisionPayload>(root, artifactId, "decisions");
+              return JSON.stringify({ revision: envelope.revision, contentHash: envelope.contentHash, answers: envelope.payload.answers }, null, 2);
+            } catch (error) {
+              return stateToolFailure(error);
+            }
+          }
           const statePath = join(
-            workRoot(ctx),
-            ".opencode",
-            "artifacts",
+            root,
             ".state",
             `${args.slug}.json`,
           );
@@ -330,12 +426,46 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             .boolean()
             .optional()
             .describe("Return a compact triage digest instead of raw threads"),
+          expectedRevision: tool.schema.number().optional().describe("Current comment-store revision required with resolveId"),
+          expectedHash: tool.schema.string().optional().describe("Current comment-store hash required with resolveId"),
+          operationId: tool.schema.string().optional().describe("UUID retained across retries of one resolve mutation"),
         },
         async execute(args, ctx) {
+          if (!STATE_KEY_RE.test(args.slug)) return "slug must be a safe lowercase identifier";
+          const root = join(workRoot(ctx), ".opencode", "artifacts");
+          const artifactId = await stateArtifactId(root, args.slug);
+          if (artifactId !== undefined) {
+            try {
+              const envelope = await readArtifactState<CommentPayload>(root, artifactId, "comments");
+              const threads = envelope.payload.threads;
+              if (args.resolveId !== undefined) {
+                if (args.expectedRevision === undefined || args.operationId === undefined) {
+                  return "resolveId requires expectedRevision and operationId";
+                }
+                const target = threads.find((thread) => thread.id === args.resolveId);
+                if (!target) return `No comment thread '${args.resolveId}' on '${args.slug}'.`;
+                const result = await replaceArtifactState<CommentPayload>({
+                  root,
+                  artifactId,
+                  kind: "comments",
+                  expectedRevision: args.expectedRevision,
+                  ...(args.expectedHash === undefined ? {} : { expectedHash: args.expectedHash }),
+                  operationId: args.operationId,
+                  payload: { threads: threads.map((thread) => thread.id === args.resolveId ? { ...thread, resolved: true } : thread) },
+                });
+                return JSON.stringify({ status: result.status, revision: result.revision, contentHash: result.contentHash }, null, 2);
+              }
+              if (args.digest === true) {
+                const open = threads.filter((thread) => !thread.resolved);
+                return [`${open.length} open, ${threads.length - open.length} resolved on '${args.slug}'.`, ...open.map((thread) => `- [${thread.id}] "${thread.quote.slice(0, 60)}" — ${thread.text.slice(0, 120)}`)].join("\n");
+              }
+              return JSON.stringify({ revision: envelope.revision, contentHash: envelope.contentHash, threads }, null, 2);
+            } catch (error) {
+              return stateToolFailure(error);
+            }
+          }
           const threadsPath = join(
-            workRoot(ctx),
-            ".opencode",
-            "artifacts",
+            root,
             ".state",
             `${args.slug}.comments.json`,
           );

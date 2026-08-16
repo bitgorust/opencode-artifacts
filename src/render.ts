@@ -224,6 +224,11 @@ h2{font-family:Georgia,Charter,"Times New Roman",serif;font-size:1.6rem;font-wei
 };
 
 const BOOT = `(function () {
+  function operationId() {
+    return window.crypto && window.crypto.randomUUID
+      ? window.crypto.randomUUID()
+      : "00000000-0000-4000-8000-" + Math.random().toString(16).slice(2).padEnd(12, "0").slice(0, 12);
+  }
   var root = document.documentElement;
   if (!root.hasAttribute("data-page-theme")) {
     var header = document.querySelector(".artifact-header");
@@ -302,6 +307,7 @@ const BOOT = `(function () {
     note.textContent = msg;
     setTimeout(function () { note.textContent = ""; }, 1600);
   }
+  var decisionStateMeta = { revision: 0, contentHash: null };
   document.addEventListener("click", function (ev) {
     var btn = ev.target && ev.target.closest ? ev.target.closest(".copy-btn") : null;
     if (btn) {
@@ -340,8 +346,19 @@ const BOOT = `(function () {
       fetch(window.__ARTIFACT_STATE_URL__ + "/" + encodeURIComponent(slug), {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ answers: state }),
-      }).catch(function () {});
+        body: JSON.stringify({ answers: state, expectedRevision: decisionStateMeta.revision, expectedHash: decisionStateMeta.contentHash || undefined, operationId: operationId() }),
+      }).then(function (r) { return r.json().then(function (body) { return { ok: r.ok, status: r.status, body: body }; }); })
+        .then(function (result) {
+          if (result.ok) {
+            decisionStateMeta.revision = result.body.revision;
+            decisionStateMeta.contentHash = result.body.contentHash;
+            document.documentElement.removeAttribute("data-artifact-state-conflict");
+          } else if (result.status === 409) {
+            decisionStateMeta.revision = result.body.revision;
+            decisionStateMeta.contentHash = result.body.contentHash;
+            document.documentElement.setAttribute("data-artifact-state-conflict", "decisions");
+          }
+        }).catch(function () {});
     }
   });
   try {
@@ -351,10 +368,22 @@ const BOOT = `(function () {
       if (el) el.classList.add("selected");
     });
   } catch (e) {}
+  if (window.__ARTIFACT_STATE_URL__) {
+    var initialStateSlug = decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html$/, "");
+    fetch(window.__ARTIFACT_STATE_URL__ + "/" + encodeURIComponent(initialStateSlug))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && typeof data.revision === "number") {
+          decisionStateMeta.revision = data.revision;
+          decisionStateMeta.contentHash = data.contentHash;
+        }
+      }).catch(function () {});
+  }
 
   var commentsKey = "artifact-comments:" + location.pathname;
   function commentsUrl() { return window.__ARTIFACT_COMMENTS_URL__ || null; }
   var threads = [];
+  var commentsStateMeta = { revision: 0, contentHash: null };
   var dock = null;
   var popBtn = null;
   var form = null;
@@ -377,8 +406,19 @@ const BOOT = `(function () {
       fetch(url + "/" + encodeURIComponent(slugFromPath()), {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ threads: threads }),
-      }).catch(function () {});
+        body: JSON.stringify({ threads: threads, expectedRevision: commentsStateMeta.revision, expectedHash: commentsStateMeta.contentHash || undefined, operationId: operationId() }),
+      }).then(function (r) { return r.json().then(function (body) { return { ok: r.ok, status: r.status, body: body }; }); })
+        .then(function (result) {
+          if (result.ok) {
+            commentsStateMeta.revision = result.body.revision;
+            commentsStateMeta.contentHash = result.body.contentHash;
+            document.documentElement.removeAttribute("data-artifact-comments-conflict");
+          } else if (result.status === 409) {
+            commentsStateMeta.revision = result.body.revision;
+            commentsStateMeta.contentHash = result.body.contentHash;
+            document.documentElement.setAttribute("data-artifact-comments-conflict", "reload-required");
+          }
+        }).catch(function () {});
     } else {
       try { localStorage.setItem(commentsKey, JSON.stringify(threads)); } catch (e) {}
     }
@@ -515,6 +555,8 @@ const BOOT = `(function () {
       .then(function (data) {
         if (data && Array.isArray(data.threads)) {
           threads = data.threads;
+          if (typeof data.revision === "number") commentsStateMeta.revision = data.revision;
+          if (typeof data.contentHash === "string") commentsStateMeta.contentHash = data.contentHash;
           try { localStorage.setItem(commentsKey, JSON.stringify(threads)); } catch (e) {}
           renderDock();
         }
