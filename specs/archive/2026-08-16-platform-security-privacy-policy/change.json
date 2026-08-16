@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "id": "platform-security-privacy-policy",
+  "title": "Publish platform, security, privacy, and release policy",
+  "lane": "high-risk",
+  "status": "archived",
+  "affectedRequirements": [
+    "SEC-01",
+    "SEC-10",
+    "PRIV-01",
+    "PRIV-02",
+    "PRIV-03",
+    "PRIV-04",
+    "PRIV-05",
+    "PRIV-06",
+    "PRIV-07",
+    "COMPAT-01",
+    "DIST-03",
+    "DIST-04",
+    "DIST-05",
+    "DIST-06",
+    "DIST-07"
+  ],
+  "currentSpecs": [
+    "specs/current/governance-policy.spec.md"
+  ],
+  "currentSpecsUpdated": true,
+  "approval": {
+    "by": "bitgorust",
+    "at": "2026-08-16T08:17:19Z"
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-16",
+  "archivedAt": "2026-08-16"
+}

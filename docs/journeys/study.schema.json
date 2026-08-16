@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/bitgorust/opencode-artifacts/blob/main/docs/journeys/study.schema.json",
+  "title": "Phase 0 journey study records",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "studyId", "corpusVersion", "release", "claimedPlatformIds", "records"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "studyId": { "type": "string", "minLength": 1, "maxLength": 120 },
+    "corpusVersion": { "const": 1 },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["package", "version", "integrity"],
+      "properties": {
+        "package": { "const": "opencode-artifacts" },
+        "version": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "integrity": { "type": "string", "pattern": "^(sha512-|sha256:)[A-Za-z0-9+/=:.-]+$" }
+      }
+    },
+    "claimedPlatformIds": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "records": {
+      "type": "array",
+      "maxItems": 100,
+      "items": { "$ref": "#/$defs/record" }
+    }
+  },
+  "$defs": {
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["participantId", "participantRole", "representative", "firstTimeUser", "conflict", "synthetic", "consent", "platform", "firstUse", "comprehension"],
+      "properties": {
+        "participantId": { "type": "string", "pattern": "^(p-[a-z0-9]{6,}|synthetic-[a-z0-9-]+)$" },
+        "participantRole": { "enum": ["primary", "secondary"] },
+        "representative": { "type": "boolean" },
+        "firstTimeUser": { "type": "boolean" },
+        "conflict": { "enum": ["none", "maintainer", "contributor", "rubric-reviewer", "other"] },
+        "synthetic": { "type": "boolean" },
+        "consent": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["given", "at", "protocolVersion", "withdrawnAt"],
+              "properties": {
+                "given": { "const": true },
+                "at": { "type": "string", "format": "date-time" },
+                "protocolVersion": { "const": 1 },
+                "withdrawnAt": { "type": ["string", "null"], "format": "date-time" }
+              }
+            }
+          ]
+        },
+        "platform": { "$ref": "#/$defs/platform" },
+        "firstUse": { "oneOf": [{ "type": "null" }, { "$ref": "#/$defs/firstUse" }] },
+        "comprehension": { "$ref": "#/$defs/comprehension" }
+      }
+    },
+    "platform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "os", "osVersion", "nodeVersion", "opencodeVersion", "browser", "browserVersion"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "os": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "osVersion": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "nodeVersion": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "opencodeVersion": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "browser": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "browserVersion": { "type": "string", "minLength": 1, "maxLength": 120 }
+      }
+    },
+    "firstUse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startedAt", "endedAt", "elapsedSeconds", "completed", "readmeOnly", "repositoryCheckout", "hostingAccount", "maintainerAssistance", "failureStep"],
+      "properties": {
+        "startedAt": { "type": "string", "format": "date-time" },
+        "endedAt": { "type": "string", "format": "date-time" },
+        "elapsedSeconds": { "type": "number", "minimum": 0, "maximum": 3600 },
+        "completed": { "type": "boolean" },
+        "readmeOnly": { "type": "boolean" },
+        "repositoryCheckout": { "type": "boolean" },
+        "hostingAccount": { "type": "boolean" },
+        "maintainerAssistance": { "type": "boolean" },
+        "failureStep": { "type": ["string", "null"], "maxLength": 300 }
+      }
+    },
+    "comprehension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fixtureId", "artifactSha256", "startedAt", "elapsedSeconds", "maintainerAssistance", "answers", "scores"],
+      "properties": {
+        "fixtureId": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "artifactSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "startedAt": { "type": "string", "format": "date-time" },
+        "elapsedSeconds": { "type": "number", "minimum": 0, "maximum": 600 },
+        "maintainerAssistance": { "type": "boolean" },
+        "answers": { "$ref": "#/$defs/fourFieldsText" },
+        "scores": { "$ref": "#/$defs/fourFieldsBoolean" }
+      }
+    },
+    "fourFieldsText": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["purpose", "primaryFinding", "provenance", "nextAction"],
+      "properties": {
+        "purpose": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "primaryFinding": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "provenance": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "nextAction": { "type": "string", "minLength": 1, "maxLength": 500 }
+      }
+    },
+    "fourFieldsBoolean": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["purpose", "primaryFinding", "provenance", "nextAction"],
+      "properties": {
+        "purpose": { "type": "boolean" },
+        "primaryFinding": { "type": "boolean" },
+        "provenance": { "type": "boolean" },
+        "nextAction": { "type": "boolean" }
+      }
+    }
+  }
+}

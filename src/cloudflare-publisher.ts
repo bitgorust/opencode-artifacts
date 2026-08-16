@@ -3,11 +3,13 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { FilePublisher, type PublishInput, type PublishResult, type Publisher } from "./publisher.ts";
 import { copyArtifacts, type Runner, runProcess } from "./github-pages.ts";
+import { assertSafeDeployment } from "./guard.ts";
 
 export interface CloudflareOptions {
   workerName: string;
   stagingDir: string;
   runner?: Runner;
+  allowSensitive?: boolean;
 }
 
 const WRANGLER_TOML = (name: string, main: string, kvId: string) => `name = "${name}"
@@ -35,6 +37,7 @@ export class CloudflarePublisher implements Publisher {
   private readonly workerName: string;
   private readonly stagingDir: string;
   private readonly runner: Runner;
+  private readonly allowSensitive: boolean;
 
   constructor(localDir: string, options: CloudflareOptions) {
     this.local = new FilePublisher(localDir);
@@ -42,6 +45,7 @@ export class CloudflarePublisher implements Publisher {
     this.workerName = options.workerName;
     this.stagingDir = options.stagingDir;
     this.runner = options.runner ?? runProcess;
+    this.allowSensitive = options.allowSensitive ?? false;
   }
 
   async publish(input: PublishInput): Promise<PublishResult> {
@@ -51,7 +55,17 @@ export class CloudflarePublisher implements Publisher {
   }
 
   async deploy(): Promise<string | undefined> {
+    await assertSafeDeployment(
+      this.localDir,
+      `workerName=${this.workerName}`,
+      this.allowSensitive,
+    );
     const main = await this.stage();
+    await assertSafeDeployment(
+      join(this.stagingDir, "assets"),
+      `workerName=${this.workerName}`,
+      this.allowSensitive,
+    );
     const kvId = await this.ensureKvNamespace();
     await writeFile(
       join(this.stagingDir, "wrangler.toml"),

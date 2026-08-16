@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-08-16",
+  "repositoryLicense": "MIT",
+  "authoredScopes": [
+    { "path": ".github/", "provenance": "repository-authored", "license": "MIT" },
+    { "path": ".gitignore", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "AGENTS.md", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "LICENSE", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "README.md", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "SECURITY.md", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "agents/", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "docs/", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "examples/", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "package-lock.json", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "package.json", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "scripts/", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "skills/", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "src/", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "test/", "provenance": "repository-authored", "license": "MIT" },
+    { "path": "tsconfig.json", "provenance": "repository-authored", "license": "MIT" }
+  ],
+  "binaryAssets": [
+    {
+      "path": "docs/evidence/artifact-page.png",
+      "sha256": "0a17e53478d86bb23c8624add368da6632f2cad34efd2458762338cfe681efc9",
+      "provenance": "repository-generated browser capture",
+      "source": "repository-authored synthetic incident-report fixture and renderer",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/comments.png",
+      "sha256": "569f3ff773b00040ff4250eb9cd6f319f534d01d0f933a9d2220c72a3ea651cc",
+      "provenance": "repository-generated browser capture",
+      "source": "repository-authored comments surface with synthetic content",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/gallery.png",
+      "sha256": "916f9b90b446f9968c4293829d33651272a936761803b2e997af71ecc28dc8dd",
+      "provenance": "repository-generated browser capture",
+      "source": "repository-authored gallery with synthetic artifacts",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/governance/renderer-upgrade-chromium-2026-08-16.png",
+      "sha256": "f61b86a00cd93a73fcc06f2947bb1f38def19c20328e4e944528ee1b32981951",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/tune-controls.md and documented adversarial smoke",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/hosted-worker.png",
+      "sha256": "edff691758c877801de3b0d77d519ddc9dd15ec271c967e4d0614192f520e2f9",
+      "provenance": "repository-generated browser capture",
+      "source": "user-operated test deployment of a repository-authored synthetic fixture",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/hosted-workshop.png",
+      "sha256": "a6451f5fbcc87cdbeebe17eb5180bb4813d308ec85042a0406a084db58337a03",
+      "provenance": "repository-generated browser capture",
+      "source": "user-operated test deployment of examples/patterns/workshop.md",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/live-artifact.png",
+      "sha256": "edff691758c877801de3b0d77d519ddc9dd15ec271c967e4d0614192f520e2f9",
+      "provenance": "repository-generated browser capture",
+      "source": "repository-authored live artifact with synthetic content",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/live-gallery.png",
+      "sha256": "1f66acac18a19f7af420c8e48250031da43216cfd9ee2248346c58eab4a30402",
+      "provenance": "repository-generated browser capture",
+      "source": "repository-authored live gallery with synthetic artifacts",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/compare-layouts.png",
+      "sha256": "8d4847f887462c6953067b0dd4bd2ca5faf692e9ac5d7224f0188225a8639784",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/compare-layouts.md",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/dashboard.png",
+      "sha256": "62f848af2e23c26493d3f9e24b6af4e59516e8d9ce1e0fd2b68169dfc98281dc",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/dashboard.md",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/funnel-editorial.png",
+      "sha256": "5b5c0a84ad004d4cb8a15bf806d8534f432f63021051fde073ade896ca0f6666",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/funnel-analysis.md editorial theme",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/funnel-ops.png",
+      "sha256": "24a27c29a6f1b9bf09e760ad778662e3c260aa56d6b8fa0c735f414b1740bc73",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/funnel-analysis.md ops theme",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/funnel-report.png",
+      "sha256": "f618a5ad36a7c037338e17714d7a1510eaa21b4c4bbb816de7bf55030ffeec2e",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/funnel-analysis.md report theme",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/incident.png",
+      "sha256": "e9711c045dbf0bf8feaeba0515a68bc922e428b002e175766deb273d6bdb436c",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/incident.md",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/license-audit.png",
+      "sha256": "3b0fef251ca06f84288571b9bcbcc4c89664bdcab28182daa24b9b277981769c",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/license-audit.md",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/plan.png",
+      "sha256": "f9c45f52c16dcfb5e9b6b12adfe33363d281d2ddd168e9487bac5570f797b541",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/plan.md",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/pr-walkthrough.png",
+      "sha256": "0214823d65bab1852a5ea48a0076a8eaebc82a88d944ee26edfe35da29eb1c06",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/pr-walkthrough.md",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/release-checklist.png",
+      "sha256": "248835c3c195360cc7be6f4555972fe1ea65d64e52cb54cee9bdcccbc22d9cb7",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/release-checklist.md",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/tune-controls.png",
+      "sha256": "704e911c81da45be5cd89300f5d621635294aaa2a35c25254b915d5dbd383e7b",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/tune-controls.md",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/patterns/workshop.png",
+      "sha256": "72a7125f6271576c57340dfc16dc11c0cf64d3d65174b8ab4b645ce4630dbcd0",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/workshop.md",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/theme-toggle-dark.png",
+      "sha256": "b495dfbb3bc4a8c5b3e7a445cd63e5eb32f3e59ff3f857f0c1d087796033b742",
+      "provenance": "repository-generated browser capture",
+      "source": "repository-authored synthetic page and renderer dark-theme control",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    }
+  ],
+  "embeddedFonts": [],
+  "externalBenchmarkReferences": [
+    {
+      "url": "https://code.claude.com/docs/en/artifacts",
+      "role": "official current feature and visual reference",
+      "localCopy": null,
+      "redistribution": "link-only"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=m7TJqx8CYG8",
+      "role": "official launch demonstration used as historical visual context",
+      "localCopy": null,
+      "redistribution": "link-only"
+    }
+  ],
+  "removedMaterials": [
+    {
+      "path": "docs/references/claude-artifact-viewer.png",
+      "sha256": "5784a8cdc227f204a8b7ebf9a5e6cf4056170db17d2ea96b85f11a1aba82bdf3",
+      "source": "official Anthropic viewer screenshot",
+      "reason": "no explicit redistribution license was established; use the official link instead",
+      "status": "removed"
+    }
+  ],
+  "dependencyEvidence": [
+    "package-lock.json",
+    "docs/license-dispositions.json",
+    "docs/evidence/governance/renderer-remediation-2026-08-16.md"
+  ]
+}

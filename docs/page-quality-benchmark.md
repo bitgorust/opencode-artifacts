@@ -42,9 +42,9 @@ Reference material is ranked to avoid building a target from cherry-picked third
    current supported CLI and Artifact feature.
 2. **Official Anthropic material.** The
    [Artifact guide](https://code.claude.com/docs/en/artifacts),
-   [official viewer screenshot](references/claude-artifact-viewer.png), and
    [launch demonstration](https://www.youtube.com/watch?v=m7TJqx8CYG8) define the initial
-   task families and visible quality bar.
+   task families and visible quality bar. These are link-only references; their media is not
+   copied into this repository without recorded redistribution authority.
 3. **Public community examples.** These may reveal useful patterns, but are supplemental
    because selection bias, unknown prompts, manual editing, and uncertain provenance make
    them unsuitable as pass/fail references.
@@ -156,8 +156,8 @@ Artifact design change.
 ## Current status
 
 The repository has a useful renderer regression corpus under `examples/patterns/` and
-`docs/evidence/patterns/`, and it retains one official viewer screenshot. That proves pattern
-coverage and catches regressions; it is not a same-input comparative benchmark.
+`docs/evidence/patterns/`; official visual material remains link-only. The local corpus proves
+pattern coverage and catches regressions; it is not a same-input comparative benchmark.
 
 A visual audit of the closest dashboard pair found a concrete shortfall: the current
 OpenCode example renders a small fixed-size chart inside a wide card with a large unintended

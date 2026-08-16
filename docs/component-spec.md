@@ -3,11 +3,12 @@
 Goal: reach Claude Code Artifacts **page** quality while keeping our authoring model
 (model writes Markdown + JSON specs, fixed renderer owns the HTML/CSS).
 
-Reference: `docs/references/claude-artifact-viewer.png` (official viewer screenshot),
+Reference: the official [Claude Code Artifact guide](https://code.claude.com/docs/en/artifacts),
 `docs/claude-code-comparison.md` (pattern list from official docs), and
-`docs/page-quality-benchmark.md` (comparative quality gate).
+`docs/page-quality-benchmark.md` (comparative quality gate). Official media remains link-only
+unless explicit redistribution authority is recorded.
 
-## Design tokens (extracted from the official screenshot)
+## Design tokens (adapted from the official visual reference)
 
 ```
 --page-bg:        #e9edf2  (light gray-blue)

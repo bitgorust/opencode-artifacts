@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "corpusVersion": 1,
+  "journeys": [
+    {
+      "id": "first-use-create-reopen",
+      "stage": "create",
+      "status": "protocol-ready",
+      "purpose": "Install the released package, create one offline artifact, and reopen it from README instructions.",
+      "preconditions": ["eligible first-time user", "clean claimed platform", "exact released package", "no repository checkout", "no hosting account"],
+      "success": "Offline artifact is created and reopened in at most 600 seconds without assistance.",
+      "failure": "Retain timeout, assistance, checkout/hosting use, or first failed step.",
+      "decisionState": ["artifact reference", "local visibility", "portable capability"]
+    },
+    {
+      "id": "create-local",
+      "stage": "create",
+      "status": "shipped-partial",
+      "purpose": "Publish a Markdown artifact locally and inspect the returned path/hash.",
+      "preconditions": ["package installed", "local write permission"],
+      "success": "Tool returns stable path and content hash; page opens offline.",
+      "failure": "Permission, validation, secret, or size refusal remains visible.",
+      "decisionState": ["slug/path reference", "content hash", "local visibility", "portable capability"]
+    },
+    {
+      "id": "revise-by-reference",
+      "stage": "revise",
+      "status": "shipped-partial",
+      "purpose": "Republish using the exact artifact reference and expected content hash.",
+      "preconditions": ["existing local artifact", "last-read content hash"],
+      "success": "Stable path is refreshed and the new hash is returned.",
+      "failure": "A stale hash refuses without writing and returns bounded live content.",
+      "decisionState": ["path reference", "head hash", "local visibility", "portable capability"]
+    },
+    {
+      "id": "review-bring-back",
+      "stage": "review",
+      "status": "shipped-partial",
+      "purpose": "Inspect a portable page and copy or record a result for the OpenCode session.",
+      "preconditions": ["rendered fixture", "portable or served capability stated"],
+      "success": "Viewer identifies or records a result and the session can consume the supported output.",
+      "failure": "Unavailable served-only state remains visible and is not presented as portable persistence.",
+      "decisionState": ["artifact reference", "current content", "local/served capability"]
+    },
+    {
+      "id": "share-explicit-target",
+      "stage": "share",
+      "status": "shipped-partial",
+      "purpose": "Select a public snapshot target separately from local rendering.",
+      "preconditions": ["existing artifact", "named provider target", "deploy permission"],
+      "success": "User confirms actual public visibility and receives the target URL.",
+      "failure": "Denied, failed, or unverified deployment leaves the local artifact unchanged.",
+      "decisionState": ["artifact reference", "target", "public visibility", "public-static capability"]
+    },
+    {
+      "id": "later-lifecycle",
+      "stage": "reconnect-export-archive-restore",
+      "status": "deferred",
+      "purpose": "Track later lifecycle journeys without claiming Phase 0 delivery.",
+      "preconditions": ["Phase 1 lifecycle contract"],
+      "success": "Defined and tested by the owning later phase.",
+      "failure": "Current absence remains explicit.",
+      "decisionState": ["stable artifact ID", "revision", "archive/restore capability"]
+    }
+  ],
+  "fixtures": [
+    {
+      "id": "incident",
+      "source": "docs/journeys/fixtures/incident.md",
+      "rubric": {
+        "purpose": "Summarize and respond to checkout incident 4172.",
+        "primaryFinding": "A synchronous fraud check in svc-payments 1.88.0 caused the latency spike.",
+        "provenance": "Incident timeline, payment deploy log, latency injection, and ledger checks captured 2026-08-15.",
+        "nextAction": "Move the fraud check async with a 200 ms budget and default-allow timeout under PAY-2210."
+      }
+    },
+    {
+      "id": "release",
+      "source": "docs/journeys/fixtures/release.md",
+      "rubric": {
+        "purpose": "Show release 2.14 readiness.",
+        "primaryFinding": "The performance baseline is the remaining hard blocker.",
+        "provenance": "Release tracker snapshot and staging migration run captured 2026-08-15.",
+        "nextAction": "Restore the benchmark cluster and rerun the performance baseline."
+      }
+    },
+    {
+      "id": "review",
+      "source": "docs/journeys/fixtures/review.md",
+      "rubric": {
+        "purpose": "Review PR 412's cache TTL change.",
+        "primaryFinding": "Dropping the default TTL from 300 seconds to 5 seconds would hammer the origin.",
+        "provenance": "PR 412 diff and Wednesday-Thursday deploy failure investigation captured 2026-08-15.",
+        "nextAction": "Restore the 300-second default and reject TTL values below one before merge."
+      }
+    },
+    {
+      "id": "migration",
+      "source": "docs/journeys/fixtures/migration.md",
+      "rubric": {
+        "purpose": "Plan migration of session storage from Redis to Postgres.",
+        "primaryFinding": "The plan is four of six complete, with dual-write drift and unverified indexes as open risks.",
+        "provenance": "Session architecture notes and 30-day volume assumptions captured 2026-08-15.",
+        "nextAction": "Decide anonymous-session retention and benchmark indexes before Phase 2 sign-off."
+      }
+    }
+  ]
+}

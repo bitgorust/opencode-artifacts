@@ -6,6 +6,8 @@ export type Check =
   | { id: string; kind: "readme-one-liner" }
   | { id: string; kind: "readme-links" }
   | { id: string; kind: "requirements-traceability"; spec: string; traceability: string }
+  | { id: string; kind: "docs-links" }
+  | { id: string; kind: "governance-policy" }
   | { id: string; kind: "spec-workflow" }
   | { id: string; kind: "package-field"; field: "version-semver" | "metadata" | "files-skills" };
 
@@ -20,6 +22,8 @@ export const CHECKS: Check[] = [
   { id: "readme-section-contributing", kind: "readme-section", section: "## Contributing" },
   { id: "readme-section-license", kind: "readme-section", section: "## License" },
   { id: "readme-links", kind: "readme-links" },
+  { id: "docs-link-integrity", kind: "docs-links" },
+  { id: "governance-policy", kind: "governance-policy" },
   { id: "no-as-any", kind: "grep-forbidden", pattern: "as any", glob: "src/**/*.ts" },
   { id: "no-ts-ignore", kind: "grep-forbidden", pattern: "@ts-ignore", glob: "src/**/*.ts" },
   { id: "no-ts-expect-error", kind: "grep-forbidden", pattern: "@ts-expect-error", glob: "src/**/*.ts" },

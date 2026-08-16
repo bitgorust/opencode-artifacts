@@ -168,6 +168,7 @@ async function deployCommand(args: string[]): Promise<void> {
     const publisher = new CloudflarePublisher(dir, {
       workerName: name,
       stagingDir: join(home, ".cache", "opencode-artifacts", "cloudflare", name),
+      allowSensitive: args.includes("--force"),
     });
     const url = await publisher.deploy();
     console.log(url ?? "deployed (workers.dev url not found in output)");
@@ -178,7 +179,12 @@ async function deployCommand(args: string[]): Promise<void> {
   const branch = optionValue(args, "--branch") ?? "main";
   if (!repo || !repo.includes("/")) usage();
   const cloneDir = join(home, ".cache", "opencode-artifacts", "ghpages", repo.replace("/", "__"));
-  const publisher = new GitHubPagesPublisher(dir, { repo, branch, cloneDir });
+  const publisher = new GitHubPagesPublisher(dir, {
+    repo,
+    branch,
+    cloneDir,
+    allowSensitive: args.includes("--force"),
+  });
   const baseUrl = await publisher.sync("deploy artifacts");
   console.log(baseUrl);
 }

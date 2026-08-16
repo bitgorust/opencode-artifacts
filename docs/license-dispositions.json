@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-08-16",
+  "approvedBy": "bitgorust",
+  "approvedAt": "2026-08-16T14:57:27Z",
+  "dispositions": [
+    {
+      "path": "node_modules/khroma",
+      "version": "2.1.0",
+      "declaredLicense": null,
+      "selectedLicense": "MIT",
+      "licenseFile": "node_modules/khroma/license",
+      "sha256": "66b333b0f66759a0b710459e03f7029abe17f4358114a128d2c972e642961b49"
+    },
+    {
+      "path": "node_modules/dompurify",
+      "version": "3.4.13",
+      "declaredLicense": "(MPL-2.0 OR Apache-2.0)",
+      "selectedLicense": "Apache-2.0",
+      "licenseFile": "node_modules/dompurify/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    {
+      "path": "node_modules/json-schema",
+      "version": "0.4.0",
+      "declaredLicense": "(AFL-2.1 OR BSD-3-Clause)",
+      "selectedLicense": "BSD-3-Clause",
+      "licenseFile": "node_modules/json-schema/LICENSE",
+      "sha256": "4e053c510d6f3e4724213a292c65142df68d069c40f558582bc4270914e16f77"
+    }
+  ]
+}

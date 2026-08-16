@@ -197,16 +197,24 @@ coverage map is [`docs/requirements-traceability.md`](requirements-traceability.
   work into a durable page. Reviewers and small teams are the secondary audience;
   organization administrators are the tertiary audience. When priorities conflict, preserve
   local authoring first, review second, and administration third without weakening security.
-- **OUT-02:** A first-time user on a supported clean machine MUST be able to install the
-  released package, create an offline artifact, and reopen it by following only the README in
-  at most ten minutes, without a repository checkout or hosting account.
-- **OUT-03:** In the checked-in journey corpus, at least 90% of at least ten representative
-  primary users MUST be able to identify the artifact's purpose, primary finding/state,
-  provenance, and next action within one minute without maintainer assistance. A collaboration
-  release additionally includes at least five representative secondary reviewers.
-- **OUT-04:** Local artifact core, local collaboration, public snapshots, authenticated
-  collaboration, and connector-capable artifacts MUST remain separately releasable outcomes.
-  A release MUST meet every requirement assigned to its claimed level.
+- **OUT-02:** A certified local-artifact-core or later release MUST show that a first-time user
+  on every claimed supported clean machine can install the exact package, create an offline
+  artifact, and reopen it by following only the README in at most ten minutes, without a
+  repository checkout or hosting account. An explicitly unsupported public preview MAY
+  distribute without this baseline only while recording it incomplete and making no first-use
+  or support claim. Synthetic agent probes are diagnostic and never participant evidence.
+- **OUT-03:** A certified local-artifact-core or later release MUST show that, in the checked-in
+  journey corpus, at least 90% of at least ten representative primary users identify the
+  artifact's purpose, primary finding/state, provenance, and next action within one minute
+  without maintainer assistance. A collaboration certification additionally includes at least
+  five representative secondary reviewers. An explicitly unsupported public preview MAY
+  distribute without this baseline only while recording it incomplete and making no human-
+  comprehension claim; model runs remain synthetic diagnostics.
+- **OUT-04:** Public preview is a non-certified distribution state that MAY precede the
+  separately releasable local artifact core, local collaboration, public snapshots,
+  authenticated collaboration, and connector-capable artifact levels. Public preview MUST be
+  labeled unsupported and uncertified and supplies no waiver or accumulated evidence to a
+  later level. A certified release MUST meet every requirement assigned to its claimed level.
 - **OUT-05:** Product-outcome measurement MUST use consented studies, local/CI benchmarks, or
   opt-in telemetry. The package MUST NOT send usage telemetry by default, and declining
   measurement MUST NOT reduce product functionality.
@@ -510,10 +518,13 @@ coverage map is [`docs/requirements-traceability.md`](requirements-traceability.
 
 ## 11. Compatibility, portability, and migration requirements
 
-- **COMPAT-01:** The support matrix MUST name tested Node, OpenCode, OS, desktop browser, and
-  mobile browser ranges. The target floor is Node 24+, current and oldest-supported stable
+- **COMPAT-01:** The support matrix MUST distinguish exact tested, unverified, unsupported, and
+  supported Node, OpenCode, OS, desktop-browser, and mobile-browser ranges. Certified local-
+  artifact-core and later releases target Node 24+, current and oldest-supported stable
   OpenCode, current Ubuntu LTS, current and previous macOS, Windows 11, and the latest two
-  stable Chromium/Firefox/Safari releases where available.
+  stable Chromium/Firefox/Safari releases where available. Public preview MAY have zero
+  supported cells only when every release surface says so and narrow technical observations
+  are not promoted into support.
 - **COMPAT-02:** The portable HTML file is the long-term compatibility artifact. It MUST remain
   openable without this package, OpenCode, a service worker, an installed runtime, or a
   network connection on every supported browser.
@@ -545,9 +556,13 @@ coverage map is [`docs/requirements-traceability.md`](requirements-traceability.
 - **DIST-02:** Registry, official OpenCode configuration, and local-development installation
   paths MUST be tested and documented from clean state. Published packages MUST remain usable
   across patch fixes unless a documented security issue requires otherwise.
-- **DIST-03:** Releases MUST use SemVer and Conventional Commits, include generated or checked
-  release notes, state their release level/capabilities, name migrations and known limits,
-  and link the evidence supporting any parity or production-readiness claim.
+- **DIST-03:** Every distribution MUST use SemVer and Conventional Commits, include generated
+  or checked release notes, state its distribution/certification status and capabilities,
+  name migrations and known limits, and link exact evidence. Public preview MUST pass build,
+  test, structural, package, final-byte security, vulnerability, license, redistribution,
+  private-intake, trusted-publishing, registry-integrity, signature, and provenance gates; it
+  MUST also expose missing OUT-02, OUT-03, support, parity, and production-readiness evidence.
+  Certified releases additionally meet every requirement for their claimed level.
 - **DIST-04:** Release CI MUST produce an SBOM and provenance/attestation for the packed bytes,
   scan runtime and development dependencies for known vulnerabilities and incompatible
   licenses, and document how consumers verify package integrity.
@@ -586,9 +601,12 @@ coverage map is [`docs/requirements-traceability.md`](requirements-traceability.
 - **QUAL-07:** A page-quality claim requires the dated prompts, fixtures, all required runs,
   interaction traces, hard-gate results, blinded rubric distributions, reference environment,
   and authorization metadata defined in `docs/page-quality-benchmark.md`.
-- **QUAL-08:** Release evidence MUST state failures, exclusions, flaky-test disposition, and
-  unsupported platforms as visibly as successes. Documentation and the README capability
-  matrix MUST be checked against this requirement set before release.
+- **QUAL-08:** Distribution evidence MUST state failures, exclusions, flaky-test disposition,
+  unsupported platforms, and uncollected human evidence as visibly as successes.
+  Documentation and README claims MUST be checked against this requirement set before every
+  distribution. Missing OUT-02, OUT-03, and support evidence is permitted only for explicitly
+  unsupported, uncertified public preview and remains incomplete rather than passed or not
+  applicable.
 
 ## 14. Definition of complete
 

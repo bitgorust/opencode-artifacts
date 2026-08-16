@@ -39,9 +39,29 @@ export interface SensitiveFileFinding {
 export async function scanArtifactDirectory(dir: string): Promise<SensitiveFileFinding[]> {
   const results: SensitiveFileFinding[] = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
-    if (!entry.isFile() || !entry.name.endsWith(".html")) continue;
+    if (!entry.isFile()) continue;
     const findings = scanSensitive(await readFile(join(dir, entry.name), "utf8"));
     if (findings.length > 0) results.push({ file: entry.name, findings });
   }
   return results;
+}
+
+export async function assertSafeDeployment(
+  dir: string,
+  configuration: string,
+  allowSensitive = false,
+): Promise<void> {
+  if (allowSensitive) return;
+  const results = await scanArtifactDirectory(dir);
+  const configurationFindings = scanSensitive(configuration);
+  if (configurationFindings.length > 0) {
+    results.push({ file: "<deployment-config>", findings: configurationFindings });
+  }
+  if (results.length === 0) return;
+  const details = results
+    .map(({ file, findings }) => `${file}: ${formatFindings(findings)}`)
+    .join("; ");
+  throw new Error(
+    `deploy blocked: credential-looking strings found: ${details}. Re-run with --force to deploy anyway.`,
+  );
 }

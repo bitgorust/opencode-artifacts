@@ -4,8 +4,10 @@ Status: Draft / Passed / Failed / Withdrawn
 
 Decision date: YYYY-MM-DD
 
-Release level: local artifact core / local collaboration / public snapshots / authenticated
-collaboration / connector-capable artifacts
+Distribution status: public preview / certified
+
+Certified release level: none (public preview) / local artifact core / local collaboration /
+public snapshots / authenticated collaboration / connector-capable artifacts
 
 Release owner: `<one accountable person>`
 
@@ -16,6 +18,7 @@ them here.
 ## Claim and scope
 
 - User outcome being released:
+- Preview/support/certification label shown to users:
 - Archived change packets included in this release:
 - Included capability classes:
 - Explicitly unavailable capabilities:
@@ -23,6 +26,11 @@ them here.
 - Supported schema range and migration source versions:
 - Support and security-fix window:
 - Known limitations:
+
+For public preview, OUT-02, OUT-03, supported-platform, parity, and production-readiness rows
+remain `incomplete` or `unverified`, never pass or N/A. Public preview must say unsupported and
+uncertified everywhere it is summarized. For certification, resolve every applicable row
+under the selected accumulated release level.
 
 ## Requirements decision
 
@@ -59,6 +67,29 @@ npm run check
 | packed-host current stable OpenCode |  |  |  |
 
 Record skipped, flaky, retried, quarantined, and platform-specific failures here:
+
+## Public-preview transition (required for public preview)
+
+| Pre-publish hard gate | Pass / Fail | Exact evidence |
+|---|---|---|
+| tests |  |  |
+| build |  |  |
+| structural checks |  |  |
+| exact package contents/coordinate |  |  |
+| final secret scan and CSP |  |  |
+| vulnerability audit |  |  |
+| license disposition |  |  |
+| redistribution inventory |  |  |
+| private vulnerability intake |  |  |
+| exact npm trusted-publisher binding |  |  |
+
+| Post-publish hard gate | Pass / Fail | Exact evidence |
+|---|---|---|
+| registry integrity equals packed bytes |  |  |
+| registry package signature |  |  |
+| registry provenance for exact tag/commit/workflow |  |  |
+
+Transition result: **development / preview-candidate / public-preview / failed**
 
 ## Browser, accessibility, and page quality
 
@@ -106,10 +137,12 @@ reduce the claim rather than converting it to a pass.
 
 ## Supply-chain outputs
 
-- Packed filename, digest, and registry provenance:
-- SBOM:
-- Attestation/signature verification:
-- Dependency/license/vulnerability reports:
+- Packed filename, SHA-256, SRI, tag/commit/workflow, and registry integrity cross-check:
+- CycloneDX JSON from the exact lockfile/install:
+- Registry trusted-publisher status and published provenance URL/verification (configuration is not evidence):
+- Registry signature verification:
+- Dependency vulnerability report and disposition:
+- SPDX license/attribution inventory and disposition:
 - Release notes and migration guide:
 
 ## Decision, rollout, and support
@@ -121,7 +154,7 @@ reduce the claim rather than converting it to a pass.
 - Post-release checks and monitoring window:
 - Incident/support contacts:
 
-Final decision: **Pass / Fail / Reduce claim**
+Final decision: **Public preview / Certified pass / Fail / Reduce claim**
 
 Accountable release owner:
 

@@ -12,10 +12,15 @@ through the official documentation index on 2026-08-15. The
 [launch post](https://claude.com/blog/artifacts-in-claude-code) is historical context: its
 Team/Enterprise-only, no-public-sharing beta statements have been superseded by the current
 guide.
-The official viewer screenshot is retained at `docs/references/claude-artifact-viewer.png`.
+Official viewer media is referenced through the current documentation and is not retained
+locally without explicit redistribution authority. The exact disposition is recorded in
+[`docs/redistribution-policy.md`](redistribution-policy.md).
 Binary-string research is supplemental and does not establish official behavior or parity.
 The target contract and honest release levels are in [`docs/product-spec.md`](product-spec.md)
 and [`docs/roadmap.md`](roadmap.md).
+Current [support](support-policy.md), [security](security.md), and
+[data-governance](data-governance.md) policies make the remaining platform, private-reporting,
+authenticated-lifecycle, and supply-chain evidence gaps explicit.
 
 Local reference evidence is explicit rather than inferred: OpenCode 1.18.18 loaded this
 checkout and registered all four tools, while a healthy native Claude Code 2.1.233 install

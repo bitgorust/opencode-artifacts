@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { handleApiRequest, type KVStore } from "../src/cloudflare/handler.ts";
@@ -156,6 +156,34 @@ test("cloudflare publishers use worker-specific KV namespace titles", async () =
       runner,
     }).deploy();
     assert.ok(calls.some((call) => call.includes("namespace create ARTIFACTS_KV_team-site")));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("cloudflare deploy blocks sensitive stale files in the reused staging tree", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "cf-stale-"));
+  try {
+    const localDir = join(dir, "local");
+    const stagingDir = join(dir, "staging");
+    await mkdir(localDir);
+    await mkdir(join(stagingDir, "assets"), { recursive: true });
+    await writeFile(join(localDir, "clean.html"), "<h1>clean</h1>");
+    await writeFile(
+      join(stagingDir, "assets", "stale.json"),
+      "ghp_0123456789abcdefABCDEF0123456789",
+    );
+    const calls: string[] = [];
+    const publisher = new CloudflarePublisher(localDir, {
+      workerName: "opencode-artifacts",
+      stagingDir,
+      runner: async (command, args) => {
+        calls.push(`${command} ${args.join(" ")}`);
+        return "";
+      },
+    });
+    await assert.rejects(publisher.deploy(), /deploy blocked.*stale\.json/);
+    assert.deepEqual(calls, []);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

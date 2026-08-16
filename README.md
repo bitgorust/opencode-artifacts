@@ -2,6 +2,11 @@
 
 Publish OpenCode session output as self-contained, interactive HTML artifact pages.
 
+> **Status: public preview.** The project is publicly inspectable but currently unsupported
+> and uncertified. There are zero fully supported platform/browser cells, and no representative-
+> user first-use or comprehension baseline is claimed. Exact technical and supply-chain
+> evidence is linked below.
+
 [![npm](https://img.shields.io/npm/v/opencode-artifacts)](https://www.npmjs.com/package/opencode-artifacts)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -31,6 +36,7 @@ output stays diff-friendly and cheap in tokens.
 - [Authoring format](#authoring-format)
 - [Sharing and hosting](#sharing-and-hosting)
 - [Limitations](#limitations)
+- [Governance and support](#governance-and-support)
 - [Development](#development)
 - [Product specification](#product-specification)
 - [Roadmap](#roadmap)
@@ -47,7 +53,7 @@ output stays diff-friendly and cheap in tokens.
 - **Gallery + versions**: every publish updates `.opencode/artifacts/index.html`; `version: true` keeps numbered history; `restore` rolls back; a stale-version hash guard prevents blind overwrites
 - **Interactive**: chart-bound controls (vega-lite `params.bind`, echarts `dataZoom`), text-selection comments, workshop decision pages the session can read back
 - **Live reload**: `opencode-artifacts serve` refreshes open pages on every republish
-- **Sharing**: cost-free public hosting via GitHub Pages, or authenticated hosting via Cloudflare Workers + KV + Access
+- **Sharing**: cost-free public snapshots via GitHub Pages or a user-operated Cloudflare Worker + KV; Cloudflare Access is a manual, unverified perimeter
 - **Safe by default**: no raw HTML passthrough, credential-pattern scan blocks accidental secret leaks, no external requests at view time
 
 ## Install
@@ -56,8 +62,11 @@ output stays diff-friendly and cheap in tokens.
 opencode plugin opencode-artifacts
 ```
 
-Published at [npmjs.com/package/opencode-artifacts](https://www.npmjs.com/package/opencode-artifacts)
-with provenance attestations (trusted publishing, see `docs/release.md`).
+Published at [npmjs.com/package/opencode-artifacts](https://www.npmjs.com/package/opencode-artifacts).
+The [dated provider report](docs/evidence/governance/provider-status-2026-08-16.md) verifies
+provenance for the then-current registry release. The registry trusted-publisher setting and
+provenance for unreleased candidate bytes remain unverified until post-publish checks; see the
+[support and release policy](docs/support-policy.md).
 
 The official OpenCode plugin command installs the package and updates the project config.
 Alternatively, add the npm package directly to `opencode.json`; OpenCode installs npm plugin
@@ -162,7 +171,7 @@ browser-verified screenshots in [`docs/evidence/patterns/`](docs/evidence/patter
 | Local files | (default) | `.opencode/artifacts/<slug>.html` + gallery |
 | Live preview | `opencode-artifacts serve` | localhost gallery, SSE live reload, comments/decisions/mini-DB persistence |
 | GitHub Pages | `opencode-artifacts deploy --repo you/artifacts` | public URL per artifact; git history as audit log ([live demo](https://bitgorust.github.io/artifacts/)) |
-| Cloudflare | `deploy --target cloudflare --name my-artifacts` | Workers + KV hosted gallery; comments/decisions/DB work hosted; add Access for org auth — [guide](docs/hosted-cloudflare.md) |
+| Cloudflare | `deploy --target cloudflare --name my-artifacts` | User-operated public-by-default Worker + KV; comments/decisions/DB work hosted; Access is a manual perimeter — [guide](docs/hosted-cloudflare.md) |
 
 ## Limitations
 
@@ -174,6 +183,23 @@ browser-verified screenshots in [`docs/evidence/patterns/`](docs/evidence/patter
   verified access policy managed by this package.
 - Hosted pages do not yet push new revisions into already-open browsers, and hosted MCP calls
   do not run through each viewer's identity.
+- No complete Node/OpenCode/OS/browser cell currently meets the supported-platform evidence
+  gate. Existing Linux host and CI observations have narrower scopes.
+
+## Governance and support
+
+Current public-preview policy is explicit about incomplete certification evidence:
+
+- [support and release policy](docs/support-policy.md) — Node 24 floor, zero currently
+  supported full matrix cells, current-minor fix window, deprecation and D-06 supply chain;
+- [security model and response](docs/security.md) and [public reporting status](SECURITY.md) —
+  threat boundaries and response process; private vulnerability reporting is enabled and
+  verified;
+- [data governance](docs/data-governance.md) — no default local telemetry, mode-specific
+  inventory, operator/controller boundaries, retention/deletion and public abuse handling.
+
+These documents do not turn missing provider, platform, participant, or production evidence
+into a readiness claim.
 
 ## Development
 
@@ -234,4 +260,6 @@ visual, attach a browser screenshot. Standard and high-risk behavior changes als
 
 ## License
 
-[MIT](LICENSE) © bitgorust
+[MIT](LICENSE) © bitgorust. Documentation, examples, retained screenshots, dependency
+dispositions, and link-only benchmark references are covered by the
+[redistribution inventory](docs/redistribution-policy.md).

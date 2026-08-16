@@ -270,7 +270,9 @@ const BOOT = `(function () {
     if (entry.error) { fail(entry.error); return; }
     try {
       if (entry.kind === "vega") {
-        window.vegaEmbed(el, entry.spec, { actions: false, ast: true });
+        Promise.resolve(window.vegaEmbed(el, entry.spec, { actions: false, ast: true })).catch(function (err) {
+          fail(err && err.message ? err.message : String(err));
+        });
       } else if (entry.kind === "echarts") {
         var chart = window.echarts.init(el);
         chart.setOption(entry.spec);

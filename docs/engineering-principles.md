@@ -193,6 +193,9 @@ collectively exhausted by [`docs/product-spec.md`](product-spec.md), not repeate
   local `npm run check` uses the same structural assertions. [check:file-ci]
 - Failed, excluded, flaky, unsupported, and not-applicable outcomes are visible beside passes.
   Evidence is never cherry-picked to protect a claim.
+- Contract Markdown links to repository files and headings are validated deterministically;
+  authoritative external-source checks are bounded, dated, and report skipped or failed
+  network results instead of treating configuration as evidence. [check:docs-link-integrity]
 
 ## 9. Distribution and supply-chain integrity
 
@@ -205,7 +208,14 @@ collectively exhausted by [`docs/product-spec.md`](product-spec.md), not repeate
   tarball. [check:pkg-metadata] [check:pkg-files-skills] [check:file-license]
 - Releases are built and tested from the exact packed bytes in clean supported hosts. They
   produce dependency/license/vulnerability evidence, SBOM, and provenance suitable for
-  consumer integrity verification.
+  consumer integrity verification. Platform, provider, privacy, and provenance claims may
+  pass only from exact dated evidence; absent or separately scoped observations stay
+  unverified. [check:governance-policy]
+- Public preview is a non-certified distribution state, not a weaker certification level. It
+  may expose missing human, platform, parity, and production evidence only while claiming zero
+  support and passing every exact security, privacy, package, trusted-publishing, integrity,
+  signature, and provenance hard gate. Synthetic agents remain diagnostics; preview history
+  never supplies a certification waiver.
 - Dependencies default to zero additions. A dependency must justify capability, browser
   weight, CSP/network behavior, license, vulnerability surface, update ownership, and removal
   path. Conditional inlining is the exception that permits existing heavy visual runtimes.

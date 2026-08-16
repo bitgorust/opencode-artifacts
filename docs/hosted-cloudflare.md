@@ -1,13 +1,20 @@
-# Authenticated hosting on Cloudflare (free tier)
+# User-operated hosting on Cloudflare
 
-The `cloudflare` deploy target publishes your artifact gallery to a Cloudflare Worker with a
+The `cloudflare` deploy target publishes your artifact gallery to a Cloudflare Worker in your
+account with a
 KV-backed state store: workshop decisions, comments, and the mini-DB all work on the hosted
 site — the same API surface as local `serve`, minus shell datasources (`/__data` returns 501,
 since Workers can't run local commands).
 
-Free-tier coverage: Workers (100k requests/day), KV (100k reads / 1k writes per day),
-Workers Static Assets (included). Cloudflare Access is free for up to 50 users and adds
-org-grade identity in front of the whole site.
+The generated `workers.dev` URL is public by default. You are the deployment operator and
+controller; Cloudflare is the provider under your account and terms. This project does not
+select a region, operate the service, promise backups/log retention or an SLA, or verify
+Cloudflare Access. See the [data governance policy](data-governance.md) before deploying.
+
+Cloudflare's current published Free limits include 100,000
+[Worker requests/day](https://developers.cloudflare.com/workers/platform/limits/) and 100,000
+[KV reads plus 1,000 writes/day](https://developers.cloudflare.com/kv/platform/limits/).
+Plans and quotas can change; confirm them in the provider account before relying on them.
 
 ## One-time setup
 
@@ -37,7 +44,7 @@ org-grade identity in front of the whole site.
    you need before redeploying an older Worker. Static artifact HTML and the local manifest
    format are unchanged.
 
-## Add identity (Cloudflare Access, free ≤ 50 users)
+## Add a manual identity perimeter with Cloudflare Access
 
 This is currently a manual operator step. Until Access is configured and verified, the
 Workers URL is public; the package does not yet provide Claude-style private-by-default
@@ -47,8 +54,9 @@ sharing, roles, or revocation. See the authenticated-hosting phase in
 1. Cloudflare dashboard → Zero Trust → Access → Applications → Add → Self-hosted.
 2. Point it at `my-artifacts.<your-subdomain>.workers.dev` (or your custom route).
 3. Pick an auth method (one-time PIN email is zero-config; GitHub/Google IdP also free).
-4. Now every viewer is authenticated; Access injects `Cf-Access-Authenticated-User-Email`
-   headers the worker could use for comment authorship (roadmap).
+4. Verify the origin cannot be reached without Access. If correctly configured, Access can
+   inject identity headers, but this package does not consume them or authorize comment
+   authorship; built-in identity remains roadmap work.
 
 ## What works where
 
