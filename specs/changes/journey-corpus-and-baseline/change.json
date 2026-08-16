@@ -3,7 +3,7 @@
   "id": "journey-corpus-and-baseline",
   "title": "Establish the journey corpus and baseline study",
   "lane": "standard",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": [
     "OUT-02",
     "OUT-03",
@@ -15,8 +15,8 @@
   ],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "bitgorust",
+    "at": "2026-08-16T08:17:19Z"
   },
   "withdrawal": {
     "by": "",

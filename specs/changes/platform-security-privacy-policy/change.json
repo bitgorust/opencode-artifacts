@@ -3,7 +3,7 @@
   "id": "platform-security-privacy-policy",
   "title": "Publish platform, security, privacy, and release policy",
   "lane": "high-risk",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": [
     "SEC-01",
     "SEC-10",
@@ -26,8 +26,8 @@
   ],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "bitgorust",
+    "at": "2026-08-16T08:17:19Z"
   },
   "withdrawal": {
     "by": "",

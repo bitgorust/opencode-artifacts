@@ -3,7 +3,7 @@
   "id": "contract-link-integrity",
   "title": "Validate documentation links and anchors",
   "lane": "standard",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": [
     "QUAL-08"
   ],
@@ -12,8 +12,8 @@
   ],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "bitgorust",
+    "at": "2026-08-16T08:17:19Z"
   },
   "withdrawal": {
     "by": "",
