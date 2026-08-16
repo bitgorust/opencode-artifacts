@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "artifact-identity-schema-migration",
+  "title": "Introduce durable artifact identity and schema migration",
+  "lane": "high-risk",
+  "status": "draft",
+  "affectedRequirements": [
+    "LIFE-01",
+    "LIFE-02",
+    "LIFE-07",
+    "OPS-03",
+    "OPS-05",
+    "OPS-07",
+    "COMPAT-03",
+    "COMPAT-04",
+    "QUAL-02"
+  ],
+  "currentSpecs": [],
+  "currentSpecsUpdated": false,
+  "approval": {
+    "by": "",
+    "at": ""
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-16",
+  "archivedAt": null
+}

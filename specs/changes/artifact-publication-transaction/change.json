@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "artifact-publication-transaction",
+  "title": "Make artifact publication crash-safe across processes",
+  "lane": "high-risk",
+  "status": "draft",
+  "affectedRequirements": [
+    "LIFE-04",
+    "SEC-07",
+    "OPS-04",
+    "OPS-05",
+    "QUAL-02",
+    "QUAL-06"
+  ],
+  "currentSpecs": [],
+  "currentSpecsUpdated": false,
+  "approval": {
+    "by": "",
+    "at": ""
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-16",
+  "archivedAt": null
+}
