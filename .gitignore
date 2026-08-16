@@ -1,4 +1,5 @@
 node_modules/
+docs/evidence/journeys/raw/
 dist/
 *.tgz
 .opencode/artifacts/

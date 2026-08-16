@@ -2,7 +2,7 @@
 
 Status: Normative planning control
 
-Last reviewed: 2026-08-15
+Last reviewed: 2026-08-16
 
 This map connects every requirement in [`docs/product-spec.md`](product-spec.md) to delivery,
 ownership, and acceptance. Ranges are inclusive: a row such as `OUT-01`–`OUT-06` assigns every
@@ -67,6 +67,7 @@ results. A release checklist resolves each class to dated files and command outp
 | Unit/integration tests | `test/` and CI output |
 | Structural/release assertions | `scripts/check-repo.ts`, `scripts/checks.ts`, CI, `npm pack --dry-run` |
 | Contract link integrity | `scripts/check-links.ts`, `test/documentation-links.test.ts`, dated `docs/evidence/contract/` reports |
+| Journey and outcome studies | `docs/journeys/`, `scripts/journey-study.ts`, `test/journey-study.test.ts`, dated `docs/evidence/journeys/` reports |
 | Browser and visual evidence | `docs/evidence/` |
 | Page-quality comparison | `docs/page-quality-benchmark.md`, dated `docs/evidence/page-quality/` reports |
 | OpenCode/Claude host probes | `docs/evidence/opencode-host-verification.md`, `docs/evidence/claude-code-host-verification.md` |

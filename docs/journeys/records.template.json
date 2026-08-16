@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "studyId": "replace-with-dated-study-id",
+  "corpusVersion": 1,
+  "release": {
+    "package": "opencode-artifacts",
+    "version": "replace-with-exact-version",
+    "integrity": "sha512-replace-with-registry-or-tarball-integrity"
+  },
+  "claimedPlatformIds": [],
+  "records": []
+}
