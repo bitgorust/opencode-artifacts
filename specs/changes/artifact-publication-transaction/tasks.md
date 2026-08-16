@@ -6,7 +6,7 @@
   cleanup, and public-staging exclusions.
 - [x] Route create, update, restore, and managed reads through recovery and the transaction.
 - [x] Add deterministic fault injection and the bounded transaction state model.
-- [ ] Add independent-process same-head/different-artifact races, stale takeover, retry, path,
+- [x] Add independent-process same-head/different-artifact races, stale takeover, retry, path,
   corruption, cancellation, and resource-limit tests.
 - [ ] Retain exact supported-filesystem results and explicit unavailable cells.
 - [ ] Record validation/verification evidence and update `specs/current/artifact-lifecycle.spec.md`.

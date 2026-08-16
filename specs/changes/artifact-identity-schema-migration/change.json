@@ -3,7 +3,7 @@
   "id": "artifact-identity-schema-migration",
   "title": "Introduce durable artifact identity and schema migration",
   "lane": "high-risk",
-  "status": "approved",
+  "status": "implementing",
   "affectedRequirements": [
     "LIFE-01",
     "LIFE-02",

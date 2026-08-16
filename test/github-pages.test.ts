@@ -60,9 +60,13 @@ test("local state directories are never published", async () => {
   await mkdir(join(cloneDir, ".git"), { recursive: true });
   await mkdir(join(localDir, ".state"), { recursive: true });
   await mkdir(join(localDir, ".transactions"), { recursive: true });
+  await mkdir(join(localDir, ".backups"), { recursive: true });
+  await mkdir(join(localDir, ".migrations"), { recursive: true });
   await mkdir(join(localDir, ".db"), { recursive: true });
   await writeFile(join(localDir, ".state", "answers.json"), "{}");
   await writeFile(join(localDir, ".transactions", "journal.json"), "{}");
+  await writeFile(join(localDir, ".backups", "manifest.json"), "{}");
+  await writeFile(join(localDir, ".migrations", "report.json"), "{}");
   await writeFile(join(localDir, ".db", "x.json"), "{}");
 
   const publisher = new GitHubPagesPublisher(localDir, {
@@ -74,6 +78,8 @@ test("local state directories are never published", async () => {
 
   await assert.rejects(readFile(join(cloneDir, ".state", "answers.json"), "utf8"));
   await assert.rejects(readFile(join(cloneDir, ".transactions", "journal.json"), "utf8"));
+  await assert.rejects(readFile(join(cloneDir, ".backups", "manifest.json"), "utf8"));
+  await assert.rejects(readFile(join(cloneDir, ".migrations", "report.json"), "utf8"));
   await assert.rejects(readFile(join(cloneDir, ".db", "x.json"), "utf8"));
   await rm(dir, { recursive: true, force: true });
 });

@@ -205,6 +205,37 @@ test("caught failures report the selected old state or finish recovered new stat
   });
 });
 
+test("transactional deletion rolls back before decision and finishes after decision", async () => {
+  await withTempDir(async (dir) => {
+    const target = join(dir, "remove.txt");
+    await writeFile(target, "old", "utf8");
+    await assert.rejects(
+      runFileTransaction(
+        dir,
+        (transaction) => transaction.commit(new Map([["remove.txt", null]])),
+        {
+          fault(point) {
+            if (point === "journal-prepared") throw new Error("before deletion decision");
+          },
+        },
+      ),
+      TransactionCommitError,
+    );
+    assert.equal(await readFile(target, "utf8"), "old");
+
+    await runFileTransaction(
+      dir,
+      (transaction) => transaction.commit(new Map([["remove.txt", null]])),
+      {
+        fault(point) {
+          if (point === "target-backed-up") throw new Error("after deletion decision");
+        },
+      },
+    );
+    await assert.rejects(readFile(target, "utf8"));
+  });
+});
+
 test("unknown transaction directories and invalid live-lock metadata fail closed", async () => {
   await withTempDir(async (dir) => {
     const transactions = join(dir, TRANSACTION_DIRECTORY);

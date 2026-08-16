@@ -30,7 +30,15 @@ export function pagesBaseUrl(repo: string): string {
   return `https://${owner}.github.io/${name}/`;
 }
 
-const SKIP_ENTRIES = new Set([".git", ".state", ".db", ".datasources", ".transactions"]);
+const SKIP_ENTRIES = new Set([
+  ".git",
+  ".state",
+  ".db",
+  ".datasources",
+  ".transactions",
+  ".backups",
+  ".migrations",
+]);
 
 export async function copyArtifacts(fromDir: string, toDir: string): Promise<void> {
   await mkdir(toDir, { recursive: true });

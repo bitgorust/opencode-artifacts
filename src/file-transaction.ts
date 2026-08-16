@@ -44,7 +44,7 @@ export interface FileTransactionOptions {
 }
 
 export interface FileTransactionContext {
-  commit(files: ReadonlyMap<string, string | Uint8Array>): Promise<void>;
+  commit(files: ReadonlyMap<string, string | Uint8Array | null>): Promise<void>;
 }
 
 interface LockOwner {
@@ -61,7 +61,7 @@ interface JournalTarget {
   path: string;
   existed: boolean;
   oldHash: string | null;
-  newHash: string;
+  newHash: string | null;
   bytes: number;
 }
 
@@ -187,8 +187,8 @@ function parseJournal(value: unknown): TransactionJournal | undefined {
       typeof target["path"] !== "string" ||
       typeof target["existed"] !== "boolean" ||
       (target["oldHash"] !== null && typeof target["oldHash"] !== "string") ||
-      typeof target["newHash"] !== "string" ||
-      !SHA256_RE.test(target["newHash"]) ||
+      (target["newHash"] !== null &&
+        (typeof target["newHash"] !== "string" || !SHA256_RE.test(target["newHash"]))) ||
       typeof target["bytes"] !== "number" ||
       !Number.isSafeInteger(target["bytes"]) ||
       target["bytes"] < 0 ||
@@ -448,31 +448,32 @@ async function targetHash(path: string): Promise<string | undefined> {
   }
 }
 
+function matchesSelectedHash(actual: string | undefined, expected: string | null): boolean {
+  return expected === null ? actual === undefined : actual === expected;
+}
+
 async function restorePrepared(root: string, transactionPath: string, journal: TransactionJournal): Promise<void> {
   for (const target of journal.targets) {
     const destination = await containedPath(root, target.path);
     const backup = join(transactionPath, "old", ...safeSegments(target.path));
     const current = await targetHash(destination);
-    if (current === target.newHash) {
-      if (!target.existed) {
-        await rm(destination, { force: true });
-      } else if (await exists(backup)) {
+    if (target.existed) {
+      if (current === target.oldHash) continue;
+      if (await exists(backup)) {
         await mkdir(dirname(destination), { recursive: true });
+        if (current !== undefined) await rm(destination, { force: true });
         await rename(backup, destination);
         await syncDirectory(dirname(backup));
         await syncDirectory(dirname(destination));
       } else {
         throw new TransactionRecoveryError(journal.id, `old bytes missing for ${target.path}`);
       }
-    } else if (target.existed && current !== target.oldHash) {
-      if (await exists(backup)) {
-        await mkdir(dirname(destination), { recursive: true });
-        await rename(backup, destination);
-        await syncDirectory(dirname(backup));
-        await syncDirectory(dirname(destination));
-      } else {
-        throw new TransactionRecoveryError(journal.id, `unexpected old bytes for ${target.path}`);
+    } else if (current !== undefined) {
+      if (!matchesSelectedHash(current, target.newHash)) {
+        throw new TransactionRecoveryError(journal.id, `unexpected new bytes for ${target.path}`);
       }
+      await rm(destination, { force: true });
+      await syncDirectory(dirname(destination));
     }
     const restored = await targetHash(destination);
     if ((target.existed && restored !== target.oldHash) || (!target.existed && restored !== undefined)) {
@@ -489,8 +490,11 @@ async function rollForward(root: string, transactionPath: string, journal: Trans
     const staged = join(transactionPath, "new", ...safeSegments(target.path));
     const backup = join(transactionPath, "old", ...safeSegments(target.path));
     const current = await targetHash(destination);
-    if (current === target.newHash) continue;
-    if (!(await exists(staged)) || (await targetHash(staged)) !== target.newHash) {
+    if (matchesSelectedHash(current, target.newHash)) continue;
+    if (
+      target.newHash !== null &&
+      (!(await exists(staged)) || (await targetHash(staged)) !== target.newHash)
+    ) {
       throw new TransactionRecoveryError(journal.id, `staged bytes missing for ${target.path}`);
     }
     if (current !== undefined) {
@@ -503,15 +507,17 @@ async function rollForward(root: string, transactionPath: string, journal: Trans
       await syncDirectory(dirname(backup));
       await syncDirectory(dirname(destination));
     }
-    await mkdir(dirname(destination), { recursive: true });
-    await rename(staged, destination);
-    await syncFile(destination);
-    await syncDirectory(dirname(staged));
-    await syncDirectory(dirname(destination));
+    if (target.newHash !== null) {
+      await mkdir(dirname(destination), { recursive: true });
+      await rename(staged, destination);
+      await syncFile(destination);
+      await syncDirectory(dirname(staged));
+      await syncDirectory(dirname(destination));
+    }
   }
   for (const target of journal.targets) {
     const destination = await containedPath(root, target.path);
-    if ((await targetHash(destination)) !== target.newHash) {
+    if (!matchesSelectedHash(await targetHash(destination), target.newHash)) {
       throw new TransactionRecoveryError(journal.id, `commit verification failed for ${target.path}`);
     }
   }
@@ -558,7 +564,7 @@ async function recoverHeld(root: string): Promise<void> {
 async function commitHeld(
   root: string,
   lock: HeldLock,
-  files: ReadonlyMap<string, string | Uint8Array>,
+  files: ReadonlyMap<string, string | Uint8Array | null>,
   options: FileTransactionOptions,
 ): Promise<void> {
   if (files.size === 0) throw new Error("artifact transaction has no target files");
@@ -566,9 +572,19 @@ async function commitHeld(
     throw new Error(`artifact transaction has ${files.size} targets; limit is ${MAX_TRANSACTION_TARGETS}`);
   }
   const normalized = [...files.entries()]
-    .map(([path, value]) => [path, typeof value === "string" ? Buffer.from(value, "utf8") : Buffer.from(value)] as const)
+    .map(
+      ([path, value]) =>
+        [
+          path,
+          value === null
+            ? null
+            : typeof value === "string"
+              ? Buffer.from(value, "utf8")
+              : Buffer.from(value),
+        ] as const,
+    )
     .sort(([left], [right]) => left.localeCompare(right));
-  const totalBytes = normalized.reduce((sum, [, value]) => sum + value.byteLength, 0);
+  const totalBytes = normalized.reduce((sum, [, value]) => sum + (value?.byteLength ?? 0), 0);
   if (totalBytes > MAX_TRANSACTION_BYTES) {
     throw new Error(`artifact transaction has ${totalBytes} bytes; limit is ${MAX_TRANSACTION_BYTES}`);
   }
@@ -593,13 +609,15 @@ async function commitHeld(
         throw error;
       },
     );
-    await writeDurable(join(transactionPath, "new", ...safeSegments(path)), value);
+    if (value !== null) {
+      await writeDurable(join(transactionPath, "new", ...safeSegments(path)), value);
+    }
     targets.push({
       path,
       existed: current !== undefined,
       oldHash: current === undefined ? null : hashBytes(current),
-      newHash: hashBytes(value),
-      bytes: value.byteLength,
+      newHash: value === null ? null : hashBytes(value),
+      bytes: value?.byteLength ?? 0,
     });
     options.fault?.("target-staged", path);
   }
@@ -631,17 +649,19 @@ async function commitHeld(
         await syncDirectory(dirname(destination));
         options.fault?.("target-backed-up", target.path);
       }
-      await mkdir(dirname(destination), { recursive: true });
-      await rename(staged, destination);
-      await syncFile(destination);
-      await syncDirectory(dirname(staged));
-      await syncDirectory(dirname(destination));
+      if (target.newHash !== null) {
+        await mkdir(dirname(destination), { recursive: true });
+        await rename(staged, destination);
+        await syncFile(destination);
+        await syncDirectory(dirname(staged));
+        await syncDirectory(dirname(destination));
+      }
       options.fault?.("target-replaced", target.path);
     }
 
     for (const target of targets) {
       const destination = await containedPath(root, target.path);
-      if ((await targetHash(destination)) !== target.newHash) {
+      if (!matchesSelectedHash(await targetHash(destination), target.newHash)) {
         throw new TransactionRecoveryError(id, `verification failed for ${target.path}`);
       }
     }
@@ -658,7 +678,7 @@ async function commitHeld(
       (await Promise.all(
         targets.map(async (target) => {
           const destination = await containedPath(root, target.path);
-          return (await targetHash(destination)) === target.newHash;
+          return matchesSelectedHash(await targetHash(destination), target.newHash);
         }),
       )).every(Boolean);
     if (selectedNew) return;
