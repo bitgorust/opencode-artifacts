@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "journey-corpus-and-baseline",
+  "title": "Establish the journey corpus and baseline study",
+  "lane": "standard",
+  "status": "draft",
+  "affectedRequirements": [
+    "OUT-02",
+    "OUT-03",
+    "OUT-05",
+    "UX-01"
+  ],
+  "currentSpecs": [
+    "specs/current/journey-evidence.spec.md"
+  ],
+  "currentSpecsUpdated": false,
+  "approval": {
+    "by": "",
+    "at": ""
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-16",
+  "archivedAt": null
+}
