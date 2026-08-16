@@ -3,7 +3,7 @@
   "id": "platform-security-privacy-policy",
   "title": "Publish platform, security, privacy, and release policy",
   "lane": "high-risk",
-  "status": "implementing",
+  "status": "archived",
   "affectedRequirements": [
     "SEC-01",
     "SEC-10",
@@ -35,5 +35,5 @@
     "reason": ""
   },
   "createdAt": "2026-08-16",
-  "archivedAt": null
+  "archivedAt": "2026-08-16"
 }

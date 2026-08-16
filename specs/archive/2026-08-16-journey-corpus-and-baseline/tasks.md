@@ -8,4 +8,4 @@
   zero participants and incomplete certification status without substituting synthetic users.
 - [x] Record validation and verification evidence.
 - [x] Add `specs/current/journey-evidence.spec.md` and reconcile Phase 0 status.
-- [ ] Run repository validation and archive the packet.
+- [x] Run repository validation and archive the packet.

@@ -36,9 +36,8 @@
 - `DIST-03`–`DIST-07`: only the current package minor receives fixes; deprecations receive at
   least one supported-release notice except active exploits. D-06 selects npm trusted
   publishing/provenance, npm CycloneDX, audit/signatures, license disposition and exact packed-
-  byte binding. The dated provider report verifies the then-current published release for its
-  own tag/commit; trusted-
-  publisher configuration and future registry provenance are not. The approved renderer
+  byte binding. The dated provider report verifies the exact trusted publisher and published
+  0.14.4 registry integrity, signature, tag/commit/workflow-bound SLSA provenance. The approved renderer
   remediation clears the current audit and hash-bound license gates and adds exact candidate
   SBOM/provenance artifact retention. Current source, documentation, example, asset, font, and
   reference redistribution disposition also passes. Provider and platform evidence remains
@@ -46,5 +45,7 @@
   public preview may distribute only through the closed pre-publish hard gates and becomes a
   verified public preview only after registry integrity, signature, and provenance pass. The
   tag workflow fails closed on prepublish evidence, publishes the coordinated tarball, and
-  verifies registry integrity/signature/provenance afterward. Preview history supplies no
+  verifies registry integrity/signature/provenance afterward. The first 0.14.4 post-publish
+  job exposed and retained a singleton-array parser failure; the corrected verifier passes the
+  retained response and independently identical registry tarball. Preview history supplies no
   certification waiver.

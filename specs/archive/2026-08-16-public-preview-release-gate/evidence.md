@@ -3,8 +3,8 @@
 The product owner approved the proposal on 2026-08-16 after explicitly declining the human
 study for this preview. The implementation retains missing and excluded results rather than
 treating public preview as certification. Authenticated provider readback verifies the exact
-npm trusted publisher; post-publication results remain pending, so the transition is
-`preview-candidate` rather than `public-preview`.
+npm trusted publisher. Published registry bytes, package signature, and SLSA provenance bind
+the exact tag/commit/workflow, so the transition is `public-preview`.
 
 ## Requirement: OUT-02
 
@@ -35,7 +35,7 @@ npm trusted publisher; post-publication results remain pending, so the transitio
 - Verification: deterministic transition tests reject a preview certification claim and prove
   that certified local core cannot inherit preview labels, unsupported status, or missing
   OUT-02/OUT-03/support evidence.
-- Result: pass for the implemented contract; exact release transition remains pending.
+- Result: pass for the implemented contract and exact public-preview transition.
 - Evidence: [@test](test/release-integrity.test.ts),
   [@manual](docs/requirements-traceability.md)
 
@@ -58,10 +58,12 @@ npm trusted publisher; post-publication results remain pending, so the transitio
   workflow verifies tag/version agreement and retains exact release artifacts. Local tests,
   build, structural checks, package review, audit, licenses, and redistribution pass for the
   candidate. Authenticated npm readback verifies repository `bitgorust/opencode-artifacts`,
-  workflow `publish.yml`, and permission `createPackage`; registry-byte, signature, and
-  provenance evidence is still pending.
-- Result: pass for `preview-candidate`; `public-preview` remains blocked pending the exact tag
-  workflow and registry verification.
+  workflow `publish.yml`, and permission `createPackage`. Retained and independently
+  downloaded registry bytes are identical; the registry package signature and SLSA statement
+  bind `v0.14.4`, commit `a5ee65a`, `publish.yml`, and run `31961711046`. The run's visible
+  singleton-array parser failure is corrected and regression-tested in `b97a9b2`; the corrected
+  verifier passes the retained response.
+- Result: pass for `public-preview`.
 - Evidence: [@test](test/release-integrity.test.ts),
   [@manual](docs/evidence/releases/2026-08-16-v0.14.4-preview.md)
 
@@ -72,6 +74,7 @@ npm trusted publisher; post-publication results remain pending, so the transitio
 - Verification: claim-consistency tests require the public-preview disclosures; the candidate
   record lists incomplete human, platform, accessibility, parity, performance, and operations
   evidence alongside every passing technical result.
-- Result: pass for the candidate documentation; final release status remains pending.
+- Result: pass for the release documentation, including the visible post-publish parser failure
+  and incomplete certification evidence.
 - Evidence: [@test](test/governance-policy.test.ts),
   [@manual](docs/evidence/releases/2026-08-16-v0.14.4-preview.md)

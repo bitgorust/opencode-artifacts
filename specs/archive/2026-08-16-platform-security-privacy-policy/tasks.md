@@ -10,4 +10,4 @@
 - [x] Verify external reporting/provenance state rather than inferring it from configuration; retain failed/unverified state.
 - [x] Record validation and verification evidence.
 - [x] Add `specs/current/governance-policy.spec.md` and reconcile README, roadmap, traceability, hosting, comparison, and release template.
-- [ ] Run repository validation and archive the packet.
+- [x] Run repository validation and archive the packet.

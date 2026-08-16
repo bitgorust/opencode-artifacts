@@ -60,7 +60,7 @@ Evidence from the repository and clean local host probes:
 | Packaged-host compatibility CI | Missing | unit plugin tests exist; the packed tarball is not loaded into a clean current OpenCode host in CI |
 | Product outcomes and usability evidence | Missing | target users and measurable journeys are now specified, but no journey study has been run |
 | Privacy/operations/performance governance | Partial | privacy inventory/policy exists; operations runbooks, SLO evidence, performance harnesses, and cost models do not |
-| Supply-chain release evidence | Partial | audit, hash-bound dependency licenses, redistribution inventory, and exact trusted-publisher readback pass; CI retains candidate SBOM/provenance/pack evidence; exact 0.14.4 registry integrity/signature/provenance remain open until publication |
+| Supply-chain release evidence | Pass for public preview | exact 0.14.4 audit, licenses, redistribution, trusted-publisher readback, packed/registry bytes, signature, SBOM, and tag/commit/workflow provenance pass; certification remains unclaimed |
 
 “Shipped” means the current behavior exists; it does not waive any stronger acceptance rule in
 the product spec.
@@ -109,6 +109,9 @@ has one owner and evidence path; the public-preview transition model rejects eve
 gate and keeps first-use, comprehension, and target-platform evidence visibly incomplete.
 Human outcome and full support-matrix results gate future certification, not Phase 0 or public
 preview distribution.
+
+Status: **passed for the `v0.14.4` unsupported public preview**. This is not local-artifact-core
+certification.
 
 ## Phase 1 — Durable artifact identity and transactions
 
@@ -366,7 +369,7 @@ consequences, owner, and review trigger. “Use the expected shape” is not a d
 | `D-03` | Authenticated reference architecture: identity proxy, unreachable origin, revision store, strongly consistent mutable store, event delivery, backups, and regional availability before Phase 5B implementation | Hosting/identity maintainer | Phase 5B | Open |
 | `D-04` | Hosted operator/controller roles, data regions, retention defaults, deletion/backup expiry, abuse/takedown, and support/SLO policy before Phase 5B public preview | Privacy/operations maintainer | Phase 5B release | Open |
 | `D-05` | Connector provider/grant model, allowed protocol surface, SSRF boundary, cache policy, quotas, billing guardrails, and action eligibility before Phase 6 | Connector/security maintainer | Phase 6 | Open |
-| `D-06` | Package provenance/signing mechanism, SBOM format, vulnerability/license policy, and supported-version window before public preview or any production-readiness claim | Release maintainer | Distribution gate | Selected; preview provider verification pending |
+| `D-06` | Package provenance/signing mechanism, SBOM format, vulnerability/license policy, and supported-version window before public preview or any production-readiness claim | Release maintainer | Distribution gate | Selected and verified for `v0.14.4` public preview |
 
 ## Risk register
 

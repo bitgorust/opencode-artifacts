@@ -115,9 +115,11 @@ target-matrix gaps do not block unsupported preview distribution.
   authorization and npm package-owner authentication, provider readback verified the exact
   `bitgorust/opencode-artifacts` / `publish.yml` trusted publisher with `createPackage`
   permission. Published 0.14.3 provenance remains verified only for its own tag/commit; exact
-  0.14.4 registry integrity, signature, and provenance remain pending publication.
-- Result: pass for the public-preview pre-publish supply-chain prerequisite; incomplete for
-  0.14.4 post-publish evidence and production readiness.
+  Published 0.14.4 registry bytes are independently identical to the retained tag tarball;
+  its package signature and SLSA provenance bind `v0.14.4`, commit `a5ee65a`, `publish.yml`,
+  and run `31961711046`. The run retained its final singleton-array parser failure, and the
+  corrected regression-tested verifier passes that exact response.
+- Result: pass for public-preview supply-chain gates; production readiness remains unclaimed.
 - Evidence: [@manual](docs/evidence/governance/supply-chain-2026-08-16.md),
   [@manual](docs/evidence/governance/renderer-remediation-2026-08-16.md),
   [@manual](docs/evidence/governance/provider-status-2026-08-16.md),

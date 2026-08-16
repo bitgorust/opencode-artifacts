@@ -21,7 +21,7 @@
       "status": "pass",
       "checkedAt": "2026-08-16",
       "evidence": "docs/evidence/governance/provider-status-2026-08-16.md",
-      "claim": "The exact GitHub repository/workflow trusted publisher is authenticated and provider-verified for createPackage; 0.14.4 registry integrity, signature, and provenance remain pending until publication."
+      "claim": "The exact GitHub repository/workflow trusted publisher is provider-verified for createPackage; published 0.14.4 registry bytes, package signature, and SLSA provenance match tag v0.14.4, commit a5ee65a, publish.yml, and run 31961711046."
     }
   ],
   "supportCells": [
