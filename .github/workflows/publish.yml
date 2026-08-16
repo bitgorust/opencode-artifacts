@@ -23,10 +23,16 @@ jobs:
       - run: npm run build
       - run: npm test
       - run: npm run check
-      - name: Generate and gate supply-chain evidence
+      - name: Pack exact release bytes
+        id: pack
         shell: bash
         run: |
           mkdir -p release-evidence
+          npm pack --json > release-evidence/pack.json
+          node scripts/release-integrity.ts pack-output release-evidence/pack.json package.json >> "$GITHUB_OUTPUT"
+      - name: Generate and gate supply-chain evidence
+        shell: bash
+        run: |
           set +e
           npm sbom --sbom-format cyclonedx > release-evidence/sbom.cdx.json
           sbom_status=$?
@@ -34,20 +40,17 @@ jobs:
           audit_status=$?
           npm audit signatures > release-evidence/signatures.txt
           signature_status=$?
-          node scripts/release-integrity.ts licenses package-lock.json > release-evidence/licenses.json
+          node scripts/release-integrity.ts licenses package-lock.json docs/license-dispositions.json > release-evidence/licenses.json
           license_status=$?
+          node scripts/release-integrity.ts candidate-provenance release-evidence/pack.json package.json > release-evidence/provenance.intoto.json
+          provenance_status=$?
           set -e
-          sha256sum release-evidence/*
+          sha256sum release-evidence/* "${{ steps.pack.outputs.tarball }}"
           test "$sbom_status" -eq 0
           test "$audit_status" -eq 0
           test "$signature_status" -eq 0
           test "$license_status" -eq 0
-      - name: Pack exact release bytes
-        id: pack
-        shell: bash
-        run: |
-          npm pack --json > release-evidence/pack.json
-          node scripts/release-integrity.ts pack-output release-evidence/pack.json package.json >> "$GITHUB_OUTPUT"
+          test "$provenance_status" -eq 0
       - name: Publish exact tarball
         shell: bash
         run: |

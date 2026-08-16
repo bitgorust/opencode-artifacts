@@ -29,7 +29,9 @@
   publishing/provenance, npm CycloneDX, audit/signatures, license disposition and exact packed-
   byte binding. The dated provider report verifies the then-current published release for its
   own tag/commit; trusted-
-  publisher configuration and future-candidate provenance are not. Current audit, license,
-  provider and platform evidence fails or is incomplete, so no production-readiness
-  claim is permitted. The tag workflow fails closed on prepublish evidence, publishes the
-  coordinated tarball, and verifies registry integrity/signature/provenance afterward.
+  publisher configuration and future registry provenance are not. The approved renderer
+  remediation clears the current audit and hash-bound license gates and adds exact candidate
+  SBOM/provenance artifact retention. Provider and platform evidence remains incomplete, so no
+  production-readiness claim is permitted. The tag workflow fails closed on prepublish
+  evidence, publishes the coordinated tarball, and verifies registry integrity/signature/
+  provenance afterward.

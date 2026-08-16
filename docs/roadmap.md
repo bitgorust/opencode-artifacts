@@ -60,7 +60,7 @@ Evidence from the repository and clean local host probes:
 | Packaged-host compatibility CI | Missing | unit plugin tests exist; the packed tarball is not loaded into a clean current OpenCode host in CI |
 | Product outcomes and usability evidence | Missing | target users and measurable journeys are now specified, but no journey study has been run |
 | Privacy/operations/performance governance | Partial | privacy inventory/policy exists; operations runbooks, SLO evidence, performance harnesses, and cost models do not |
-| Supply-chain release evidence | Partial | support/release policy, lockfile and pack inspection exist; complete SBOM/license/vulnerability evidence and registry provenance verification remain open |
+| Supply-chain release evidence | Partial | audit and hash-bound license gates pass and CI retains exact candidate SBOM/provenance/pack evidence; future registry provenance and trusted-publisher verification remain open |
 
 “Shipped” means the current behavior exists; it does not waive any stronger acceptance rule in
 the product spec.

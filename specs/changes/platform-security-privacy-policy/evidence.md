@@ -94,25 +94,28 @@ unverified results keep the packet open and block the Phase 0 gate.
 ## Requirement: DIST-04
 - Validation: npm trusted publishing, CycloneDX, audit/signature/license and exact-byte binding
   were approved.
-- Verification: npm 10 generated CycloneDX and exact tarball digests were inspected; current
-  npm verified 220 signatures and 22 attestations, while audit found 8 vulnerabilities.
-  Published 0.14.3 provenance was verified for its own tag/commit. Trusted-publisher
-  configuration and future-candidate provenance remain unverified. The tag workflow now
-  fails closed on all four prepublish outputs, publishes one coordinated tarball, and verifies
-  registry bytes/signature/provenance after publish.
+- Verification: the baseline found 8 vulnerabilities. The approved remediation candidate now
+  reports zero audit findings, exact hash-bound license dispositions, 212 verified signatures,
+  22 attestations, a CycloneDX SBOM, and candidate provenance bound to packed bytes. Exact-
+  commit CI retention is pending. Published 0.14.3 provenance remains verified only for its
+  own tag/commit, while trusted-publisher configuration and a future registry release remain
+  unverified.
 - Result: fail for production readiness.
 - Evidence: [@manual](docs/evidence/governance/supply-chain-2026-08-16.md),
+  [@manual](docs/evidence/governance/renderer-remediation-2026-08-16.md),
   [@manual](docs/evidence/governance/provider-status-2026-08-16.md),
   [@test](test/release-integrity.test.ts)
 
 ## Requirement: DIST-05
 - Validation: license, vulnerability, network/CSP, weight, owner and removal rules were
   approved.
-- Verification: the lockfile inventory has one missing license entry and `npm audit` reports
-  seven high and one moderate finding; two compound-license branches also lack explicit
-  selection, and complete runtime disposition is absent.
-- Result: fail for production readiness.
+- Verification: the remediated runtime lockfile reports zero audit findings; exact path and
+  content-hash dispositions select the three previously unresolved licenses; compatibility,
+  size, and package-tree-removal checks pass.
+- Result: pass for runtime dependency governance; production readiness remains blocked by
+  other open release gates.
 - Evidence: [@manual](docs/evidence/governance/supply-chain-2026-08-16.md),
+  [@manual](docs/evidence/governance/renderer-remediation-2026-08-16.md),
   [@test](test/release-integrity.test.ts), [@test](test/render.test.ts)
 
 ## Requirement: DIST-06
@@ -126,8 +129,9 @@ unverified results keep the packet open and block the Phase 0 gate.
 ## Requirement: DIST-07
 - Validation: redistribution authority, attribution and private-reference handling were
   approved.
-- Verification: repository MIT license exists, but the lockfile has one missing license entry
-  and the complete docs/assets/fonts/reference disposition is absent.
+- Verification: repository MIT license exists and runtime dependency disposition now passes,
+  but complete docs/assets/fonts/reference disposition is absent.
 - Result: fail for a release readiness claim.
 - Evidence: [@manual](LICENSE),
-  [@manual](docs/evidence/governance/supply-chain-2026-08-16.md)
+  [@manual](docs/evidence/governance/supply-chain-2026-08-16.md),
+  [@manual](docs/evidence/governance/renderer-remediation-2026-08-16.md)

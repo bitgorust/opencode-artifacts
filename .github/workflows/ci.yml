@@ -14,8 +14,27 @@ jobs:
         with:
           node-version: "24"
           cache: npm
+      - run: npm install -g npm@latest
       - run: npm ci
       - run: npm run build
       - run: npm test
       - run: npm run check
-      - run: npm pack --dry-run
+      - name: Generate exact candidate evidence
+        shell: bash
+        run: |
+          mkdir -p release-evidence
+          npm pack --json > release-evidence/pack.json
+          node scripts/release-integrity.ts pack-output release-evidence/pack.json package.json
+          node scripts/release-integrity.ts candidate-provenance release-evidence/pack.json package.json > release-evidence/provenance.intoto.json
+          npm sbom --sbom-format cyclonedx > release-evidence/sbom.cdx.json
+          npm audit --json > release-evidence/audit.json
+          npm audit signatures > release-evidence/signatures.txt
+          node scripts/release-integrity.ts licenses package-lock.json docs/license-dispositions.json > release-evidence/licenses.json
+          sha256sum release-evidence/* opencode-artifacts-*.tgz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exact-candidate-evidence
+          path: |
+            release-evidence/
+            opencode-artifacts-*.tgz
+          retention-days: 14

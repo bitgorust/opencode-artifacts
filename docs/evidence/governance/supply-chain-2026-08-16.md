@@ -93,3 +93,10 @@ publishes that exact tarball, and compares registry integrity/shasum while requi
 and provenance metadata. The dependency-free verifier has deterministic pass/failure tests.
 Because the current audit and license gates fail, a tag workflow would stop before packaging
 or publication. No tag, registry write, or provider-setting change was performed.
+
+## Later remediation checkpoint
+
+This file preserves the pre-remediation baseline and the evidence available when it was
+recorded. The approved dependency and license remediation is documented separately in
+[the renderer remediation checkpoint](renderer-remediation-2026-08-16.md). The original
+failure explains why remediation was required; it is not the current candidate verdict.

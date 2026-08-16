@@ -40,19 +40,19 @@
     "check": "node scripts/check-repo.ts",
     "check:links": "node scripts/check-links.ts",
     "check:governance": "node scripts/governance-policy.ts",
-    "check:licenses": "node scripts/release-integrity.ts licenses package-lock.json",
+    "check:licenses": "node scripts/release-integrity.ts licenses package-lock.json docs/license-dispositions.json",
     "study": "node scripts/journey-study.ts",
     "spec": "node scripts/spec-workflow.ts",
     "prepare": "git config core.hooksPath .githooks || true",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "echarts": "^5.6.0",
+    "echarts": "^6.1.0",
     "markdown-it": "^14.1.0",
     "mermaid": "^11.16.1",
-    "vega": "^5.30.0",
-    "vega-embed": "^6.29.0",
-    "vega-lite": "^5.21.0"
+    "vega": "^6.4.0",
+    "vega-embed": "^7.1.0",
+    "vega-lite": "^6.4.3"
   },
   "peerDependencies": {
     "@opencode-ai/plugin": ">=1.0.0"
