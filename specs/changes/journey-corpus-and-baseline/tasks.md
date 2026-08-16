@@ -4,7 +4,8 @@
 - [x] Check in the corpus, consent/withdrawal protocol, inclusion rubric, and blank record schema.
 - [x] Add deterministic schema, scoring, threshold, exclusion, and redaction tests.
 - [x] Implement a dependency-free validator/aggregator that cannot turn missing runs into passes.
-- [ ] Run OUT-02 and OUT-03 with consented representative participants and retain real results.
+- [x] Record the product owner's decision not to run OUT-02/OUT-03 for public preview; retain
+  zero participants and incomplete certification status without substituting synthetic users.
 - [x] Record validation and verification evidence.
 - [x] Add `specs/current/journey-evidence.spec.md` and reconcile Phase 0 status.
 - [ ] Run repository validation and archive the packet.

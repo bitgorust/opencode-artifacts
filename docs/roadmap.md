@@ -67,15 +67,18 @@ the product spec.
 
 ## Phase 0 — Make the contract truthful
 
-Goal: one authoritative, measurable definition and no inflated capability language.
+Goal: one authoritative, measurable definition and an executable unsupported public-preview
+gate with no inflated capability language.
 
 Requirements: `OUT-01` through `OUT-06`, `UX-01` through `UX-08` at contract level,
 `PRIV-01` through `PRIV-07` at policy level, `SEC-01`, `SEC-10`, `COMPAT-01`, `DIST-03`
 through `DIST-07`, `QUAL-01`, `QUAL-08`.
 
 Owner: Product/release maintainer. Effort: **M**. Dependencies: none. Main risk: producing
-paper policy without executable evidence. Stop/re-scope: do not start a release claim whose
-users, support envelope, data handling, or acceptance evidence cannot be named.
+paper policy without executable evidence or mistaking public distribution for certification.
+Stop/re-scope: do not start a certified release claim whose users, support envelope, data
+handling, or acceptance evidence cannot be named; a public preview must expose every missing
+certification input and claim zero support.
 
 - [x] Establish `docs/product-spec.md` as the normative target.
 - [x] Separate portable artifact behavior from optional service behavior.
@@ -90,15 +93,22 @@ users, support envelope, data handling, or acceptance evidence cannot be named.
   evidence contract, release applicability, and status.
 - [x] Adopt a risk-scaled spec-anchored workflow that separates target intent, current shipped
   behavior, proposed deltas, and validation/verification evidence.
-- [ ] Check in the create/revise/review/share journey corpus and run the first OUT-02/OUT-03
-  study with consented representative users.
+- [x] Check in the create/revise/review/share journey corpus, consent protocol, strict study
+  schema, and diagnostic harness; record OUT-02/OUT-03 as incomplete until a future
+  certification owner elects to run the representative-user study.
 - [x] Publish the supported-platform matrix, threat model, data inventory, telemetry stance,
   retention/deletion/public-abuse policies, vulnerability contact/response policy, and
   supported-version/deprecation policy.
+- [x] Define a machine-checked public-preview state that requires exact security, privacy,
+  redistribution, package, trusted-publishing, and provenance evidence while refusing support,
+  usability, parity, or production-readiness claims.
 
 Exit gate: README, comparison, component docs, hosting docs, traceability, and release
 template agree on what is shipped, partial, missing, or not applicable; every normative ID
-has one owner and evidence path; the first-use and comprehension baselines are recorded.
+has one owner and evidence path; the public-preview transition model rejects every failed hard
+gate and keeps first-use, comprehension, and target-platform evidence visibly incomplete.
+Human outcome and full support-matrix results gate future certification, not Phase 0 or public
+preview distribution.
 
 ## Phase 1 — Durable artifact identity and transactions
 
@@ -351,12 +361,12 @@ consequences, owner, and review trigger. “Use the expected shape” is not a d
 
 | ID | Decision and deadline | Owner role | Blocks | Current state |
 |---|---|---|---|---|
-| `D-01` | Supported OpenCode/Node/OS/browser matrix before Phase 1 migration fixtures and Phase 3 CI | Compatibility maintainer | Phases 1, 3 | Open |
+| `D-01` | Supported OpenCode/Node/OS/browser matrix before certification; preview may retain zero supported cells | Compatibility maintainer | Certification and platform default-enablement | Target published; exact cells unverified |
 | `D-02` | Authorized Claude benchmark account, model/settings protocol, artifact retention permission, and reviewer recruitment before Phase 2 comparison | Product/design maintainer | Equal-or-better claim | Blocked on account and reviewers |
 | `D-03` | Authenticated reference architecture: identity proxy, unreachable origin, revision store, strongly consistent mutable store, event delivery, backups, and regional availability before Phase 5B implementation | Hosting/identity maintainer | Phase 5B | Open |
 | `D-04` | Hosted operator/controller roles, data regions, retention defaults, deletion/backup expiry, abuse/takedown, and support/SLO policy before Phase 5B public preview | Privacy/operations maintainer | Phase 5B release | Open |
 | `D-05` | Connector provider/grant model, allowed protocol surface, SSRF boundary, cache policy, quotas, billing guardrails, and action eligibility before Phase 6 | Connector/security maintainer | Phase 6 | Open |
-| `D-06` | Package provenance/signing mechanism, SBOM format, vulnerability/license policy, and supported-version window before the next production-readiness claim | Release maintainer | Release gate | Open |
+| `D-06` | Package provenance/signing mechanism, SBOM format, vulnerability/license policy, and supported-version window before public preview or any production-readiness claim | Release maintainer | Distribution gate | Selected; preview provider verification pending |
 
 ## Risk register
 
@@ -376,7 +386,18 @@ work or an explicit scope reduction; it cannot be accepted by omitting its evide
 | Platform/API churn breaks clean installation | High / High | current or oldest-supported packed-host job fails | explicit matrix, adapter boundary, narrow claims, tested deprecation/migration | Compatibility maintainer |
 | Supply-chain compromise reaches a release | Low / Critical | provenance, vulnerability, or integrity verification fails | pin/review, SBOM/attestation, rotation/revocation playbook, block release | Release/security maintainer |
 
-## Recurring release gate — prove and support the claimed level
+## Public-preview distribution gate
+
+Public preview is unsupported and uncertified. It may proceed with OUT-02, OUT-03, target
+platform, comparative-quality, performance, and operational certification evidence visibly
+incomplete, but only after every closed hard gate in `DIST-03` passes for exact candidate
+bytes. The pre-publish transition requires tests, build, structural checks, package review,
+final-byte secret/CSP controls, vulnerability/license/redistribution disposition, verified
+private intake, and the exact trusted-publisher binding. The post-publish transition requires
+registry byte equality, signature, and provenance. A failed hard gate blocks or fails the
+preview; a prior preview supplies no waiver to certification.
+
+## Recurring certification gate — prove and support the claimed level
 
 Requirements: `OUT-04` through `OUT-06`, all applicable `UX`, `SEC`, `PRIV`, `OPS`, `PERF`,
 `COMPAT`, and `QUAL` requirements, plus `DIST-01` through `DIST-07`.
@@ -407,6 +428,7 @@ Use these labels in release notes and README claims:
 
 | Level | Required phases | Claim allowed |
 |---|---|---|
+| Public preview (not certified) | Phase 0 preview gate | Public inspection of explicitly unsupported exact package/source bytes; no capability-level claim |
 | Local artifact core | 0–3 | Offline pages and native local OpenCode lifecycle |
 | Local collaboration | 0–4 | Reliable served comments/decisions/live data on one machine |
 | Public snapshots | 0–4 + 5A | Explicit public static sharing |

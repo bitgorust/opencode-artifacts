@@ -1,7 +1,9 @@
 # Evidence: Publish platform, security, privacy, and release policy
 
 This record separates policy publication from current operational evidence. Failed and
-unverified results keep the packet open and block the Phase 0 gate.
+unverified results remain visible and block the affected support, certification, or hard-gate
+claim. Under the later approved public-preview contract, certification-only participant and
+target-matrix gaps do not block unsupported preview distribution.
 
 ## Requirement: SEC-01
 - Validation: `bitgorust` approved the boundary set, fail-closed semantics, owner/review

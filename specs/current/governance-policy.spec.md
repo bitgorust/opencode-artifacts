@@ -16,7 +16,8 @@
   latest-two desktop Chromium/Firefox/Safari and mobile Android Chrome/iOS Safari where
   available. An exact Ubuntu/Node/OpenCode/single-Chromium packed-candidate observation is
   tested but incomplete. There are zero supported complete cells; all target cells are
-  unverified.
+  unverified. Public preview may expose that state but cannot promote the observation or claim
+  support; certification still requires the target matrix.
 - `SEC-01`: current, partial, and planned trust boundaries have owners, threats, controls,
   tests, residual risk and review triggers. Planned identity/connectors do not become shipped.
 - `SEC-10`: private GitHub vulnerability reporting is enabled and provider-verified, so the
@@ -41,6 +42,9 @@
   remediation clears the current audit and hash-bound license gates and adds exact candidate
   SBOM/provenance artifact retention. Current source, documentation, example, asset, font, and
   reference redistribution disposition also passes. Provider and platform evidence remains
-  incomplete, so no production-readiness claim is permitted. The tag workflow fails closed on
-  prepublish evidence, publishes the coordinated tarball, and verifies registry integrity/
-  signature/provenance afterward.
+  incomplete, so no production-readiness or certified-level claim is permitted. An unsupported
+  public preview may distribute only through the closed pre-publish hard gates and becomes a
+  verified public preview only after registry integrity, signature, and provenance pass. The
+  tag workflow fails closed on prepublish evidence, publishes the coordinated tarball, and
+  verifies registry integrity/signature/provenance afterward. Preview history supplies no
+  certification waiver.

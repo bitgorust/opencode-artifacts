@@ -24,7 +24,7 @@ not-applicable.
 
 | Requirements | Owning perspective | Roadmap / release gate | Accountable role | Evidence contract | Current status |
 |---|---|---|---|---|---|
-| `OUT-01`–`OUT-06` | Product outcomes | Phase 0 and every release gate | Product maintainer | named-user journey study, outcome metrics, release-level checklist, phase planning fields | Partial |
+| `OUT-01`–`OUT-06` | Product outcomes | Phase 0 preview contract; Goal 5 and every certification gate | Product maintainer | honest incomplete preview status; named-user journey study, outcome metrics, certification checklist, phase planning fields | Partial |
 | `UX-01`–`UX-08` | Human workflow | Phases 0–6; applicable release gate | Product maintainer | end-to-end journey corpus, error/permission/teardown review, Unicode/RTL/zoom QA | Partial |
 | `OC-01`–`OC-06` | OpenCode integration | Phase 3; local artifact core | OpenCode integration maintainer | clean packed-host matrix, tool/skill discovery, permission denial tests | Partial |
 | `LIFE-01`–`LIFE-07` | Artifact lifecycle | Phase 1; local artifact core | Core storage maintainer | migration fixtures, multi-process race and fault-injection tests, CLI/plugin lifecycle E2E | Partial |
@@ -39,8 +39,8 @@ not-applicable.
 | `PRIV-01`–`PRIV-07` | Data purpose and rights | Phase 0 policy; Phases 5–6 implementation; every release gate | Privacy maintainer | data inventory, no-telemetry proof, export/delete test, retention and public-abuse policy | Missing |
 | `OPS-01`–`OPS-08` | Reliability and operation | Phases 1, 4, 5B, and 6; applicable release gate | Operations maintainer | SLO dashboard/report, restore drill, degraded-mode/rollout/incident runbooks, quota alerts | Missing |
 | `PERF-01`–`PERF-07` | Speed, capacity, and cost | Phases 2, 4, 5B, and 6; applicable release gate | Performance maintainer | reproducible percentile benchmarks, limits, load/soak report, provider cost model | Missing |
-| `COMPAT-01`–`COMPAT-08` | Platforms and evolution | Phases 1 and 3; hosting migration in Phase 5B; every release gate | Compatibility maintainer | support matrix CI/manual QA, schema fixtures, export round trip, upgrade/rollback tests | Partial |
-| `DIST-01`–`DIST-07` | Release and supply chain | Phase 0 policy, Phase 3 automation, every release gate | Release maintainer | packed-host test, clean installs, release checklist, SBOM/provenance/license/vulnerability output | Partial |
+| `COMPAT-01`–`COMPAT-08` | Platforms and evolution | Phase 0 preview disclosure; Phases 1 and 3; hosting migration in Phase 5B; every certification gate | Compatibility maintainer | exact tested/unverified preview matrix; support matrix CI/manual QA, schema fixtures, export round trip, upgrade/rollback tests | Partial |
+| `DIST-01`–`DIST-07` | Release and supply chain | Phase 0 preview gate, Phase 3 automation, every distribution/certification gate | Release maintainer | preview transition model, packed-host test, clean installs, release checklist, SBOM/provenance/license/vulnerability output | Partial |
 | `QUAL-01`–`QUAL-08` | Acceptance evidence | Every phase and release gate | Quality maintainer | traceability check, automated/manual suites, retained evidence, honest failure report | Partial |
 
 ## Release applicability
@@ -51,6 +51,7 @@ not omitted.
 
 | Release level | Required product behavior | Additional release-specific IDs |
 |---|---|---|
+| Public preview (non-certified distribution) | Exact package/security/privacy/supply-chain hard gates; unsupported/uncertified label; missing human, platform, parity, and production evidence visible | `OUT-04`, `COMPAT-01`, `DIST-03`–`DIST-07`, `QUAL-01`, `QUAL-02`, `QUAL-06`, `QUAL-08`, and applicable `SEC`/`PRIV`; OUT-02/OUT-03 remain incomplete |
 | Local artifact core | `OUT`, `UX`, `OC`, `LIFE`, `RENDER`, `LOCAL-01`, plus applicable `SEC`, `PRIV`, `OPS`, `PERF`, `COMPAT`, `DIST`, `QUAL` | None |
 | Local collaboration | Local artifact core + `LOCAL-02`–`LOCAL-05` | Local-service security, privacy, operations, performance, and quality cases |
 | Public snapshots | Local collaboration + public hosting | `HOST-01`, `HOST-02`, `HOST-08`, `HOST-10` and applicable portions of `HOST-07` |

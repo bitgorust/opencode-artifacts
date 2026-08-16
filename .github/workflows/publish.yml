@@ -23,6 +23,8 @@ jobs:
       - run: npm run build
       - run: npm test
       - run: npm run check
+      - name: Verify coordinated release tag
+        run: node scripts/release-integrity.ts tag-version package.json "$GITHUB_REF_NAME"
       - name: Pack exact release bytes
         id: pack
         shell: bash
@@ -63,3 +65,13 @@ jobs:
         run: |
           npm view "${{ steps.pack.outputs.package_spec }}" dist --json > release-evidence/registry-dist.json
           node scripts/release-integrity.ts verify-registry release-evidence/pack.json package.json release-evidence/registry-dist.json
+      - name: Retain exact release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-${{ github.ref_name }}-${{ github.run_id }}
+          path: |
+            release-evidence/
+            opencode-artifacts-*.tgz
+          if-no-files-found: error
+          retention-days: 30

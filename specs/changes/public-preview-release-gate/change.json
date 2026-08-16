@@ -3,7 +3,7 @@
   "id": "public-preview-release-gate",
   "title": "Decouple public preview from certification evidence",
   "lane": "high-risk",
-  "status": "draft",
+  "status": "implementing",
   "affectedRequirements": [
     "OUT-02",
     "OUT-03",
@@ -18,8 +18,8 @@
   ],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "bitgorust",
+    "at": "2026-08-16T16:50:30Z"
   },
   "withdrawal": {
     "by": "",

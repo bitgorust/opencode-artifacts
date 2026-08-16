@@ -14,6 +14,12 @@ removal. It did not exercise Firefox, the latest two stable browser generations,
 consented first-time user following only the README. The target matrix therefore remains
 unverified and blocks a production-readiness claim.
 
+Public preview is nevertheless distributable after its closed technical, security, privacy,
+package-integrity, and supply-chain gates pass. Public preview is explicitly unsupported and
+uncertified: it makes no first-use, comprehension, parity, production-readiness, or supported-
+platform claim. Narrow observations remain diagnostic. A certified local-artifact-core or
+later release still requires the complete target matrix and OUT-02/OUT-03 evidence.
+
 | Cell | Target | Current status | Evidence or missing scope |
 |---|---|---|---|
 | Ubuntu technical observation | Ubuntu 24.04.4, Node 24.19.0, OpenCode 1.18.18, Chrome for Testing 145.0.7632.6 | Tested, not supported | [Exact packed observation](evidence/governance/ubuntu-packed-observation-2026-08-16.md); Firefox/latest-two/human first-use absent |
@@ -48,12 +54,21 @@ notice would extend an active exploit; release notes must record the security ex
 without disclosing usable exploit detail. End-of-life begins when a newer minor becomes the
 supported minor. Unsupported versions receive no fix promise.
 
-## Release gate
+## Distribution and certification gates
 
-Every release uses [the release evidence template](release-evidence-template.md) and names one
-capability level. It must include SemVer tag/version agreement, Conventional Commit history,
-reviewed notes, migrations, known limits/failures, and exact evidence for every claim.
-Missing evidence narrows or fails the claim; “not applicable” requires a reason.
+Every distribution uses [the release evidence template](release-evidence-template.md) and
+names either `public preview` or one certified capability level. It must include SemVer tag/
+version agreement, Conventional Commit history, reviewed notes, migrations, known limits/
+failures, and exact evidence for every claim. Missing evidence narrows or fails a certified
+claim. For public preview, missing OUT-02, OUT-03, support, parity, and production evidence
+must remain explicitly incomplete rather than becoming pass or not applicable.
+
+Public preview uses two transitions. `preview-candidate` passes before registry mutation only
+when tests, build, structural checks, package review, final secret/CSP controls, audit,
+licenses, redistribution, private intake, and exact trusted-publisher binding pass. `public-
+preview` passes only after registry integrity, package signature, and provenance are verified
+for those exact bytes. Any failed hard gate blocks or fails the preview. A prior preview
+supplies no waiver or evidence to later certification.
 
 The D-06 supply-chain decision follows npm's official
 [`npm sbom`](https://docs.npmjs.com/cli/commands/npm-sbom/),

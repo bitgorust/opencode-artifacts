@@ -44,7 +44,7 @@ allows parallelism; it cannot claim a later level before the accumulated earlier
 
 | Goal | Durable objective | Roadmap scope | Verifiable stopping condition |
 |---|---|---|---|
-| 1 | Truthful, executable contract | Phase 0 | Phase 0 exit gate passes with real policy and journey evidence |
+| 1 | Truthful, executable public-preview contract | Phase 0 | Phase 0 public-preview gate passes with real hard-gate evidence and missing certification inputs visible |
 | 2 | Durable artifact lifecycle | Phase 1 | transaction, recovery, migration, and lifecycle gates pass |
 | 3 | Portable rendering completeness | Phase 2 correctness track | offline asset, accessibility, security, and performance gates pass |
 | 4 | Native packaged OpenCode lifecycle | Phase 3 | clean packed installs and permission/lifecycle host tests pass |
@@ -68,11 +68,11 @@ policy approval, provider result, or manual QA outcome.
 
 | Needed by | Human/external input | If unavailable |
 |---|---|---|
-| Goal 1 | representative-user and policy evidence required by `OUT-02`/`OUT-03`; supported-platform access | retain missing/blocked status; do not pass Phase 0 |
+| Goal 1 | npm package-owner authentication and exact public-preview provider evidence | retain the provider gate as failed/unverified; do not publish preview |
 | Goal 2 | supported OS filesystems for lock/migration/fault tests | do not default-enable the schema on unverified platforms |
 | Goal 3 | supported desktop/mobile browsers, keyboard and screen-reader QA | retain the affected compatibility/accessibility failure |
 | Goal 4 | oldest-supported and current stable OpenCode hosts; release-policy decisions | narrow the support claim or pause certification |
-| Goal 5 | authorized current Claude Artifact runs, retention permission, and reviewers required by the quality benchmark | ship absolute improvements only; keep equal-or-better and local-core completion unverified |
+| Goal 5 | representative-user evidence required by `OUT-02`/`OUT-03`, supported-platform access, authorized current Claude Artifact runs, retention permission, and benchmark reviewers | public preview may continue; keep support, equal-or-better, and local-core certification unverified |
 | Goal 6 | independent clients and secondary reviewers required by `OUT-03` and the Phase 4 gate | do not certify local collaboration |
 | Goal 7 | GitHub Pages and Cloudflare test sites/credentials; public abuse/privacy policy owners | fake tests may pass, but public certification pauses |
 | Goals 8–9 | identity/domain/provider architecture, two users, region/retention/SLO decisions, backup target | authenticated support remains unavailable |
@@ -161,9 +161,11 @@ npm pack --dry-run
 git diff --check
 ```
 
-User-visible work also requires real browser/accessibility evidence; adapters need fake-runner
-and authorized real-provider smoke evidence; release claims need a completed copy of
-`docs/release-evidence-template.md` under `docs/evidence/releases/`.
+Certified user-visible work also requires real browser/accessibility evidence; adapters need
+fake-runner and authorized real-provider smoke evidence. Public preview may retain those
+certification inputs as visibly incomplete but still requires its exact technical hard gates.
+Every distribution needs a completed copy of `docs/release-evidence-template.md` under
+`docs/evidence/releases/`.
 
 ### 8. Reconcile truth
 
@@ -183,30 +185,36 @@ and authorized real-provider smoke evidence; release claims need a completed cop
   `/goal pause`/`/goal resume` around human or external checkpoints; do not start the next goal
   while the current one is merely “mostly done.”
 
-## Goal 1 — Truthful, executable contract
+## Goal 1 — Truthful, executable public-preview contract
 
 ### Copy-ready objective
 
 ```text
 /goal Execute Goal 1 in docs/goal-runbook.md: finish roadmap Phase 0 as a truthful,
-executable contract. Follow the common run loop and spec-anchored workflow, retain real
-journey and policy evidence, and stop only when the canonical Phase 0 gate linked below passes.
-Do not fabricate participants, approvals, platform results, or evidence. Deliver on an
-agent/goal-1-contract branch with a draft PR unless I authorize another delivery path.
+executable public-preview contract. Follow the common run loop and spec-anchored workflow,
+retain exact policy, security, package, provider, and release evidence, and stop only when the
+canonical Phase 0 public-preview gate linked below passes. Keep uncollected representative-
+user and full target-platform evidence visibly incomplete; do not fabricate participants,
+approvals, platform results, or evidence. Deliver on an agent/goal-1-contract branch with a
+draft PR unless I authorize another delivery path.
 ```
 
 ### Packets, work, and gate
 
 - `contract-link-integrity` — standard; official-source and internal-anchor validation.
-- `journey-corpus-and-baseline` — standard; fixtures, consent protocol, OUT-02/OUT-03 study,
-  and retained results.
+- `journey-corpus-and-baseline` — standard; fixtures, consent protocol, strict diagnostic
+  harness, and honest incomplete OUT-02/OUT-03 certification status.
 - `platform-security-privacy-policy` — high-risk; D-01/D-06, support matrix, threat model, data
   inventory, telemetry, retention/deletion/abuse, vulnerability, support, and release policies.
+- `public-preview-release-gate` — high-risk; non-certified preview state machine, exact hard
+  gates, claim consistency, provider verification, and first preview decision.
 
 Canonical scope and stopping condition: [Roadmap Phase 0](roadmap.md#phase-0--make-the-contract-truthful)
-and its linked product/traceability records. Execute every unchecked canonical item; do not
-copy its acceptance details here. Hand off the resolved support/schema/recovery constraints
-to Goal 2 and the fixture protocol to Goals 3 and 5.
+and its linked product/traceability records. The goal passes when the unsupported public-
+preview transition and exact pre/post-publish gates pass with certification evidence still
+truthfully incomplete; it does not certify local artifact core. Hand off schema/recovery
+constraints to Goal 2 and the fixture, participant, platform, and comparative protocols to
+Goals 3 and 5.
 
 ## Goal 2 — Durable artifact lifecycle
 
@@ -306,13 +314,15 @@ retain the blocker. Deliver on an agent/goal-5-local-core branch with a draft PR
   hierarchy, visual scale, mobile recomposition, and browser evidence.
 - `blinded-page-quality-benchmark` — standard; authorized Claude/OpenCode runs, reviewer
   blinding, complete distributions, iteration, and report.
+- `first-use-comprehension-certification` — standard; real OUT-02/OUT-03 representative-user
+  study and exact claimed support-cell coverage.
 - `local-artifact-core-release` — high-risk; exact-package, support, migration, security,
   privacy, performance, supply-chain, and release-decision evidence.
 
 Canonical scope and stopping condition: [Roadmap Phase 2](roadmap.md#phase-2--portable-page-completeness),
 the benchmark's [hard gates](page-quality-benchmark.md#hard-gates) and
 [equal-or-better threshold](page-quality-benchmark.md#equal-or-better-threshold), and the
-[recurring release gate](roadmap.md#recurring-release-gate--prove-and-support-the-claimed-level).
+[recurring certification gate](roadmap.md#recurring-certification-gate--prove-and-support-the-claimed-level).
 Goal 6 starts from the resulting certified baseline.
 
 ## Goal 6 — Reliable local collaboration
@@ -337,7 +347,7 @@ authorize otherwise.
 - `local-collaboration-release` — accumulated release/evidence packet.
 
 Canonical scope and stopping condition: [Roadmap Phase 4](roadmap.md#phase-4--reliable-local-collaboration)
-and the [recurring release gate](roadmap.md#recurring-release-gate--prove-and-support-the-claimed-level).
+and the [recurring certification gate](roadmap.md#recurring-certification-gate--prove-and-support-the-claimed-level).
 Freeze the verified shared collaboration semantics for authenticated hosting.
 
 ## Goal 7 — Honest public snapshots
@@ -363,7 +373,7 @@ site without explicit scoped authority.
 - `public-snapshot-policy-release` — privacy/operator/retention/abuse/cost docs and release evidence.
 
 Canonical scope and stopping condition: [Roadmap Phase 5A](roadmap.md#5a-public-snapshot-adapters)
-and the [recurring release gate](roadmap.md#recurring-release-gate--prove-and-support-the-claimed-level).
+and the [recurring certification gate](roadmap.md#recurring-certification-gate--prove-and-support-the-claimed-level).
 Retain provider/teardown evidence and resolve the linked authenticated-hosting decisions
 before Goal 8.
 
@@ -418,7 +428,7 @@ agent/goal-9-auth-collab branch with a draft PR unless I authorize otherwise.
   origin-bypass evidence and release decision.
 
 Canonical scope and stopping condition: [Roadmap Phase 5B](roadmap.md#5b-authenticated-reference-deployment)
-and the [recurring release gate](roadmap.md#recurring-release-gate--prove-and-support-the-claimed-level).
+and the [recurring certification gate](roadmap.md#recurring-certification-gate--prove-and-support-the-claimed-level).
 Freeze the verified viewer, policy, audit, state, event, and operations contracts for Goal 10.
 
 ## Goal 10 — Connector-capable artifacts and complete target
@@ -447,7 +457,7 @@ definition linked below pass. Deliver on an agent/goal-10-connectors branch with
   performance/compatibility/supply-chain/quality evidence and release decision.
 
 Canonical scope and stopping condition: [Roadmap Phase 6](roadmap.md#phase-6--viewer-scoped-connectors-and-governance),
-the [recurring release gate](roadmap.md#recurring-release-gate--prove-and-support-the-claimed-level),
+the [recurring certification gate](roadmap.md#recurring-certification-gate--prove-and-support-the-claimed-level),
 and the product [definition of complete](product-spec.md#14-definition-of-complete). Missing
 external evidence produces a blocker or reduced claim, never “done.”
 

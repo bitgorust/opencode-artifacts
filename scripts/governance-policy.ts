@@ -434,11 +434,19 @@ export function validateGovernanceClaims(inputs: GovernanceClaimInputs): string[
   for (const link of ["docs/support-policy.md", "docs/security.md", "docs/data-governance.md"]) {
     if (!inputs.readme.includes(link)) errors.push(`README is missing governance link ${link}`);
   }
+  if (!inputs.readme.includes("**Status: public preview.**") ||
+      !inputs.readme.includes("unsupported") || !inputs.readme.includes("uncertified")) {
+    errors.push("README must expose unsupported and uncertified public-preview status");
+  }
   if (!inputs.security.includes("Private vulnerability reporting is currently **available**")) {
     errors.push("SECURITY.md must expose verified private reporting");
   }
   if (!inputs.support.includes("no fully supported platform/browser cells")) {
     errors.push("support policy must expose the empty supported matrix");
+  }
+  if (!inputs.support.includes("Public preview is explicitly unsupported and") ||
+      !inputs.support.includes("uncertified")) {
+    errors.push("support policy must separate public preview from certification");
   }
   if (!inputs.dataGovernance.includes("Local rendering sends no project usage telemetry")) {
     errors.push("data policy must state the no-default-telemetry boundary");

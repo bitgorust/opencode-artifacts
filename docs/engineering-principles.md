@@ -211,6 +211,11 @@ collectively exhausted by [`docs/product-spec.md`](product-spec.md), not repeate
   consumer integrity verification. Platform, provider, privacy, and provenance claims may
   pass only from exact dated evidence; absent or separately scoped observations stay
   unverified. [check:governance-policy]
+- Public preview is a non-certified distribution state, not a weaker certification level. It
+  may expose missing human, platform, parity, and production evidence only while claiming zero
+  support and passing every exact security, privacy, package, trusted-publishing, integrity,
+  signature, and provenance hard gate. Synthetic agents remain diagnostics; preview history
+  never supplies a certification waiver.
 - Dependencies default to zero additions. A dependency must justify capability, browser
   weight, CSP/network behavior, license, vulnerability surface, update ownership, and removal
   path. Conditional inlining is the exception that permits existing heavy visual runtimes.

@@ -251,6 +251,87 @@ export function releaseCandidateGateFailures(checks: ReleaseCandidateChecks): st
     .map(([name]) => name);
 }
 
+export const PREVIEW_PREPUBLISH_GATES = [
+  "tests",
+  "build",
+  "structural",
+  "package",
+  "finalSecretScan",
+  "csp",
+  "audit",
+  "licenses",
+  "redistribution",
+  "privateIntake",
+  "trustedPublishing",
+] as const;
+
+export const PREVIEW_POSTPUBLISH_GATES = [
+  "registryIntegrity",
+  "signature",
+  "provenance",
+] as const;
+
+export type PreviewPrepublishGate = typeof PREVIEW_PREPUBLISH_GATES[number];
+export type PreviewPostpublishGate = typeof PREVIEW_POSTPUBLISH_GATES[number];
+export type ReleaseEvidenceStatus = "pass" | "failed" | "incomplete" | "unverified";
+export type ReleaseTransitionTarget =
+  | "development"
+  | "preview-candidate"
+  | "public-preview"
+  | "certified-local-core";
+
+export interface ReleaseTransitionChecks {
+  hardGates: Record<PreviewPrepublishGate | PreviewPostpublishGate, boolean>;
+  previewLabel: boolean;
+  unsupportedDisclosure: boolean;
+  missingEvidenceVisible: boolean;
+  certificationClaim: boolean;
+  out02: ReleaseEvidenceStatus;
+  out03: ReleaseEvidenceStatus;
+  support: ReleaseEvidenceStatus;
+}
+
+function failedGates(
+  checks: ReleaseTransitionChecks,
+  gates: ReadonlyArray<PreviewPrepublishGate | PreviewPostpublishGate>,
+): string[] {
+  return gates.filter((gate) => !checks.hardGates[gate]).map((gate) => `hard gate failed: ${gate}`);
+}
+
+function certificationEvidenceIsMissing(checks: ReleaseTransitionChecks): boolean {
+  return checks.out02 !== "pass" || checks.out03 !== "pass" || checks.support !== "pass";
+}
+
+export function releaseTransitionFailures(
+  target: ReleaseTransitionTarget,
+  checks: ReleaseTransitionChecks,
+): string[] {
+  if (target === "development") return [];
+
+  const failures = failedGates(checks, PREVIEW_PREPUBLISH_GATES);
+  if (target !== "preview-candidate") {
+    failures.push(...failedGates(checks, PREVIEW_POSTPUBLISH_GATES));
+  }
+
+  if (target === "preview-candidate" || target === "public-preview") {
+    if (!checks.previewLabel) failures.push("public preview label is missing");
+    if (!checks.unsupportedDisclosure) failures.push("unsupported disclosure is missing");
+    if (checks.certificationClaim) failures.push("public preview cannot claim certification");
+    if (certificationEvidenceIsMissing(checks) && !checks.missingEvidenceVisible) {
+      failures.push("missing certification evidence is hidden");
+    }
+    return failures;
+  }
+
+  if (checks.previewLabel) failures.push("certified release cannot retain a preview label");
+  if (checks.unsupportedDisclosure) failures.push("certified release cannot claim unsupported status");
+  if (!checks.certificationClaim) failures.push("certified release must claim its exact certified level");
+  for (const field of ["out02", "out03", "support"] as const) {
+    if (checks[field] !== "pass") failures.push(`certification evidence is not pass: ${field}`);
+  }
+  return failures;
+}
+
 export interface PackCoordinate {
   filename: string;
   integrity: string;
@@ -346,6 +427,14 @@ export function verifyPublishedDistribution(pack: unknown, dist: unknown): strin
   return errors;
 }
 
+export function verifyTagVersion(packageJson: unknown, tag: string): string[] {
+  if (!isRecord(packageJson) || typeof packageJson["version"] !== "string") {
+    return ["package.json must contain a version"];
+  }
+  const expected = `v${packageJson["version"]}`;
+  return tag === expected ? [] : [`release tag ${tag || "<empty>"} does not match package version ${expected}`];
+}
+
 async function json(path: string): Promise<unknown> {
   return JSON.parse(await readFile(path, "utf8")) as unknown;
 }
@@ -403,7 +492,14 @@ async function main(): Promise<void> {
     else console.log("ok - registry integrity, signature, and provenance match the packed release");
     return;
   }
-  console.error("Usage: release-integrity.ts licenses <package-lock.json> <license-dispositions.json> | pack-output <pack.json> <package.json> | candidate-provenance <pack.json> <package.json> | verify-registry <pack.json> <package.json> <dist.json>");
+  if (command === "tag-version" && args.length === 2) {
+    const errors = verifyTagVersion(await json(args[0]), args[1]);
+    for (const error of errors) console.error(`FAIL - ${error}`);
+    if (errors.length > 0) process.exitCode = 1;
+    else console.log(`ok - release tag ${args[1]} matches package version`);
+    return;
+  }
+  console.error("Usage: release-integrity.ts licenses <package-lock.json> <license-dispositions.json> | pack-output <pack.json> <package.json> | candidate-provenance <pack.json> <package.json> | verify-registry <pack.json> <package.json> <dist.json> | tag-version <package.json> <tag>");
   process.exitCode = 2;
 }
 

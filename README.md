@@ -2,6 +2,11 @@
 
 Publish OpenCode session output as self-contained, interactive HTML artifact pages.
 
+> **Status: public preview.** The project is publicly inspectable but currently unsupported
+> and uncertified. There are zero fully supported platform/browser cells, and no representative-
+> user first-use or comprehension baseline is claimed. Exact technical and supply-chain
+> evidence is linked below.
+
 [![npm](https://img.shields.io/npm/v/opencode-artifacts)](https://www.npmjs.com/package/opencode-artifacts)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -183,7 +188,7 @@ browser-verified screenshots in [`docs/evidence/patterns/`](docs/evidence/patter
 
 ## Governance and support
 
-Current policy is explicit about incomplete evidence:
+Current public-preview policy is explicit about incomplete certification evidence:
 
 - [support and release policy](docs/support-policy.md) — Node 24 floor, zero currently
   supported full matrix cells, current-minor fix window, deprecation and D-06 supply chain;

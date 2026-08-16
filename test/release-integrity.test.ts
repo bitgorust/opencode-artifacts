@@ -5,9 +5,14 @@ import {
   createLicenseInventory,
   licenseInventoryErrors,
   packCoordinate,
+  PREVIEW_POSTPUBLISH_GATES,
+  PREVIEW_PREPUBLISH_GATES,
   releaseCandidateGateFailures,
+  releaseTransitionFailures,
   validateLicenseDispositions,
   verifyPublishedDistribution,
+  verifyTagVersion,
+  type ReleaseTransitionChecks,
 } from "../scripts/release-integrity.ts";
 
 test("license inventory reports missing and compound dispositions", () => {
@@ -102,6 +107,76 @@ test("release candidate property model blocks every failed constituent gate", ()
   for (const name of Object.keys(passing) as Array<keyof typeof passing>) {
     assert.deepEqual(releaseCandidateGateFailures({ ...passing, [name]: false }), [name]);
   }
+});
+
+function previewChecks(): ReleaseTransitionChecks {
+  return {
+    hardGates: Object.fromEntries(
+      [...PREVIEW_PREPUBLISH_GATES, ...PREVIEW_POSTPUBLISH_GATES].map((gate) => [gate, true]),
+    ) as ReleaseTransitionChecks["hardGates"],
+    previewLabel: true,
+    unsupportedDisclosure: true,
+    missingEvidenceVisible: true,
+    certificationClaim: false,
+    out02: "incomplete",
+    out03: "incomplete",
+    support: "unverified",
+  };
+}
+
+test("public preview state machine permits visible missing certification evidence but no hard-gate failure", () => {
+  const base = previewChecks();
+  assert.deepEqual(releaseTransitionFailures("preview-candidate", base), []);
+  assert.deepEqual(releaseTransitionFailures("public-preview", base), []);
+
+  for (const gate of PREVIEW_PREPUBLISH_GATES) {
+    const changed = structuredClone(base);
+    changed.hardGates[gate] = false;
+    assert.match(releaseTransitionFailures("preview-candidate", changed).join("\n"), new RegExp(gate));
+    assert.match(releaseTransitionFailures("public-preview", changed).join("\n"), new RegExp(gate));
+  }
+  for (const gate of PREVIEW_POSTPUBLISH_GATES) {
+    const changed = structuredClone(base);
+    changed.hardGates[gate] = false;
+    assert.deepEqual(releaseTransitionFailures("preview-candidate", changed), []);
+    assert.match(releaseTransitionFailures("public-preview", changed).join("\n"), new RegExp(gate));
+  }
+
+  for (const field of ["previewLabel", "unsupportedDisclosure", "missingEvidenceVisible"] as const) {
+    const changed = structuredClone(base);
+    changed[field] = false;
+    assert.notDeepEqual(releaseTransitionFailures("preview-candidate", changed), []);
+  }
+  const inflated = structuredClone(base);
+  inflated.certificationClaim = true;
+  assert.match(releaseTransitionFailures("public-preview", inflated).join("\n"), /cannot claim certification/);
+});
+
+test("certification never inherits a public-preview waiver", () => {
+  const preview = previewChecks();
+  const failures = releaseTransitionFailures("certified-local-core", preview).join("\n");
+  assert.match(failures, /preview label/);
+  assert.match(failures, /unsupported status/);
+  assert.match(failures, /must claim its exact certified level/);
+  assert.match(failures, /out02/);
+  assert.match(failures, /out03/);
+  assert.match(failures, /support/);
+
+  const certified = structuredClone(preview);
+  certified.previewLabel = false;
+  certified.unsupportedDisclosure = false;
+  certified.missingEvidenceVisible = false;
+  certified.certificationClaim = true;
+  certified.out02 = "pass";
+  certified.out03 = "pass";
+  certified.support = "pass";
+  assert.deepEqual(releaseTransitionFailures("certified-local-core", certified), []);
+});
+
+test("release tag must match the coordinated package version", () => {
+  assert.deepEqual(verifyTagVersion({ version: "0.14.4" }, "v0.14.4"), []);
+  assert.match(verifyTagVersion({ version: "0.14.4" }, "v0.14.5").join("\n"), /does not match/);
+  assert.match(verifyTagVersion({}, "v0.14.4").join("\n"), /must contain a version/);
 });
 
 test("pack coordinate binds filename, hashes, package name, and version", () => {

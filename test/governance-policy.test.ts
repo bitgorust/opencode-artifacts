@@ -56,6 +56,8 @@ test("inflated README provenance and mismatched Node claims fail consistency", (
   assert.match(errors, /claims provenance attestations/);
   assert.match(errors, /engines.node must match/);
   assert.match(errors, /verified private reporting/);
+  assert.match(errors, /public-preview status/);
+  assert.match(errors, /separate public preview from certification/);
 });
 
 test("redistribution inventory binds every retained binary and keeps official references link-only", () => {

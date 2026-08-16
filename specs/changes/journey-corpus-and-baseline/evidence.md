@@ -6,7 +6,8 @@
 - Verification: the approved corpus and validator are checked in; focused tests prove that no
   platform, uncovered platforms, and fewer-than-required evidence stay incomplete, while an
   observed covered miss fails.
-- Result: missing, which is not a pass.
+- Result: incomplete, which is not a pass and cannot support certification; the approved
+  public-preview contract permits distribution only with this absence visible.
 - Evidence: [@test](test/journey-study.test.ts),
   [@manual](docs/evidence/journeys/phase-0-baseline-status.md)
 
@@ -15,7 +16,8 @@
 - Validation: missing; there are no results from ten consented representative primary users.
 - Verification: focused tests exercise the exact ten-participant and 90% boundary, exclusion
   rules, fixture distribution, and the empty-study result.
-- Result: missing, which keeps the Phase 0 gate failed.
+- Result: incomplete, which is not a pass and cannot support certification; the approved
+  public-preview contract permits distribution only with this absence visible.
 - Evidence: [@test](test/journey-study.test.ts),
   [@manual](docs/evidence/journeys/phase-0-baseline-status.md)
 

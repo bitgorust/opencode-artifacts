@@ -31,5 +31,8 @@
   four true without assistance in at most 60 seconds. Fewer than ten is `incomplete`, not a
   pass or a rounded rate.
 - The retained status at `docs/evidence/journeys/phase-0-baseline-status.md` records zero real
-  participants. Therefore `OUT-02` and `OUT-03` remain missing and the Phase 0 gate remains
-  incomplete until the approved real study is run.
+  participants. Therefore `OUT-02` and `OUT-03` remain incomplete and cannot support a human-
+  usability, platform-support, or certified-level claim. Their absence does not block an
+  explicitly unsupported and uncertified public preview whose separate hard gates pass.
+  Synthetic Kimi/model probes may diagnose the instructions or corpus but never change this
+  status or enter the participant denominator.
