@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "public-preview-release-gate",
+  "title": "Decouple public preview from certification evidence",
+  "lane": "high-risk",
+  "status": "draft",
+  "affectedRequirements": [
+    "OUT-02",
+    "OUT-03",
+    "OUT-04",
+    "COMPAT-01",
+    "DIST-03",
+    "QUAL-08"
+  ],
+  "currentSpecs": [
+    "specs/current/governance-policy.spec.md",
+    "specs/current/journey-evidence.spec.md"
+  ],
+  "currentSpecsUpdated": false,
+  "approval": {
+    "by": "",
+    "at": ""
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-16",
+  "archivedAt": null
+}
