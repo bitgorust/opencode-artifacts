@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "goal-2-optional-platform-evidence",
+  "title": "Make cross-platform filesystem evidence optional for Goal 2",
+  "lane": "standard",
+  "status": "archived",
+  "affectedRequirements": [
+    "COMPAT-01"
+  ],
+  "currentSpecs": [
+    "specs/current/governance-policy.spec.md",
+    "specs/current/artifact-lifecycle.spec.md"
+  ],
+  "currentSpecsUpdated": true,
+  "approval": {
+    "by": "user",
+    "at": "2026-08-17T14:52:36Z"
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-17",
+  "archivedAt": "2026-08-17"
+}

@@ -44,5 +44,7 @@
 - `QUAL-02`, `QUAL-06`: the Node 24 full suite covers deterministic unit, model, multi-process,
   crash, migration, CLI, plugin, hostile-reference, bundle, and loopback behavior. A real
   two-tab Chromium run verifies visible decision/comment conflicts and a non-mutating quota
-  refusal. Unavailable write-platform cells still prevent Phase 1 and local-artifact-core
-  certification from passing across the target matrix.
+  refusal. The approved Goal 2 gate treats unavailable macOS and Windows native/WSL
+  write-platform cells as optional for Phase 1 completion only. Those cells remain unverified,
+  schema 2 remains opt-in there, and local-artifact-core certification still requires its
+  complete target matrix.

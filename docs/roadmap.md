@@ -150,12 +150,12 @@ Exit gate:
 - fault injection at every write boundary always recovers a complete old or new transaction;
 - all old fixtures either migrate losslessly or produce an explicit repair report.
 
-Status: **implementation and observed technical gate complete; platform gate unverified**.
-The approved worktree passes the Node 24 build, all 169 tests, structural checks, the
+Status: **passed for the Phase 1 opt-in lifecycle contract on 2026-08-17**.
+The approved worktree passes the Node 24 build, all 170 tests, structural checks, the
 Ubuntu/ext4 transaction and migration observation, and real-Chromium decision/comment/limit
-workflows. Current/previous macOS and Windows native/WSL write-filesystem cells remain
-unavailable, so schema 2 stays opt-in, Phase 1 has not passed across its target matrix, and
-later phases cannot inherit a lifecycle certification.
+workflows. By explicit human decision, current/previous macOS and Windows native/WSL
+write-filesystem cells are optional for Goal 2 completion. They remain unverified, schema 2
+stays opt-in there, and neither later certification nor platform support inherits a pass.
 
 ## Phase 2 — Portable page completeness
 

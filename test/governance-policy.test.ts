@@ -44,6 +44,20 @@ test("required target cells, data modes, and threat boundaries cannot disappear"
   assert.match(errors, /threatBoundaries is missing connectors/);
 });
 
+test("Goal 2 optional platform evidence never becomes support or default enablement", async () => {
+  const [runbook, roadmap, governance, lifecycle] = await Promise.all([
+    readFile(new URL("../docs/goal-runbook.md", import.meta.url), "utf8"),
+    readFile(new URL("../docs/roadmap.md", import.meta.url), "utf8"),
+    readFile(new URL("../specs/current/governance-policy.spec.md", import.meta.url), "utf8"),
+    readFile(new URL("../specs/current/artifact-lifecycle.spec.md", import.meta.url), "utf8"),
+  ]);
+  assert.match(runbook, /macOS and Windows native\/WSL cells are optional for Goal 2 completion/);
+  assert.match(roadmap, /passed for the Phase 1 opt-in lifecycle contract/);
+  assert.match(governance, /no later support\/certification gate inherits evidence/);
+  assert.match(lifecycle, /schema 2 remains opt-in there/);
+  assert.ok((policy["supportCells"] as Array<Record<string, unknown>>).every((cell) => cell["status"] !== "supported"));
+});
+
 test("inflated README provenance and mismatched Node claims fail consistency", () => {
   const errors = validateGovernanceClaims({
     readme: "with provenance attestations",

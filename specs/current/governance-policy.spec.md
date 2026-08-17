@@ -17,7 +17,10 @@
   available. An exact Ubuntu/Node/OpenCode/single-Chromium packed-candidate observation is
   tested but incomplete. There are zero supported complete cells; all target cells are
   unverified. Public preview may expose that state but cannot promote the observation or claim
-  support; certification still requires the target matrix.
+  support; certification still requires the target matrix. A goal-specific implementation
+  gate may treat an unavailable cell as optional only after an explicit human decision and
+  only when the cell remains unverified, platform-dependent behavior remains opt-in or
+  disabled, and no later support/certification gate inherits evidence.
 - `SEC-01`: current, partial, and planned trust boundaries have owners, threats, controls,
   tests, residual risk and review triggers. Planned identity/connectors do not become shipped.
 - `SEC-10`: private GitHub vulnerability reporting is enabled and provider-verified, so the

@@ -13,7 +13,7 @@ On 2026-08-17, the canonical commands ran on the Ubuntu 24.04.4 LTS host's ext4 
 through the official `node:24-bookworm` image at digest
 `sha256:934240a162082fd8b8a2f90cd5114446443f1eba1c5378f6687167ca405e6584`.
 The isolated runtime reported Debian 12 x86_64, Node `24.19.0`, and npm `11.17.0`; network
-access was disabled for the commands. `npm run build` passed, `npm test` passed all 169 tests,
+access was disabled for the commands. `npm run build` passed, `npm test` passed all 170 tests,
 and `npm run check` passed all 35 registered checks and engineering-principle tags.
 
 The earlier Bun diagnostics below exercised the same TypeScript sources while Node 24 was
@@ -84,6 +84,8 @@ accessibility, mobile, latest-two-browser, or broad platform certification.
 ## Gate disposition
 
 The implementation and all four packet verification suites pass, including the canonical
-multi-process, every-boundary fault, migration, and real-browser state checks. Phase 1 remains
-non-default and Goal 2 cannot close until the unavailable supported write-platform matrix is
-resolved. Goals 3–10 must not start while Goal 2 remains at this external evidence gate.
+multi-process, every-boundary fault, migration, and real-browser state checks. On 2026-08-17,
+the user explicitly made macOS and Windows native/WSL write-filesystem evidence optional for
+Goal 2. Phase 1 and Goal 2 therefore pass for the opt-in lifecycle contract. The missing cells
+remain unverified, schema 2 remains non-default there, and later support/certification gates
+inherit no result from this narrow decision.
