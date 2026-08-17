@@ -8,6 +8,6 @@
 - [x] Add deterministic fault injection and the bounded transaction state model.
 - [x] Add independent-process same-head/different-artifact races, stale takeover, retry, path,
   corruption, cancellation, and resource-limit tests.
-- [ ] Retain exact supported-filesystem results and explicit unavailable cells.
-- [ ] Record validation/verification evidence and update `specs/current/artifact-lifecycle.spec.md`.
-- [ ] Run repository validation and archive the packet.
+- [x] Retain exact supported-filesystem results and explicit unavailable cells.
+- [x] Record validation/verification evidence and update `specs/current/artifact-lifecycle.spec.md`.
+- [x] Run repository validation and archive the packet.

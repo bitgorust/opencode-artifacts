@@ -1,20 +1,21 @@
 {
   "schemaVersion": 1,
-  "id": "artifact-state-cas-limits",
-  "title": "Make mutable artifact state atomic and bounded",
+  "id": "artifact-publication-transaction",
+  "title": "Make artifact publication crash-safe across processes",
   "lane": "high-risk",
-  "status": "implementing",
+  "status": "archived",
   "affectedRequirements": [
-    "LOCAL-04",
+    "LIFE-04",
     "SEC-07",
     "OPS-04",
-    "PERF-05",
-    "COMPAT-03",
+    "OPS-05",
     "QUAL-02",
     "QUAL-06"
   ],
-  "currentSpecs": [],
-  "currentSpecsUpdated": false,
+  "currentSpecs": [
+    "specs/current/artifact-lifecycle.spec.md"
+  ],
+  "currentSpecsUpdated": true,
   "approval": {
     "by": "aaron.zeng",
     "at": "2026-08-16T20:32:04Z"
@@ -25,5 +26,5 @@
     "reason": ""
   },
   "createdAt": "2026-08-16",
-  "archivedAt": null
+  "archivedAt": "2026-08-17"
 }

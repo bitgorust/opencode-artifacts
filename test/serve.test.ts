@@ -249,8 +249,8 @@ test("schema-2 HTTP state uses CAS, replay IDs, bounded conflicts, and document 
       put("one", "dddddddd-dddd-4ddd-8ddd-dddddddddddd"),
       put("two", "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"),
     ]);
-    assert.equal(one.status, 200);
-    assert.equal(two.status, 200);
+    assert.equal(one.status, 200, one.status === 200 ? undefined : await one.text());
+    assert.equal(two.status, 200, two.status === 200 ? undefined : await two.text());
     const listed = (await (await fetch(`${url}/__db/board/notes`)).json()) as { docs: Array<{ id: string }>; revision: number };
     assert.deepEqual(listed.docs.map((entry) => entry.id).sort(), ["one", "two"]);
     assert.equal(listed.revision, 2);

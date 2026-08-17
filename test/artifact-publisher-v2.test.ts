@@ -87,7 +87,8 @@ test("schema-2 stale guard is atomic and restore appends an auditable revision",
     assert.ok(rejected?.status === "rejected");
     assert.ok(rejected.reason instanceof StaleArtifactError);
 
-    const restored = await publisher.restore("report", 1);
+    await assert.rejects(publisher.restore("report", 1), StaleArtifactError);
+    const restored = await publisher.restore("report", 1, 2);
     assert.equal(restored.version, 3);
     const manifest = await readArtifactManifestV2(dir);
     const artifact = manifest.artifacts[ARTIFACT_ID];

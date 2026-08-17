@@ -35,6 +35,14 @@ export interface RevisionRecordV2 {
   author?: string;
   charts: number;
   provenance: RevisionProvenanceV2;
+  authoringSource?: AuthoringSourceReferenceV2;
+}
+
+export interface AuthoringSourceReferenceV2 {
+  format: "markdown" | "html";
+  path: string;
+  bytes: number;
+  contentHash: string;
 }
 
 export interface DeploymentReferenceV2 {
@@ -172,7 +180,21 @@ const REVISION_KEYS = new Set([
   "author",
   "charts",
   "provenance",
+  "authoringSource",
 ]);
+
+const AUTHORING_SOURCE_KEYS = new Set(["format", "path", "bytes", "contentHash"]);
+
+function validateAuthoringSource(value: unknown, artifactId: string, revision: number, path: string, issues: string[]): void {
+  if (!isRecord(value) || !hasOnlyKeys(value, AUTHORING_SOURCE_KEYS)) {
+    issues.push(`${path} must be an exact authoring source reference`);
+    return;
+  }
+  if (value["format"] !== "markdown" && value["format"] !== "html") issues.push(`${path}.format is invalid`);
+  if (value["path"] !== `.sources/${artifactId}/${revision}.${String(value["format"])}.txt`) issues.push(`${path}.path is not canonical`);
+  if (!nonNegativeInteger(value["bytes"])) issues.push(`${path}.bytes is invalid`);
+  if (typeof value["contentHash"] !== "string" || !CONTENT_HASH_RE.test(value["contentHash"])) issues.push(`${path}.contentHash is invalid`);
+}
 
 function validateRevision(
   value: unknown,
@@ -206,6 +228,9 @@ function validateRevision(
   }
   if (!nonNegativeInteger(value["charts"])) issues.push(`${path}.charts is invalid`);
   validateProvenance(value["provenance"], `${path}.provenance`, issues);
+  if (value["authoringSource"] !== undefined) {
+    validateAuthoringSource(value["authoringSource"], artifactId, expectedRevision, `${path}.authoringSource`, issues);
+  }
 }
 
 const DEPLOYMENT_KEYS = new Set([
@@ -323,6 +348,10 @@ function validateArtifact(value: unknown, id: string, path: string, issues: stri
         `${path}.deploymentReferences[${index}]`,
         issues,
       );
+      const deployment = value["deploymentReferences"][index];
+      if (isRecord(deployment) && positiveInteger(deployment["revision"]) && positiveInteger(value["headRevision"]) && deployment["revision"] > value["headRevision"]) {
+        issues.push(`${path}.deploymentReferences[${index}].revision exceeds the artifact head`);
+      }
     }
   }
 }

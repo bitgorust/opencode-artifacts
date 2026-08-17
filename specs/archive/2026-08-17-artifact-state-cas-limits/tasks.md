@@ -6,6 +6,6 @@
 - [x] Enforce documented byte/count/field/rate defaults, warnings, and override ceilings.
 - [x] Route loopback HTTP, served bridge, and approved plugin operations through one store API.
 - [x] Add model/property, process/client race, migration, malformed, quota, replay, and overload tests.
-- [ ] Retain browser evidence for decision/comment conflict and limit states.
-- [ ] Record validation/verification evidence and update current lifecycle/local-service specs.
-- [ ] Run repository validation and archive the packet.
+- [x] Retain browser evidence for decision/comment conflict and limit states.
+- [x] Record validation/verification evidence and update current lifecycle/local-service specs.
+- [x] Run repository validation and archive the packet.

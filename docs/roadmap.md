@@ -150,6 +150,13 @@ Exit gate:
 - fault injection at every write boundary always recovers a complete old or new transaction;
 - all old fixtures either migrate losslessly or produce an explicit repair report.
 
+Status: **implementation and observed technical gate complete; platform gate unverified**.
+The approved worktree passes the Node 24 build, all 169 tests, structural checks, the
+Ubuntu/ext4 transaction and migration observation, and real-Chromium decision/comment/limit
+workflows. Current/previous macOS and Windows native/WSL write-filesystem cells remain
+unavailable, so schema 2 stays opt-in, Phase 1 has not passed across its target matrix, and
+later phases cannot inherit a lifecycle certification.
+
 ## Phase 2 — Portable page completeness
 
 Goal: make the offline file cover the official single-page envelope without relying on raw

@@ -396,6 +396,8 @@ export function validateArtifactStateEnvelope(
     throw new ArtifactStateError("corrupt", "state envelope is malformed or belongs to another artifact/store", 0, "restore a verified backup or run state repair preflight");
   }
   const seen = new Set<string>();
+  let priorOperationRevision = 0;
+  let priorOperationTime = -Infinity;
   for (const operation of value["operations"]) {
     if (
       !isRecord(operation) ||
@@ -409,13 +411,18 @@ export function validateArtifactStateEnvelope(
       !Number.isSafeInteger(operation["revision"]) ||
       operation["revision"] < 1 ||
       operation["revision"] > value["revision"] ||
+      operation["revision"] <= priorOperationRevision ||
       typeof operation["contentHash"] !== "string" ||
       !HASH_RE.test(operation["contentHash"]) ||
-      !validTimestamp(operation["committedAt"])
+      !validTimestamp(operation["committedAt"]) ||
+      Date.parse(operation["committedAt"]) < priorOperationTime ||
+      Date.parse(operation["committedAt"]) > Date.parse(value["updatedAt"])
     ) {
       throw new ArtifactStateError("corrupt", "state operation ledger is malformed", value["revision"], "restore a verified backup or run state repair preflight");
     }
     seen.add(operation["id"]);
+    priorOperationRevision = operation["revision"];
+    priorOperationTime = Date.parse(operation["committedAt"]);
   }
   const payload = validatePayload(expected.kind, value["payload"], limits, value["revision"]);
   const contentHash = sha256(stableJson(payload, limits.maxJsonDepth));
@@ -543,7 +550,8 @@ async function mutateInternal<T extends ArtifactStatePayload>(
     if (conflict(current)) {
       throw new ArtifactStateConflictError("state mutation precondition is stale", current, limits.conflictPreviewBytes);
     }
-    const warnings = mutationWarnings(current.operations, Date.parse(now), limits);
+    const committedAt = Date.parse(now) < Date.parse(current.updatedAt) ? current.updatedAt : now;
+    const warnings = mutationWarnings(current.operations, Date.parse(committedAt), limits);
     const payload = validatePayload(input.kind, resolvePayload(current), limits, current.revision) as T;
     const contentHash = sha256(stableJson(payload, limits.maxJsonDepth));
     const revision = current.revision + 1;
@@ -552,7 +560,7 @@ async function mutateInternal<T extends ArtifactStatePayload>(
       inputHash,
       revision,
       contentHash,
-      committedAt: now,
+      committedAt,
     };
     const envelope: ArtifactStateEnvelope<T> = {
       schemaVersion: ARTIFACT_STATE_SCHEMA_VERSION,
@@ -562,7 +570,7 @@ async function mutateInternal<T extends ArtifactStatePayload>(
       revision,
       contentHash,
       payload,
-      updatedAt: now,
+      updatedAt: committedAt,
       operations: [...current.operations, operation].slice(-limits.operationRecords),
     };
     validateArtifactStateEnvelope(envelope, { artifactId: input.artifactId, kind: input.kind, key }, limits);
@@ -700,6 +708,13 @@ async function legacyMigrationItem(
   const targetText = `${JSON.stringify(envelope, null, 2)}\n`;
   if (utf8Bytes(targetText) > encodedStateCap(kind, limits)) {
     throw new ArtifactStateError("quota", `migrated ${kind} envelope exceeds ${encodedStateCap(kind, limits)} encoded bytes`, 0, "reduce or partition legacy state before migration");
+  }
+  const existingTarget = await readEnvelopeLocked(root, artifactId, kind, key, limits);
+  if (existingTarget) {
+    if (existingTarget.contentHash !== envelope.contentHash) {
+      throw new ArtifactStateError("stale", `schema-2 target already differs from legacy state: ${targetPath}`, existingTarget.revision, "review both states and choose an explicit repair before migration");
+    }
+    return undefined;
   }
   return {
     sourcePath,

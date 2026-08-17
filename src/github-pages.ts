@@ -38,6 +38,9 @@ const SKIP_ENTRIES = new Set([
   ".transactions",
   ".backups",
   ".migrations",
+  ".sources",
+  ".archives",
+  ".archive-previews",
 ]);
 
 export async function copyArtifacts(fromDir: string, toDir: string): Promise<void> {

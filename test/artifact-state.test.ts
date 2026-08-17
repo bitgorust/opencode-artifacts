@@ -269,6 +269,45 @@ test("future schemas, malformed hashes, symlinks, and cross-artifact envelopes f
   });
 });
 
+test("operation ledgers stay revision-ordered when caller clocks move backward", async () => {
+  await withTempDir(async (root) => {
+    const first = await replaceArtifactState({
+      root,
+      artifactId: ARTIFACT_ID,
+      kind: "decisions",
+      expectedRevision: 0,
+      operationId: OP_A,
+      payload: { answers: { layout: "tabs" } },
+      now: "2026-08-16T20:00:01Z",
+    });
+    const second = await replaceArtifactState({
+      root,
+      artifactId: ARTIFACT_ID,
+      kind: "decisions",
+      expectedRevision: 1,
+      operationId: OP_B,
+      payload: { answers: { layout: "dense" } },
+      now: "2026-08-16T20:00:00Z",
+    });
+    assert.equal(second.envelope.updatedAt, first.envelope.updatedAt);
+    assert.equal(second.envelope.operations[1]?.committedAt, first.envelope.updatedAt);
+
+    const unordered = structuredClone(second.envelope);
+    unordered.operations[1]!.revision = 1;
+    assert.throws(
+      () => validateArtifactStateEnvelope(unordered, { artifactId: ARTIFACT_ID, kind: "decisions", key: "default" }),
+      /operation ledger is malformed/,
+    );
+
+    const futureDated = structuredClone(second.envelope);
+    futureDated.operations[1]!.committedAt = "2026-08-16T20:00:02Z";
+    assert.throws(
+      () => validateArtifactStateEnvelope(futureDated, { artifactId: ARTIFACT_ID, kind: "decisions", key: "default" }),
+      /operation ledger is malformed/,
+    );
+  });
+});
+
 test("bounded CAS model exhaustively preserves one-winner, replay, and distinct-document properties", () => {
   const values = ["a", "b"];
   for (const left of values) {

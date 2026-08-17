@@ -3,7 +3,7 @@
   "id": "artifact-identity-schema-migration",
   "title": "Introduce durable artifact identity and schema migration",
   "lane": "high-risk",
-  "status": "implementing",
+  "status": "archived",
   "affectedRequirements": [
     "LIFE-01",
     "LIFE-02",
@@ -15,8 +15,10 @@
     "COMPAT-04",
     "QUAL-02"
   ],
-  "currentSpecs": [],
-  "currentSpecsUpdated": false,
+  "currentSpecs": [
+    "specs/current/artifact-lifecycle.spec.md"
+  ],
+  "currentSpecsUpdated": true,
   "approval": {
     "by": "aaron.zeng",
     "at": "2026-08-16T20:32:04Z"
@@ -27,5 +29,5 @@
     "reason": ""
   },
   "createdAt": "2026-08-16",
-  "archivedAt": null
+  "archivedAt": "2026-08-17"
 }

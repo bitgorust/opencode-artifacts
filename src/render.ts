@@ -166,6 +166,9 @@ pre.mermaid{background:var(--card-bg);border:1px solid var(--line);border-radius
 .decision-opt.selected .decision-label{font-weight:650;color:var(--accent)}
 .decision-note{font-size:.82rem;color:var(--ink-2)}
 .decisions-hint{font-size:.78rem;color:var(--ink-3);margin-top:.5rem}
+.artifact-state-notice{position:fixed;left:50%;top:1rem;transform:translateX(-50%);z-index:30;max-width:min(92vw,640px);padding:.7rem 1rem;border:1px solid var(--warn);border-radius:10px;background:var(--card-warn-bg);color:var(--ink);box-shadow:0 6px 24px rgb(15 23 42/.18);font-size:.86rem}
+.artifact-state-notice[data-scope="comments"]{top:5rem}
+.artifact-state-notice[data-tone="error"]{border-color:var(--bad);background:var(--bad-bg)}
 .table-wrap{margin:1rem 0}
 .table-filter{width:100%;max-width:320px;padding:.45rem .8rem;border:1px solid var(--line);border-radius:8px;background:var(--card-bg);color:var(--ink);font:inherit;font-size:.88rem;margin-bottom:.5rem}
 .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
@@ -307,6 +310,30 @@ const BOOT = `(function () {
     note.textContent = msg;
     setTimeout(function () { note.textContent = ""; }, 1600);
   }
+  function stateNotice(scope, message, tone) {
+    var id = "artifact-state-notice-" + scope;
+    var notice = document.getElementById(id);
+    if (!message) {
+      if (notice && notice.parentNode) notice.parentNode.removeChild(notice);
+      return;
+    }
+    if (!notice) {
+      notice = document.createElement("div");
+      notice.id = id;
+      notice.className = "artifact-state-notice";
+      notice.setAttribute("role", "alert");
+      notice.setAttribute("aria-live", "assertive");
+      notice.setAttribute("data-scope", scope);
+      document.body.appendChild(notice);
+    }
+    notice.setAttribute("data-tone", tone || "warning");
+    notice.textContent = message;
+  }
+  function stateFailureMessage(label, body) {
+    var reason = body && (body.message || body.error) ? String(body.message || body.error) : "request refused";
+    var next = body && body.nextAction ? " " + String(body.nextAction) : " Reload the page and retry.";
+    return label + " were not saved: " + reason + "." + next;
+  }
   var decisionStateMeta = { revision: 0, contentHash: null };
   document.addEventListener("click", function (ev) {
     var btn = ev.target && ev.target.closest ? ev.target.closest(".copy-btn") : null;
@@ -353,12 +380,16 @@ const BOOT = `(function () {
             decisionStateMeta.revision = result.body.revision;
             decisionStateMeta.contentHash = result.body.contentHash;
             document.documentElement.removeAttribute("data-artifact-state-conflict");
+            stateNotice("decisions", "");
           } else if (result.status === 409) {
             decisionStateMeta.revision = result.body.revision;
             decisionStateMeta.contentHash = result.body.contentHash;
             document.documentElement.setAttribute("data-artifact-state-conflict", "decisions");
+            stateNotice("decisions", "Decisions changed in another session. Reload to review the latest choices before retrying.");
+          } else {
+            stateNotice("decisions", stateFailureMessage("Decisions", result.body), "error");
           }
-        }).catch(function () {});
+        }).catch(function () { stateNotice("decisions", "Decisions were not saved because the local service is unavailable. Check the server and retry.", "error"); });
     }
   });
   try {
@@ -413,12 +444,16 @@ const BOOT = `(function () {
             commentsStateMeta.revision = result.body.revision;
             commentsStateMeta.contentHash = result.body.contentHash;
             document.documentElement.removeAttribute("data-artifact-comments-conflict");
+            stateNotice("comments", "");
           } else if (result.status === 409) {
             commentsStateMeta.revision = result.body.revision;
             commentsStateMeta.contentHash = result.body.contentHash;
             document.documentElement.setAttribute("data-artifact-comments-conflict", "reload-required");
+            stateNotice("comments", "Comments changed in another session. Reload to review the latest thread before retrying.");
+          } else {
+            stateNotice("comments", stateFailureMessage("Comments", result.body), "error");
           }
-        }).catch(function () {});
+        }).catch(function () { stateNotice("comments", "Comments were not saved because the local service is unavailable. Check the server and retry.", "error"); });
     } else {
       try { localStorage.setItem(commentsKey, JSON.stringify(threads)); } catch (e) {}
     }

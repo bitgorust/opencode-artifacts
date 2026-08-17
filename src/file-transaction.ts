@@ -351,7 +351,11 @@ async function stealDeadLock(lockPath: string): Promise<boolean> {
   }
   if (owner && processIsAlive(owner.pid)) return false;
   if (!owner) {
-    const info = await stat(lockPath);
+    const info = await stat(lockPath).catch((error: unknown) => {
+      if (errnoCode(error) === "ENOENT") return undefined;
+      throw error;
+    });
+    if (!info) return true;
     if (Date.now() - info.mtimeMs < OWNER_INITIALIZATION_GRACE_MS) return false;
   }
   const stalePath = `${lockPath}.stale-${randomUUID()}`;

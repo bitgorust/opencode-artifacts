@@ -7,6 +7,7 @@ import type { PluginInput, ToolContext } from "@opencode-ai/plugin";
 import { ArtifactsPlugin } from "../src/plugin.ts";
 import { FilePublisher } from "../src/publisher.ts";
 import { replaceArtifactState } from "../src/artifact-state.ts";
+import { emptyArtifactManifestV2, readArtifactManifestV2 } from "../src/artifact-schema.ts";
 
 async function withWorktree(run: (dir: string) => Promise<void>): Promise<void> {
   const dir = await mkdtemp(join(tmpdir(), "plugin-"));
@@ -335,6 +336,43 @@ test("plugin state surfaces expose schema-2 CAS metadata and conditional mutatio
       operationId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
     }, ctx));
     assert.match(resolved, /"revision": 2/);
+  });
+});
+
+test("plugin lifecycle tool and publish arguments enforce exact updates and archive permission", async () => {
+  const hooks = await ArtifactsPlugin({} as unknown as PluginInput);
+  const publish = hooks.tool?.artifact_publish;
+  const lifecycle = hooks.tool?.artifact_lifecycle;
+  assert.ok(publish && lifecycle);
+  await withWorktree(async (dir) => {
+    const asked: Array<Parameters<ToolContext["ask"]>[0]> = [];
+    const ctx: ToolContext = {
+      sessionID: "s1",
+      messageID: "m1",
+      agent: "test",
+      directory: dir,
+      worktree: dir,
+      abort: new AbortController().signal,
+      metadata: () => {},
+      ask: async (input) => { asked.push(input); },
+    };
+    const root = join(dir, ".opencode", "artifacts");
+    await mkdir(root, { recursive: true });
+    await writeFile(join(root, "manifest.json"), `${JSON.stringify(emptyArtifactManifestV2(), null, 2)}\n`, "utf8");
+    const created = String(await publish.execute({ markdown: "---\ntitle: Report\n---\n# One" }, ctx));
+    assert.match(created, /Artifact published/);
+    const manifest = await readArtifactManifestV2(root);
+    const id = manifest.slugIndex.report;
+    const collision = String(await publish.execute({ markdown: "---\ntitle: Report\n---\n# Lost" }, ctx));
+    assert.match(collision, /"error": "stale"/);
+    const updated = String(await publish.execute({ markdown: "---\ntitle: Report\n---\n# Two", artifact: id, expectedRevision: 1 }, ctx));
+    assert.match(updated, /Artifact published/);
+    assert.match(String(await lifecycle.execute({ op: "list" }, ctx)), new RegExp(id));
+    assert.match(String(await lifecycle.execute({ op: "restore", artifact: id, revision: 1, expectedRevision: 2 }, ctx)), /"headRevision": 3/);
+    const preview = JSON.parse(String(await lifecycle.execute({ op: "archive-preview", artifact: id }, ctx))) as { token: string };
+    assert.match(String(await lifecycle.execute({ op: "archive-confirm", token: preview.token }, ctx)), /"active": false/);
+    assert.equal(asked.some((input) => input.permission === "artifact_archive" && input.patterns.includes(id)), true);
+    assert.match(String(await lifecycle.execute({ op: "unarchive", artifact: id }, ctx)), /"active": true/);
   });
 });
 

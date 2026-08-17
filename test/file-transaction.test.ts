@@ -101,6 +101,16 @@ test("independent processes allow one same-head winner", async () => {
   });
 });
 
+test("rapid in-process lock handoff retries when the observed lock already vanished", async () => {
+  await withTempDir(async (dir) => {
+    const completions = await Promise.all(
+      Array.from({ length: 24 }, (_, index) =>
+        runFileTransaction(dir, async () => index, { lockTimeoutMs: 10_000, pollIntervalMs: 1 })),
+    );
+    assert.deepEqual(completions.sort((left, right) => left - right), Array.from({ length: 24 }, (_, index) => index));
+  });
+});
+
 test("independent processes do not lose different-artifact manifest entries", async () => {
   await withTempDir(async (dir) => {
     const readyA = join(dir, "ready-a");

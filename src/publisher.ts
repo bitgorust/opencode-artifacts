@@ -164,6 +164,10 @@ function replaceFooter(html: string, footer: string): string {
   return existingFooter.test(html) ? html.replace(existingFooter, footer) : html;
 }
 
+export function applyArtifactFooter(html: string, meta: ArtifactMeta): string {
+  return replaceFooter(html, footerHtml(meta));
+}
+
 export class FilePublisher implements Publisher {
   private readonly dir: string;
   private readonly schemaVersion: 1 | 2 | undefined;
@@ -204,6 +208,9 @@ export class FilePublisher implements Publisher {
     const existingId = manifest.slugIndex[input.slug];
     const existing = existingId ? manifest.artifacts[existingId] : undefined;
     if (existingId && !existing) throw new Error(`artifact slug index is corrupt for ${input.slug}`);
+    if (existing && input.expectedHash === undefined) {
+      throw new StaleArtifactError(input.slug, existing.contentHash.slice(0, 12));
+    }
     if (
       input.expectedHash !== undefined &&
       existing &&
@@ -235,7 +242,7 @@ export class FilePublisher implements Publisher {
       bytes: Buffer.byteLength(input.html, "utf8"),
       hash: "",
     };
-    const html = replaceFooter(input.html, footerHtml(provisionalMeta));
+    const html = applyArtifactFooter(input.html, provisionalMeta);
     const bytes = Buffer.byteLength(html, "utf8");
     if (bytes > DEFAULT_MAX_BYTES) throw new ArtifactTooLargeError(bytes, DEFAULT_MAX_BYTES);
     const digest = fullContentHash(html);
@@ -401,10 +408,10 @@ export class FilePublisher implements Publisher {
     )[0];
   }
 
-  async restore(slug: string, version: number): Promise<PublishResult> {
+  async restore(slug: string, version: number, expectedRevision?: number): Promise<PublishResult> {
     return runFileTransaction(this.dir, async (transaction) =>
       (await this.selectedSchemaVersionLocked()) === 2
-        ? this.restoreV2Serialized(slug, version, transaction)
+        ? this.restoreV2Serialized(slug, version, expectedRevision, transaction)
         : this.restoreSerialized(slug, version, transaction),
     );
   }
@@ -412,12 +419,16 @@ export class FilePublisher implements Publisher {
   private async restoreV2Serialized(
     slug: string,
     version: number,
+    expectedRevision: number | undefined,
     transaction: FileTransactionContext,
   ): Promise<PublishResult> {
     const manifest = await readManifestV2Locked(this.dir);
     const id = manifest.slugIndex[slug];
     const existing = id ? manifest.artifacts[id] : undefined;
     if (!existing) throw new Error(`unknown artifact: ${slug}`);
+    if (expectedRevision === undefined || expectedRevision !== existing.headRevision) {
+      throw new StaleArtifactError(slug, existing.contentHash.slice(0, 12));
+    }
     const restored = existing.revisions.find((revision) => revision.revision === version);
     if (!restored) throw new Error(`unknown version ${version} for artifact ${slug}`);
     const sourceContent = await readFile(join(this.dir, ...restored.pagePath.split("/")), "utf8");
@@ -443,7 +454,7 @@ export class FilePublisher implements Publisher {
       bytes: restored.bytes,
       hash: "",
     };
-    const html = replaceFooter(sourceContent, footerHtml(meta));
+    const html = applyArtifactFooter(sourceContent, meta);
     const bytes = Buffer.byteLength(html, "utf8");
     if (bytes > DEFAULT_MAX_BYTES) throw new ArtifactTooLargeError(bytes, DEFAULT_MAX_BYTES);
     const digest = fullContentHash(html);

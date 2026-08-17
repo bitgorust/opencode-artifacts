@@ -228,3 +228,16 @@ test("decisions renders option rows with question/option data attributes", () =>
   assert.match(html, /decision-note">deep-linkable</);
   assert.match(html, /decision-opt" data-question="layout" data-option="dense"/);
 });
+
+test("interactive state failures render actionable live notices", () => {
+  const { html } = renderArtifact([
+    "```decisions",
+    JSON.stringify({ title: "Choose", questions: [{ id: "layout", question: "Layout?", options: [{ id: "tabs", label: "Tabs" }] }] }),
+    "```",
+  ].join("\n"));
+  assert.match(html, /className = "artifact-state-notice"/);
+  assert.match(html, /setAttribute\("role", "alert"\)/);
+  assert.match(html, /Decisions changed in another session\. Reload to review the latest choices before retrying\./);
+  assert.match(html, /Comments changed in another session\. Reload to review the latest thread before retrying\./);
+  assert.match(html, /were not saved because the local service is unavailable/);
+});

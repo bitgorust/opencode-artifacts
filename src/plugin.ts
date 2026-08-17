@@ -1,4 +1,4 @@
-import { join, dirname } from "node:path";
+import { join, dirname, resolve } from "node:path";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
@@ -31,6 +31,10 @@ import {
   ArtifactMigrationRequiredError,
   readArtifactManifestV2,
 } from "./artifact-schema.ts";
+import {
+  ArtifactLifecycleConflictError,
+  ArtifactLifecycleStore,
+} from "./artifact-lifecycle.ts";
 
 function ghPagesCloneDir(repo: string): string {
   return join(homedir(), ".cache", "opencode-artifacts", "ghpages", repo.replace("/", "__"));
@@ -58,6 +62,18 @@ async function stateArtifactId(root: string, slug: string): Promise<string | und
     return artifactId;
   } catch (error) {
     if (error instanceof ArtifactMigrationRequiredError) return undefined;
+    throw error;
+  }
+}
+
+async function isSchema2Store(root: string): Promise<boolean> {
+  try {
+    const info = await lstat(join(root, "manifest.json"));
+    if (info.isSymbolicLink() || !info.isFile()) throw new Error("artifact manifest path is unsafe");
+    const value = JSON.parse(await readFile(join(root, "manifest.json"), "utf8")) as unknown;
+    return typeof value === "object" && value !== null && "schemaVersion" in value && value.schemaVersion === 2;
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return false;
     throw error;
   }
 }
@@ -127,6 +143,14 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             .describe(
               "Hash from a previous publish result; publishing fails with a conflict if the artifact changed since",
             ),
+          artifact: tool.schema
+            .string()
+            .optional()
+            .describe("Exact artifact ID, active slug, contained path, or registered URL for an update"),
+          expectedRevision: tool.schema
+            .number()
+            .optional()
+            .describe("Expected schema-2 head revision for an update"),
           force: tool.schema
             .boolean()
             .optional()
@@ -183,43 +207,55 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             });
 
             const localDir = join(workRoot(ctx), ".opencode", "artifacts");
-            const publisher = await (async () => {
-              if (!args.deploy) return new FilePublisher(localDir);
-              const config = await loadConfig(workRoot(ctx));
-              const resolved = resolveDeploy(
-                { repo: args.repo, target: args.target, workerName: args.workerName },
-                config,
-              );
-              if (resolved.target === "github" && resolved.repo) {
-                return new GitHubPagesPublisher(localDir, {
-                  repo: resolved.repo,
-                  branch: resolved.branch,
-                  cloneDir: ghPagesCloneDir(resolved.repo),
-                  allowSensitive: args.force === true,
-                });
+            let result: { path: string; version: number; gallery: string; hash: string; url?: string };
+            if (await isSchema2Store(localDir)) {
+              const lifecycle = new ArtifactLifecycleStore(localDir);
+              let status = await lifecycle.write({
+                artifact: args.artifact,
+                slug,
+                html: rendered.html,
+                title,
+                icon: rendered.meta.icon,
+                description: rendered.meta.description,
+                source: rendered.meta.source,
+                charts: rendered.chartCount,
+                expectedRevision: args.expectedRevision,
+                expectedHash: args.expectedHash,
+                authoringSource: args.markdown,
+                inputFormat: args.format ?? "markdown",
+              });
+              let url: string | undefined;
+              if (args.deploy) {
+                const config = await loadConfig(workRoot(ctx));
+                const resolved = resolveDeploy({ repo: args.repo, target: args.target, workerName: args.workerName }, config);
+                if (resolved.target === "github" && resolved.repo) {
+                  const adapter = new GitHubPagesPublisher(localDir, { repo: resolved.repo, branch: resolved.branch, cloneDir: ghPagesCloneDir(resolved.repo), allowSensitive: args.force === true });
+                  const base = await adapter.sync(`publish ${slug} v${status.headRevision}`);
+                  url = `${base}${slug}.html`;
+                  status = await lifecycle.recordDeployment(status.id, { capability: "public-static", target: `github:${resolved.repo}:${resolved.branch}`, url });
+                } else if (resolved.target === "cloudflare" && resolved.workerName) {
+                  const adapter = new CloudflarePublisher(localDir, { workerName: resolved.workerName, stagingDir: cfStagingDir(resolved.workerName), allowSensitive: args.force === true });
+                  const base = await adapter.deploy();
+                  url = base === undefined ? undefined : `${base}/${slug}.html`;
+                  if (url) status = await lifecycle.recordDeployment(status.id, { capability: "public-static", target: `cloudflare:${resolved.workerName}`, url });
+                } else {
+                  throw new Error(`deploy target '${resolved.target}' is missing its ${resolved.target === "github" ? "repo" : "workerName"} — run \`opencode-artifacts init\``);
+                }
               }
-              if (resolved.target === "cloudflare" && resolved.workerName) {
-                return new CloudflarePublisher(localDir, {
-                  workerName: resolved.workerName,
-                  stagingDir: cfStagingDir(resolved.workerName),
-                  allowSensitive: args.force === true,
-                });
-              }
-              throw new Error(
-                `deploy target '${resolved.target}' is missing its ${resolved.target === "github" ? "repo" : "workerName"} — run \`opencode-artifacts init\``,
-              );
-            })();
-            const result = await publisher.publish({
-              slug,
-              html: rendered.html,
-              title,
-              icon: rendered.meta.icon,
-              description: rendered.meta.description,
-              source: rendered.meta.source,
-              charts: rendered.chartCount,
-              version: args.version ?? false,
-              expectedHash: args.expectedHash,
-            });
+              if (args.version !== undefined) console.error("artifact_publish version is deprecated for schema 2; immutable history is always retained");
+              result = { path: status.stablePath ?? join(localDir, `${status.slug}.html`), version: status.headRevision, gallery: join(localDir, "index.html"), hash: status.contentHash.slice(0, 12), ...(url === undefined ? {} : { url }) };
+            } else {
+              if (args.artifact !== undefined || args.expectedRevision !== undefined) throw new Error("artifact and expectedRevision require a migrated schema-2 store");
+              const publisher = await (async () => {
+                if (!args.deploy) return new FilePublisher(localDir);
+                const config = await loadConfig(workRoot(ctx));
+                const resolved = resolveDeploy({ repo: args.repo, target: args.target, workerName: args.workerName }, config);
+                if (resolved.target === "github" && resolved.repo) return new GitHubPagesPublisher(localDir, { repo: resolved.repo, branch: resolved.branch, cloneDir: ghPagesCloneDir(resolved.repo), allowSensitive: args.force === true });
+                if (resolved.target === "cloudflare" && resolved.workerName) return new CloudflarePublisher(localDir, { workerName: resolved.workerName, stagingDir: cfStagingDir(resolved.workerName), allowSensitive: args.force === true });
+                throw new Error(`deploy target '${resolved.target}' is missing its ${resolved.target === "github" ? "repo" : "workerName"} — run \`opencode-artifacts init\``);
+              })();
+              result = await publisher.publish({ slug, html: rendered.html, title, icon: rendered.meta.icon, description: rendered.meta.description, source: rendered.meta.source, charts: rendered.chartCount, version: args.version ?? false, expectedHash: args.expectedHash });
+            }
             if (args.open) openFile(result.path);
             if (args.dataSources && args.dataSources.length > 0) {
               const registryDir = join(workRoot(ctx), ".opencode", "artifacts", ".datasources");
@@ -269,7 +305,67 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
                 "[End of live content]",
               ].join("\n\n");
             }
+            if (err instanceof ArtifactLifecycleConflictError) {
+              return JSON.stringify({ error: "stale", message: err.message, artifact: err.artifact, merge: err.merge, nextAction: "merge onto the returned immutable input and retry with artifact plus expectedRevision/hash" }, null, 2);
+            }
             throw err;
+          }
+        },
+      }),
+      artifact_lifecycle: tool({
+        description: "List, inspect, read, restore, archive/unarchive, export, or import schema-2 artifacts by exact identity/reference. Archive is recoverable and requires a preview-bound permission confirmation.",
+        args: {
+          op: tool.schema.enum(["list", "status", "read", "restore", "archive-preview", "archive-confirm", "unarchive", "export", "import"]),
+          artifact: tool.schema.string().optional().describe("Exact artifact reference or opaque ID"),
+          revision: tool.schema.number().optional().describe("Revision to read or restore"),
+          expectedRevision: tool.schema.number().optional().describe("Expected current head for restore"),
+          token: tool.schema.string().optional().describe("One-use archive confirmation token"),
+          slug: tool.schema.string().optional().describe("Explicit non-conflicting slug for unarchive"),
+          path: tool.schema.string().optional().describe("Export destination or import bundle directory"),
+        },
+        async execute(args, ctx) {
+          const root = join(workRoot(ctx), ".opencode", "artifacts");
+          if (!(await isSchema2Store(root))) return "artifact_lifecycle requires a migrated schema-2 store";
+          const lifecycle = new ArtifactLifecycleStore(root);
+          switch (args.op) {
+            case "list":
+              return JSON.stringify({ schemaVersion: 1, artifacts: await lifecycle.list() }, null, 2);
+            case "status":
+              if (!args.artifact) return "status requires artifact";
+              return JSON.stringify(await lifecycle.status(args.artifact), null, 2);
+            case "read": {
+              if (!args.artifact) return "read requires artifact";
+              const result = await lifecycle.read(args.artifact, args.revision);
+              const bytes = Buffer.byteLength(result.html, "utf8");
+              return JSON.stringify({ status: result.status, revision: result.revision, ...(bytes <= 256 * 1024 ? { html: result.html } : { pinnedPath: join(root, ...result.revision.pagePath.split("/")), preview: `${result.html.slice(0, 8192)}\n…\n${result.html.slice(-8192)}` }) }, null, 2);
+            }
+            case "restore":
+              if (!args.artifact || args.revision === undefined || args.expectedRevision === undefined) return "restore requires artifact, revision, and expectedRevision";
+              try {
+                return JSON.stringify(await lifecycle.restore(args.artifact, args.revision, args.expectedRevision), null, 2);
+              } catch (error) {
+                if (error instanceof ArtifactLifecycleConflictError) return JSON.stringify({ error: "stale", message: error.message, artifact: error.artifact, merge: error.merge }, null, 2);
+                throw error;
+              }
+            case "archive-preview":
+              if (!args.artifact) return "archive-preview requires artifact";
+              return JSON.stringify(await lifecycle.previewArchive(args.artifact), null, 2);
+            case "archive-confirm": {
+              if (!args.token) return "archive-confirm requires token";
+              const preview = await lifecycle.inspectArchivePreview(args.token);
+              await ctx.ask({ permission: "artifact_archive", patterns: [preview.artifact.id, args.token], always: [], metadata: { artifactId: preview.artifact.id, slug: preview.artifact.slug, headRevision: preview.artifact.headRevision, token: args.token } });
+              return JSON.stringify(await lifecycle.archive(args.token), null, 2);
+            }
+            case "unarchive":
+              if (!args.artifact) return "unarchive requires artifact ID";
+              return JSON.stringify(await lifecycle.unarchive(args.artifact, args.slug), null, 2);
+            case "export":
+              if (!args.artifact || !args.path) return "export requires artifact and path";
+              return JSON.stringify(await lifecycle.exportBundle(args.artifact, args.path), null, 2);
+            case "import":
+              if (!args.path) return "import requires path";
+              await ctx.ask({ permission: "artifact_import", patterns: [resolve(args.path)], always: [], metadata: { bundle: resolve(args.path) } });
+              return JSON.stringify(await lifecycle.importBundle(args.path), null, 2);
           }
         },
       }),
