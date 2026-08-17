@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { renderArtifact, renderRawHtml } from "./render.ts";
+import { renderPortableArtifact, renderRawHtml } from "./render.ts";
 import { FilePublisher, slugify } from "./publisher.ts";
 import { GitHubPagesPublisher } from "./github-pages.ts";
 import { CloudflarePublisher } from "./cloudflare-publisher.ts";
@@ -107,8 +107,15 @@ async function renderCommand(args: string[]): Promise<void> {
     process.exit(1);
   }
   const rendered =
-    format === "html" ? renderRawHtml(markdown, title ? { title } : {}) : renderArtifact(markdown);
+    format === "html" ? renderRawHtml(markdown, title ? { title } : {}) : await renderPortableArtifact(markdown, process.cwd());
   const finalTitle = title ?? rendered.meta.title ?? "Artifact";
+  const finalFindings = scanSensitive(rendered.html);
+  if (finalFindings.length > 0 && !force) {
+    console.error(
+      `publish blocked: final portable bytes contain credential-looking strings: ${formatFindings(finalFindings)}. Re-run with --force to publish anyway.`,
+    );
+    process.exit(1);
+  }
 
   let outPath: string;
   if (out) {

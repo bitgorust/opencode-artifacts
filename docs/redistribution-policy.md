@@ -1,6 +1,6 @@
 # Redistribution and attribution inventory
 
-Policy version: 1. Last reviewed: 2026-08-16.
+Policy version: 1. Last reviewed: 2026-08-17.
 
 The machine-readable [`redistribution-inventory.json`](redistribution-inventory.json) is the
 complete Phase 0 disposition for repository documentation, examples, retained binary assets,

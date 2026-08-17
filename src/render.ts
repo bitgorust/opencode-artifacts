@@ -3,6 +3,7 @@ import { parseDocument, type ChartSpec, type Frontmatter } from "./markdown.ts";
 import { renderComponent } from "./components.ts";
 import { runtimeBundle, type RuntimeName } from "./runtime.ts";
 import { escapeHtmlText, slugify } from "./text.ts";
+import { resolvePortableAssets, type AssetLimits, type PortableAssets } from "./assets.ts";
 
 export { escapeHtmlText } from "./text.ts";
 
@@ -21,6 +22,11 @@ export class ArtifactTooLargeError extends Error {
 }
 
 export interface RenderOptions {
+  maxBytes?: number;
+  assets?: PortableAssets;
+}
+
+export interface PortableRenderOptions extends AssetLimits {
   maxBytes?: number;
 }
 
@@ -687,6 +693,7 @@ interface AssembleInput {
   needsBoot: boolean;
   needsMermaid: boolean;
   maxBytes: number;
+  assetCss?: string;
 }
 
 function assemblePage(input: AssembleInput): string {
@@ -716,7 +723,7 @@ function assemblePage(input: AssembleInput): string {
       ? `<meta name="description" content="${escapeHtmlText(input.description)}">`
       : "",
     `<title>${escapeHtmlText(input.title)}</title>`,
-    `<style>${ARTIFACT_CSS}${input.theme !== undefined ? (THEME_CSS[input.theme] ?? "") : ""}</style>`,
+    `<style>${ARTIFACT_CSS}${input.theme !== undefined ? (THEME_CSS[input.theme] ?? "") : ""}${input.assetCss ?? ""}</style>`,
     "</head>",
     "<body>",
     `<header class="artifact-header"><span class="artifact-icon">${escapeHtmlText(input.icon)}</span><h1>${escapeHtmlText(input.title)}</h1></header>`,
@@ -746,7 +753,7 @@ function assemblePage(input: AssembleInput): string {
 }
 
 export function renderArtifact(markdown: string, options: RenderOptions = {}): RenderedArtifact {
-  const doc = parseDocument(markdown);
+  const doc = parseDocument(markdown, { assets: options.assets?.bySource });
 
   let bodyHtml = doc.bodyHtml;
   let needsBoot = false;
@@ -769,8 +776,20 @@ export function renderArtifact(markdown: string, options: RenderOptions = {}): R
     needsBoot,
     needsMermaid,
     maxBytes: options.maxBytes ?? DEFAULT_MAX_BYTES,
+    assetCss: options.assets?.font === undefined
+      ? undefined
+      : `@font-face{font-family:"Artifact Project";src:url(${options.assets.font.dataUri}) format("${options.assets.font.mime === "font/woff2" ? "woff2" : "woff"}");font-display:swap}body{font-family:"Artifact Project",system-ui,-apple-system,"Segoe UI",sans-serif}`,
   });
   return { html, meta: doc.meta, chartCount: doc.charts.length };
+}
+
+export async function renderPortableArtifact(
+  markdown: string,
+  worktreeRoot: string,
+  options: PortableRenderOptions = {},
+): Promise<RenderedArtifact> {
+  const assets = await resolvePortableAssets(markdown, worktreeRoot, options);
+  return renderArtifact(markdown, { maxBytes: options.maxBytes, assets });
 }
 
 export function renderRawHtml(

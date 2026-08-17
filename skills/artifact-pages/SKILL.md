@@ -54,6 +54,8 @@ an over-styled page is worse than a plain one.
 3. Every chart's title states the finding, not the axes
 4. Components carry `tone` where attention matters
 5. No error boxes survive to publish — fix and re-render first
+6. Every local Markdown image has meaningful alt text; use `![](path "decorative")` only when
+   the image genuinely adds no information
 
 ## Naming (adapted from Claude Code's artifact-design skill)
 
@@ -94,3 +96,6 @@ Grown from observed failures; add new ones as they bite:
   and republish rather than working around the box.
 - `serve`-mode extras (live reload, decisions persistence, comments) exist only on served
   pages; a `file://` artifact keeps its strict CSP and localStorage-only state.
+- Markdown image paths are worktree-root-relative. The publisher embeds allowlisted local
+  bytes and refuses URLs, absolute/traversal paths, symlinks, missing alt text, and unsupported
+  or oversized content before asking permission.

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-08-16",
+  "reviewedAt": "2026-08-17",
   "repositoryLicense": "MIT",
   "authoredScopes": [
     { "path": ".github/", "provenance": "repository-authored", "license": "MIT" },
@@ -206,6 +206,15 @@
       "sha256": "72a7125f6271576c57340dfc16dc11c0cf64d3d65174b8ab4b645ce4630dbcd0",
       "provenance": "repository-generated browser capture",
       "source": "examples/patterns/workshop.md",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/renderer/goal-3-portable-assets-chromium-2026-08-17.png",
+      "sha256": "de64548e9c0e40b594f31b3bc84cb09d261ecc73c3dd5b756ecd5ac74a7a529d",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/portable-mixed.md rendered offline in Chromium 151",
       "license": "MIT",
       "attribution": "opencode-artifacts contributors",
       "status": "approved"

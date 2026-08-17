@@ -1,0 +1,27 @@
+{
+  "capturedAt": "2026-08-17T15:15:03.968Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "offlineEmulation": true,
+  "usefulContentMs": 492,
+  "observations": {
+    "activeElement": "decision-opt selected",
+    "chartVisuals": 1,
+    "csp": "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'",
+    "decisionButtons": 2,
+    "imageComplete": true,
+    "imageHash": "62f848af2e23c26493d3f9e24b6af4e59516e8d9ce1e0fd2b68169dfc98281dc",
+    "imageNaturalWidth": 1011,
+    "imageSource": "data:image/png;base64,iVBORw0KGg",
+    "keyboardSelected": true,
+    "pageBytes": 753580,
+    "readyState": "complete",
+    "tableCaptions": [],
+    "tables": 1
+  },
+  "browserLogs": [],
+  "requestUrls": [
+    "file:///evidence/portable-mixed.html",
+    "data:image/png;base64,[embedded]"
+  ],
+  "networkRequestUrls": []
+}

@@ -5,10 +5,12 @@ import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { tool, type Hooks, type Plugin } from "@opencode-ai/plugin";
 import {
   ArtifactTooLargeError,
-  renderArtifact,
+  renderPortableArtifact,
   renderRawHtml,
   type RenderedArtifact,
 } from "./render.ts";
+import { AssetPreflightError } from "./assets.ts";
+import { parseDocument } from "./markdown.ts";
 import { FilePublisher, slugify, StaleArtifactError } from "./publisher.ts";
 import { GitHubPagesPublisher } from "./github-pages.ts";
 import { CloudflarePublisher } from "./cloudflare-publisher.ts";
@@ -187,16 +189,20 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
         async execute(args, ctx) {
           let slug = "artifact";
           try {
-            const rendered: RenderedArtifact =
-              args.format === "html"
-                ? renderRawHtml(args.markdown, args.title ? { title: args.title } : {})
-                : renderArtifact(args.markdown);
-            const title = args.title ?? rendered.meta.title ?? "Artifact";
+            const parsedTitle = args.format === "html" ? undefined : parseDocument(args.markdown).meta.title;
+            const title = args.title ?? parsedTitle ?? "Artifact";
             slug = slugify(title);
-
             const findings = scanSensitive(`${args.markdown}\n${title}`);
             if (findings.length > 0 && args.force !== true) {
               return `Publish blocked: the content contains credential-looking strings: ${formatFindings(findings)}. If these are intentional (e.g. redacted examples), call again with force: true.`;
+            }
+            const rendered: RenderedArtifact =
+              args.format === "html"
+                ? renderRawHtml(args.markdown, args.title ? { title: args.title } : {})
+                : await renderPortableArtifact(args.markdown, workRoot(ctx));
+            const finalFindings = scanSensitive(rendered.html);
+            if (finalFindings.length > 0 && args.force !== true) {
+              return `Publish blocked: the final portable bytes contain credential-looking strings: ${formatFindings(finalFindings)}. If these are intentional, call again with force: true.`;
             }
 
             await ctx.ask({
@@ -280,6 +286,9 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
           } catch (err) {
             if (err instanceof ArtifactTooLargeError) {
               return `Artifact too large: ${err.message}`;
+            }
+            if (err instanceof AssetPreflightError) {
+              return JSON.stringify({ error: err.code, path: err.assetPath, message: err.message, nextAction: err.nextAction }, null, 2);
             }
             if (err instanceof StaleArtifactError) {
               const currentPath = join(workRoot(ctx), ".opencode", "artifacts", `${slug}.html`);

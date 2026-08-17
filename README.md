@@ -55,6 +55,7 @@ output stays diff-friendly and cheap in tokens.
 - **Live reload**: `opencode-artifacts serve` refreshes open pages on every republish
 - **Sharing**: cost-free public snapshots via GitHub Pages or a user-operated Cloudflare Worker + KV; Cloudflare Access is a manual, unverified perimeter
 - **Safe by default**: no raw HTML passthrough, credential-pattern scan blocks accidental secret leaks, no external requests at view time
+- **Contained local images**: Markdown images beneath the worktree are MIME-checked and embedded as hashed data URIs; missing, external, symlinked, active, oversized, or unlabelled inputs fail before publication
 
 ## Install
 
@@ -170,6 +171,7 @@ Full reference: [`docs/component-spec.md`](docs/component-spec.md). Short versio
 - **Components** (JSON fences): `stats` metric cards, `timeline`, `findings` (severity-coded), `compare` variant cards, `callout` insight cards, `progress`, `diff` (annotated), `copy` (copy-to-session button), `decisions` (workshop rows the session reads back via `artifact_state`)
 - **Charts/diagrams**: ```` ```vega-lite ```` / ```` ```vega ```` / ```` ```echarts ```` / ```` ```mermaid ```` fences; runtimes inline only when used
 - **Markdown extras**: GitHub alerts (`> [!WARNING]` etc.), task lists, heading anchors, `##` sections become cards
+- **Local images**: ordinary `![meaningful alt](path/to/image.png)` resolves from the worktree root and embeds PNG/JPEG/GIF/WebP or constrained static SVG. Use the exact title `"decorative"` with empty alt only for an intentionally decorative image. URLs, absolute paths, traversal, and symlinks are refused.
 - Broken specs degrade to inline error boxes; the page always ships
 
 Worked examples for every canonical pattern: [`examples/patterns/`](examples/patterns/) with

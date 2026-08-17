@@ -12,7 +12,7 @@ machine-readable disposition is
 
 - Repository-authored source, policy, documentation, examples, fixtures, skills, tests, and
   generated evidence are covered by the root MIT license.
-- All 21 retained binary assets are repository-generated screenshots under `docs/evidence/`.
+- All 23 retained binary assets are repository-generated screenshots under `docs/evidence/`.
   Each entry names its synthetic/repository source, MIT disposition, contributor attribution,
   and exact SHA-256.
 - The repository contains zero embedded font files. Renderer CSS selects system fallback
