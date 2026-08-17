@@ -3,13 +3,13 @@
   "id": "portable-asset-pipeline",
   "title": "Add a contained offline asset pipeline",
   "lane": "high-risk",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": ["RENDER-04", "RENDER-05", "SEC-02"],
   "currentSpecs": ["specs/current/portable-renderer.spec.md"],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-17T15:02:07Z"
   },
   "withdrawal": {
     "by": "",

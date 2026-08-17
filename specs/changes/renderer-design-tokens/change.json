@@ -3,13 +3,13 @@
   "id": "renderer-design-tokens",
   "title": "Add bounded renderer design tokens",
   "lane": "standard",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": ["RENDER-07", "SEC-04"],
   "currentSpecs": ["specs/current/portable-renderer.spec.md"],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-17T15:02:07Z"
   },
   "withdrawal": {
     "by": "",

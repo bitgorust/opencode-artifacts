@@ -3,13 +3,13 @@
   "id": "renderer-performance-budgets",
   "title": "Enforce renderer performance budgets",
   "lane": "standard",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": ["PERF-01", "PERF-02", "PERF-03", "PERF-05"],
   "currentSpecs": ["specs/current/portable-renderer.spec.md"],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-17T15:02:07Z"
   },
   "withdrawal": {
     "by": "",

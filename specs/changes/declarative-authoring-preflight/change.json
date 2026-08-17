@@ -3,13 +3,13 @@
   "id": "declarative-authoring-preflight",
   "title": "Preflight declarative authoring errors",
   "lane": "standard",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": ["RENDER-02", "QUAL-02"],
   "currentSpecs": ["specs/current/portable-renderer.spec.md"],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-17T15:02:07Z"
   },
   "withdrawal": {
     "by": "",
