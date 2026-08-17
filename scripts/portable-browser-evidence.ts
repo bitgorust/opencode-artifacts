@@ -52,27 +52,33 @@ try {
   let ready = false;
   for (let attempt = 0; attempt < 100; attempt++) {
     ready = await request<boolean>("POST", `${route}/execute/sync`, {
-      script: "return document.readyState === 'complete' && !!document.querySelector('.chart svg, .chart canvas');",
+      script: "return document.readyState === 'complete' && (!document.querySelector('.chart') || !!document.querySelector('.chart svg, .chart canvas'));",
       args: [],
     });
     if (ready) break;
     await new Promise((resolve) => setTimeout(resolve, 50));
   }
   const usefulContentMs = Date.now() - startedAt;
-  await request("POST", `${route}/execute/sync`, {
-    script: "document.querySelector('.decision-opt').focus(); return true;",
+  await request("POST", `${route}/execute/async`, {
+    script: "const done = arguments[arguments.length - 1]; document.fonts.ready.then(() => done(true), () => done(false));",
     args: [],
   });
-  await request("POST", `${route}/actions`, {
-    actions: [{
-      type: "key",
-      id: "keyboard",
-      actions: [
-        { type: "keyDown", value: "\uE007" },
-        { type: "keyUp", value: "\uE007" },
-      ],
-    }],
+  const hasDecision = await request<boolean>("POST", `${route}/execute/sync`, {
+    script: "const button = document.querySelector('.decision-opt'); if (button) button.focus(); return !!button;",
+    args: [],
   });
+  if (hasDecision) {
+    await request("POST", `${route}/actions`, {
+      actions: [{
+        type: "key",
+        id: "keyboard",
+        actions: [
+          { type: "keyDown", value: "\uE007" },
+          { type: "keyUp", value: "\uE007" },
+        ],
+      }],
+    });
+  }
   const observations = await request<Record<string, unknown>>("POST", `${route}/execute/sync`, {
     script: `
       const image = document.querySelector('img[data-asset-sha256]');
@@ -90,6 +96,9 @@ try {
         keyboardSelected: !!button && button.classList.contains('selected'),
         activeElement: document.activeElement ? document.activeElement.className : null,
         csp: document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.getAttribute('content'),
+        fontSetStatus: document.fonts.status,
+        projectFontFaces: Array.from(document.fonts).filter((face) => face.family.includes('Artifact Project')).map((face) => ({ family: face.family, status: face.status })),
+        bodyFontFamily: getComputedStyle(document.body).fontFamily,
         pageBytes: new TextEncoder().encode(document.documentElement.outerHTML).length,
       };
     `,

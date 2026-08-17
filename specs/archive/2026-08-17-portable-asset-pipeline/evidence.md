@@ -4,8 +4,9 @@
 - Validation: Phase 2 requires contained assets and a self-contained offline mixed-content page.
 - Verification: `test/assets.test.ts` covers filesystem, MIME, SVG, alt, refusal/no-write,
   and expansion behavior; the mixed fixture was exercised offline in real Chromium 151.
-- Result: image/SVG behavior passed; WOFF/WOFF2 loading awaits explicit approval for the
-  narrow `font-src data:` CSP directive and is not yet claimed.
+- Result: passed for images, constrained SVG, and WOFF/WOFF2/TTF/OTF. After explicit approval,
+  real offline Chromium loaded the embedded TTF under the narrow `font-src data:` directive
+  with zero console entries and zero HTTP(S) requests.
 - Evidence: [@test](test/assets.test.ts) [@manual](docs/evidence/renderer/goal-3-portable-assets-2026-08-17.md)
 
 ## Requirement: RENDER-05

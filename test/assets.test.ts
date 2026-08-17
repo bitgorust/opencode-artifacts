@@ -132,6 +132,12 @@ test("font declarations are typed, hashed, and embedded without trusting the ext
     assert.match(rendered.html, /data:font\/woff2;base64,/);
     await writeFile(join(root, "wrong.woff2"), PNG);
     await assert.rejects(resolvePortableAssets("---\nfont: wrong.woff2\n---\nx", root), (error: unknown) => error instanceof AssetPreflightError && error.code === "type-mismatch");
+    const ttf = Buffer.concat([Buffer.from([0, 1, 0, 0]), Buffer.alloc(32)]);
+    await writeFile(join(root, "project.ttf"), ttf);
+    const ttfRendered = await renderPortableArtifact("---\nfont: project.ttf\n---\nx", root);
+    assert.match(ttfRendered.html, /data:font\/ttf;base64,/);
+    assert.match(ttfRendered.html, /format\("truetype"\)/);
+    assert.match(ttfRendered.html, /font-src data:/);
   });
 });
 

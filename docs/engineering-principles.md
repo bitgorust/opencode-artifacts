@@ -48,7 +48,8 @@ collectively exhausted by [`docs/product-spec.md`](product-spec.md), not repeate
 - Markdown uses `markdown-it` with `html: false`; raw HTML never passes through Markdown mode.
   Trusted HTML is a separately permissioned execution surface, never an implicit fallback.
 - Every emitted page carries the strict on-disk CSP: `default-src 'none'; script-src
-  'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'`. Served or
+  'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'`.
+  The `font-src` allowance is confined to embedded bytes and grants no network authority. Served or
   hosted copies may relax `connect-src` only to the documented self boundary; the portable
   file never changes. No `unsafe-eval`, ever—Vega uses its `ast: true` interpreter.
   [check:csp-no-unsafe-eval] [check:vega-interpreter]

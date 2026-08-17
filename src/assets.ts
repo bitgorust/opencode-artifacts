@@ -193,10 +193,12 @@ function declaredMime(path: string, kind: AssetKind): string {
     [".svg", "image/svg+xml", "image"],
     [".woff", "font/woff", "font"],
     [".woff2", "font/woff2", "font"],
+    [".ttf", "font/ttf", "font"],
+    [".otf", "font/otf", "font"],
   ];
   const match = entries.find(([extension]) => lower.endsWith(extension));
   if (!match || match[2] !== kind) {
-    throw new AssetPreflightError("unsupported-type", `unsupported ${kind} asset type`, path, kind === "font" ? "use a WOFF or WOFF2 file" : "use PNG, JPEG, GIF, WebP, or a constrained SVG");
+    throw new AssetPreflightError("unsupported-type", `unsupported ${kind} asset type`, path, kind === "font" ? "use a WOFF, WOFF2, TTF, or OTF file" : "use PNG, JPEG, GIF, WebP, or a constrained SVG");
   }
   return match[1];
 }
@@ -208,6 +210,8 @@ function detectedMime(bytes: Buffer): string | undefined {
   if (bytes.length >= 12 && bytes.subarray(0, 4).toString("ascii") === "RIFF" && bytes.subarray(8, 12).toString("ascii") === "WEBP") return "image/webp";
   if (bytes.length >= 4 && bytes.subarray(0, 4).toString("ascii") === "wOFF") return "font/woff";
   if (bytes.length >= 4 && bytes.subarray(0, 4).toString("ascii") === "wOF2") return "font/woff2";
+  if (bytes.length >= 4 && bytes.subarray(0, 4).equals(Buffer.from([0, 1, 0, 0]))) return "font/ttf";
+  if (bytes.length >= 4 && bytes.subarray(0, 4).toString("ascii") === "OTTO") return "font/otf";
   try {
     const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes).trim();
     if (text.startsWith("<svg") && text.endsWith("</svg>")) return "image/svg+xml";

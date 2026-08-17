@@ -49,6 +49,7 @@ export const CSP = [
   "script-src 'unsafe-inline'",
   "style-src 'unsafe-inline'",
   "img-src data:",
+  "font-src data:",
   "connect-src 'none'",
 ].join("; ");
 
@@ -778,9 +779,16 @@ export function renderArtifact(markdown: string, options: RenderOptions = {}): R
     maxBytes: options.maxBytes ?? DEFAULT_MAX_BYTES,
     assetCss: options.assets?.font === undefined
       ? undefined
-      : `@font-face{font-family:"Artifact Project";src:url(${options.assets.font.dataUri}) format("${options.assets.font.mime === "font/woff2" ? "woff2" : "woff"}");font-display:swap}body{font-family:"Artifact Project",system-ui,-apple-system,"Segoe UI",sans-serif}`,
+      : `@font-face{font-family:"Artifact Project";src:url(${options.assets.font.dataUri}) format("${fontFormat(options.assets.font.mime)}");font-display:swap}body{font-family:"Artifact Project",system-ui,-apple-system,"Segoe UI",sans-serif}`,
   });
   return { html, meta: doc.meta, chartCount: doc.charts.length };
+}
+
+function fontFormat(mime: string): string {
+  if (mime === "font/woff2") return "woff2";
+  if (mime === "font/woff") return "woff";
+  if (mime === "font/ttf") return "truetype";
+  return "opentype";
 }
 
 export async function renderPortableArtifact(

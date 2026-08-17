@@ -99,3 +99,5 @@ Grown from observed failures; add new ones as they bite:
 - Markdown image paths are worktree-root-relative. The publisher embeds allowlisted local
   bytes and refuses URLs, absolute/traversal paths, symlinks, missing alt text, and unsupported
   or oversized content before asking permission.
+- A project font is opt-in via worktree-root-relative frontmatter `font:` and must be WOFF,
+  WOFF2, TTF, or OTF. The renderer generates the font rule; never add CSS to Markdown.

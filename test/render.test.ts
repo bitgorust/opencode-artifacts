@@ -29,7 +29,7 @@ test("plain markdown artifact carries CSP and escaped title, no chart runtimes",
   const { html, meta, chartCount } = renderArtifact("---\ntitle: My <b>Report</b>\n---\n# Hi\n");
   assert.equal(meta.title, "My <b>Report</b>");
   assert.equal(chartCount, 0);
-  assert.match(html, /Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'"/);
+  assert.match(html, /Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'"/);
   assert.match(html, /<title>My &lt;b&gt;Report&lt;\/b&gt;<\/title>/);
   assert.match(html, /<h1 id="hi">Hi<\/h1>/);
   assert.ok(!html.includes("runtime:vega"));

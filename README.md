@@ -167,11 +167,12 @@ opencode-artifacts import ./bundle
 
 Full reference: [`docs/component-spec.md`](docs/component-spec.md). Short version:
 
-- **Frontmatter**: `title`, `icon` (emoji favicon), `description` (gallery subtitle)
+- **Frontmatter**: `title`, `icon` (emoji favicon), `description` (gallery subtitle), and an optional worktree-relative `font` (WOFF/WOFF2/TTF/OTF embedded under `font-src data:`)
 - **Components** (JSON fences): `stats` metric cards, `timeline`, `findings` (severity-coded), `compare` variant cards, `callout` insight cards, `progress`, `diff` (annotated), `copy` (copy-to-session button), `decisions` (workshop rows the session reads back via `artifact_state`)
 - **Charts/diagrams**: ```` ```vega-lite ```` / ```` ```vega ```` / ```` ```echarts ```` / ```` ```mermaid ```` fences; runtimes inline only when used
 - **Markdown extras**: GitHub alerts (`> [!WARNING]` etc.), task lists, heading anchors, `##` sections become cards
 - **Local images**: ordinary `![meaningful alt](path/to/image.png)` resolves from the worktree root and embeds PNG/JPEG/GIF/WebP or constrained static SVG. Use the exact title `"decorative"` with empty alt only for an intentionally decorative image. URLs, absolute paths, traversal, and symlinks are refused.
+- **Local fonts**: `font: path/to/project.woff2` uses the same contained, MIME-checked pipeline and a generated `@font-face`; it never permits a viewer network request or arbitrary CSS.
 - Broken specs degrade to inline error boxes; the page always ships
 
 Worked examples for every canonical pattern: [`examples/patterns/`](examples/patterns/) with

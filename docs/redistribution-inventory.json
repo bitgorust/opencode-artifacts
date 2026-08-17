@@ -220,6 +220,15 @@
       "status": "approved"
     },
     {
+      "path": "docs/evidence/renderer/goal-3-portable-font-chromium-2026-08-17.png",
+      "sha256": "98ab1a439c223319cf6b31c85790429751559cd448eb0ff35d640c53ebf3e97a",
+      "provenance": "repository-generated browser capture",
+      "source": "temporary offline fixture using the OS-packaged DejaVu Sans Mono font; font bytes are not retained",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
       "path": "docs/evidence/theme-toggle-dark.png",
       "sha256": "b495dfbb3bc4a8c5b3e7a445cd63e5eb32f3e59ff3f857f0c1d087796033b742",
       "provenance": "repository-generated browser capture",

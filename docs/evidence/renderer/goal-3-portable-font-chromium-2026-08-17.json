@@ -1,0 +1,35 @@
+{
+  "capturedAt": "2026-08-17T15:25:13.232Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "offlineEmulation": true,
+  "usefulContentMs": 629,
+  "observations": {
+    "activeElement": "",
+    "bodyFontFamily": "\"Artifact Project\", system-ui, -apple-system, \"Segoe UI\", sans-serif",
+    "chartVisuals": 0,
+    "csp": "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'",
+    "decisionButtons": 0,
+    "fontSetStatus": "loaded",
+    "imageComplete": false,
+    "imageHash": null,
+    "imageNaturalWidth": 0,
+    "imageSource": null,
+    "keyboardSelected": false,
+    "pageBytes": 489511,
+    "projectFontFaces": [
+      {
+        "family": "Artifact Project",
+        "status": "loaded"
+      }
+    ],
+    "readyState": "complete",
+    "tableCaptions": [],
+    "tables": 1
+  },
+  "browserLogs": [],
+  "requestUrls": [
+    "file:///evidence/portable-font.html",
+    "data:font/ttf;base64,[embedded]"
+  ],
+  "networkRequestUrls": []
+}

@@ -8,9 +8,9 @@
   symlinked, non-regular, mislabeled, active, changed-during-read, or unlabelled image inputs
   fail before the permission prompt or any publication write. An exact image title of
   `decorative` explicitly selects empty-alt presentation semantics.
-- `RENDER-04`: optional frontmatter `font:` declarations accept contained WOFF/WOFF2 bytes
-  under the same resolver and generate a fixed `@font-face`; the required narrow CSP font
-  directive remains pending explicit approval, so font loading is not yet claimed.
+- `RENDER-04`: optional frontmatter `font:` declarations accept contained WOFF, WOFF2, TTF,
+  or OTF bytes under the same resolver and generate a fixed `@font-face`. The on-disk CSP adds
+  only `font-src data:`, so embedded fonts load without granting network authority.
 - `RENDER-05`: Markdown source, declaration count, each source asset, aggregate decoded asset
   bytes, encoded contributions, rendered HTML, and footer-expanded publication bytes are
   bounded. The final default limit remains 15 MiB and is enforced before lifecycle commit.
@@ -40,7 +40,7 @@ malformed or unknown markup.
   accounting, mutation, refusal/no-write, and no-view-time-request properties.
 - `examples/patterns/portable-mixed.md` plus
   `docs/evidence/renderer/goal-3-portable-assets-2026-08-17.md` retain the real Chromium
-  offline mixed-page observation.
-- This evidence is one Linux/Chromium observation. It does not certify a browser, OS, mobile,
-  assistive-technology, or font-loading cell, and it does not complete the remaining Goal 3
+  offline mixed-page and loaded-font observations.
+- This evidence is one Linux/Chromium observation. It does not certify a supported browser,
+  OS, mobile, or assistive-technology cell, and it does not complete the remaining Goal 3
   declarative, token, accessibility, or performance packets.
