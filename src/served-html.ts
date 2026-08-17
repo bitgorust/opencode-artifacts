@@ -10,7 +10,7 @@ export const NAME_RE = /^[a-z0-9-]+$/;
  */
 export function prepareServedHtml(text: string, options: { liveReload?: boolean } = {}): string {
   const relaxed = text.replace("connect-src 'none'", "connect-src 'self'");
-  const headEnd = relaxed.lastIndexOf("</head>");
+  const headEnd = relaxed.indexOf("</head>");
   const bodyStart = relaxed.indexOf("<body", headEnd === -1 ? 0 : headEnd + 7);
   const bodyOpenEnd = bodyStart === -1 ? -1 : relaxed.indexOf(">", bodyStart);
   const bridged = bodyOpenEnd === -1

@@ -50,6 +50,20 @@
 - `QUAL-04`: semantic tests and retained Chromium desktop, 390-pixel dark/reduced-motion, and
   200%-equivalent RTL evidence are green. Manual screen-reader evidence is unavailable in the
   current environment, so accessibility certification and the packet archive gate remain open.
+- `PERF-01`: `benchmarks/renderer/v1/` owns hashed no-runtime, one-chart, and multi-runtime
+  fixtures plus the two-core/4 GiB Node 24/Chromium 151 reference profile. Reports retain raw
+  cold/warm samples, nearest-rank p50/p95, a five-sample minimum, 250ms scheduler floor,
+  relative-spread disposition, exact environment comparison, excluded setup, and hashes.
+- `PERF-02`: comparable 12-sample CLI p95 is below the 2,000ms no-runtime and 5,000ms
+  multi-runtime limits; an explicit preinstalled-dependency record prevents install time from
+  being silently mixed into or removed from render samples.
+- `PERF-03`: seven fresh-profile Chromium navigations per desktop/mobile workload require
+  useful visuals and a completed keyboard radio transition. Runtime errors, severe console
+  entries, external requests, and missed marks are retained hard failures; all six current
+  cells pass their desktop or 2× mobile limits.
+- `PERF-05`: version-1 workload warning/hard byte budgets cover 128/192 KiB no-runtime,
+  1/1.5 MiB one-chart, and 6/8 MiB multi-runtime pages below the absolute 15 MiB cap. Reports
+  separate final, runtime, asset, and shell/content bytes and exact remaining capacity.
 
 ## Limits
 
@@ -89,6 +103,9 @@ malformed or unknown markup.
   locale/time-zone/RTL output, keyboard state, reduced motion, reflow, and print behavior.
   `docs/evidence/renderer/goal-3-accessibility-2026-08-17.md` retains the Chromium 151
   accessibility-tree, keyboard, desktop/mobile/zoom, console, request, and screenshot results.
+- `test/performance.test.ts`, `scripts/renderer-{cli,browser}-benchmark.ts`, and
+  `docs/evidence/renderer/goal-3-performance-2026-08-17.md` retain exact boundary/refusal
+  logic and comparable full-distribution CLI/browser reports for all three workloads.
 - This evidence is one Linux/Chromium observation. It does not certify a supported browser,
   OS, physical mobile device, or assistive-technology cell. The screen-reader gate and Goal 3
-  performance packet remain incomplete.
+  accessibility packet remain incomplete.
