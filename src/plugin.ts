@@ -5,12 +5,13 @@ import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { tool, type Hooks, type Plugin } from "@opencode-ai/plugin";
 import {
   ArtifactTooLargeError,
-  renderPortableArtifact,
+  renderArtifact,
   renderRawHtml,
   type RenderedArtifact,
 } from "./render.ts";
-import { AssetPreflightError } from "./assets.ts";
+import { AssetPreflightError, type PortableAssets } from "./assets.ts";
 import { parseDocument } from "./markdown.ts";
+import { formatPreflight, preflightDocument, trustedHtmlDiagnostic, type AuthoringDiagnostic } from "./preflight.ts";
 import { FilePublisher, slugify, StaleArtifactError } from "./publisher.ts";
 import { GitHubPagesPublisher } from "./github-pages.ts";
 import { CloudflarePublisher } from "./cloudflare-publisher.ts";
@@ -196,10 +197,21 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             if (findings.length > 0 && args.force !== true) {
               return `Publish blocked: the content contains credential-looking strings: ${formatFindings(findings)}. If these are intentional (e.g. redacted examples), call again with force: true.`;
             }
+            let preflightWarnings: AuthoringDiagnostic[] = [];
+            let portableAssets: PortableAssets | undefined;
+            if (args.format === "html") {
+              preflightWarnings = [trustedHtmlDiagnostic()];
+            } else {
+              const preflight = await preflightDocument(args.markdown, { worktreeRoot: workRoot(ctx) });
+              const errors = preflight.diagnostics.filter((item) => item.severity === "error");
+              if (errors.length > 0 || preflight.omitted > 0) return formatPreflight(preflight);
+              preflightWarnings = preflight.diagnostics;
+              portableAssets = preflight.assets;
+            }
             const rendered: RenderedArtifact =
               args.format === "html"
                 ? renderRawHtml(args.markdown, args.title ? { title: args.title } : {})
-                : await renderPortableArtifact(args.markdown, workRoot(ctx));
+                : renderArtifact(args.markdown, { assets: portableAssets });
             const finalFindings = scanSensitive(rendered.html);
             if (finalFindings.length > 0 && args.force !== true) {
               return `Publish blocked: the final portable bytes contain credential-looking strings: ${formatFindings(finalFindings)}. If these are intentional, call again with force: true.`;
@@ -209,7 +221,7 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
               permission: "artifact_publish",
               patterns: [slug],
               always: ["*"],
-              metadata: { title, slug },
+              metadata: { title, slug, format: args.format ?? "markdown", trustedHtml: args.format === "html" },
             });
 
             const localDir = join(workRoot(ctx), ".opencode", "artifacts");
@@ -282,7 +294,8 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
                 hash: result.hash,
               },
             });
-            return `Artifact published to ${result.path}${result.url ? ` — live at ${result.url}` : ""} (gallery: ${result.gallery}, hash: ${result.hash})`;
+            const warning = preflightWarnings.length === 0 ? "" : `\nPreflight warnings: ${preflightWarnings.map((item) => `${item.code} at ${item.line}:${item.column}`).join(", ")}`;
+            return `Artifact published to ${result.path}${result.url ? ` — live at ${result.url}` : ""} (gallery: ${result.gallery}, hash: ${result.hash})${warning}`;
           } catch (err) {
             if (err instanceof ArtifactTooLargeError) {
               return `Artifact too large: ${err.message}`;

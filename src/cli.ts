@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { renderPortableArtifact, renderRawHtml } from "./render.ts";
+import { renderArtifact, renderRawHtml } from "./render.ts";
+import type { PortableAssets } from "./assets.ts";
+import { formatPreflight, preflightDocument, trustedHtmlDiagnostic } from "./preflight.ts";
 import { FilePublisher, slugify } from "./publisher.ts";
 import { GitHubPagesPublisher } from "./github-pages.ts";
 import { CloudflarePublisher } from "./cloudflare-publisher.ts";
@@ -106,8 +108,21 @@ async function renderCommand(args: string[]): Promise<void> {
     );
     process.exit(1);
   }
+  let assets: PortableAssets | undefined;
+  if (format === "html") {
+    console.error(`warning: ${trustedHtmlDiagnostic().message}`);
+  } else {
+    const preflight = await preflightDocument(markdown, { worktreeRoot: process.cwd() });
+    const errors = preflight.diagnostics.filter((item) => item.severity === "error");
+    if (errors.length > 0 || preflight.omitted > 0) {
+      console.error(formatPreflight(preflight));
+      process.exit(1);
+    }
+    for (const warning of preflight.diagnostics) console.error(`warning: ${warning.code} at ${warning.line}:${warning.column}: ${warning.message}`);
+    assets = preflight.assets;
+  }
   const rendered =
-    format === "html" ? renderRawHtml(markdown, title ? { title } : {}) : await renderPortableArtifact(markdown, process.cwd());
+    format === "html" ? renderRawHtml(markdown, title ? { title } : {}) : renderArtifact(markdown, { assets });
   const finalTitle = title ?? rendered.meta.title ?? "Artifact";
   const finalFindings = scanSensitive(rendered.html);
   if (finalFindings.length > 0 && !force) {

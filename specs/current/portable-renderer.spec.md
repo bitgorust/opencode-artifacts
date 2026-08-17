@@ -2,6 +2,18 @@
 
 ## Current behavior
 
+- `RENDER-02`: CLI and plugin Markdown publication runs one side-effect-free preflight before
+  permission or writes. Frontmatter, component/table, chart, Mermaid, heading-anchor,
+  task-marker, alert, and asset diagnostics carry stable codes, severity, line/column, and a
+  next action in source order. Errors refuse publication; warnings remain visible on success.
+- `RENDER-02`: reports retain at most 50 diagnostics and 16 KiB of diagnostic JSON by default.
+  Sensitive-looking values are redacted, messages/actions are truncated, and any overflow
+  ends in a `diagnostics-omitted` error with the exact omitted count. Raw HTML remains an
+  explicit trusted mode and produces a visible `trusted-html-mode` warning plus permission
+  metadata.
+- `QUAL-02`: component and chart acceptance is shared by preflight and rendering. Standalone
+  rendering preserves escaped inline error boxes, while every checked-in pattern must pass
+  preflight without errors and CLI/plugin refusals are verified as no-write behavior.
 - `RENDER-04`: Markdown images published through the CLI or plugin resolve only from the
   explicit project worktree. PNG, JPEG, GIF, WebP, and a conservatively reconstructed SVG
   subset become hashed data URIs. External, absolute, traversal, encoded-separator, missing,
@@ -38,6 +50,9 @@ malformed or unknown markup.
 
 - `test/assets.test.ts` and `test/model/asset-pipeline-model.ts` cover the resolver, exact
   accounting, mutation, refusal/no-write, and no-view-time-request properties.
+- `test/preflight.test.ts` covers ordered multi-error reports, redaction, count/byte ceilings,
+  repeated asset locations, every component kind, chart fallback parity, valid examples,
+  CLI/plugin no-write refusal, visible warnings, and trusted-mode disclosure.
 - `examples/patterns/portable-mixed.md` plus
   `docs/evidence/renderer/goal-3-portable-assets-2026-08-17.md` retain the real Chromium
   offline mixed-page and loaded-font observations.

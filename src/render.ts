@@ -667,20 +667,24 @@ export function emojiFaviconDataUri(icon: string): string {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`;
 }
 
+export function validateChartSpec(chart: ChartSpec): ResolvedChart & { code?: string } {
+  const kind: ResolvedKind = chart.kind === "echarts" ? "echarts" : "vega";
+  try {
+    const parsed: unknown = JSON.parse(chart.json);
+    if (kind === "echarts") return { kind, spec: parsed };
+    if (chart.kind === "vega-lite") {
+      const compiled = compileVegaLite(parsed as Parameters<typeof compileVegaLite>[0]);
+      return { kind, spec: compiled.spec };
+    }
+    return { kind, spec: parsed };
+  } catch (err) {
+    return { kind, code: `${chart.kind}-invalid`, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
 function resolveCharts(charts: ChartSpec[]): ResolvedChart[] {
   return charts.map((chart) => {
-    const kind: ResolvedKind = chart.kind === "echarts" ? "echarts" : "vega";
-    try {
-      const parsed: unknown = JSON.parse(chart.json);
-      if (kind === "echarts") return { kind, spec: parsed };
-      if (chart.kind === "vega-lite") {
-        const compiled = compileVegaLite(parsed as Parameters<typeof compileVegaLite>[0]);
-        return { kind, spec: compiled.spec };
-      }
-      return { kind, spec: parsed };
-    } catch (err) {
-      return { kind, error: err instanceof Error ? err.message : String(err) };
-    }
+    return validateChartSpec(chart);
   });
 }
 

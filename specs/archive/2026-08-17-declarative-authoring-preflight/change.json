@@ -3,10 +3,15 @@
   "id": "declarative-authoring-preflight",
   "title": "Preflight declarative authoring errors",
   "lane": "standard",
-  "status": "approved",
-  "affectedRequirements": ["RENDER-02", "QUAL-02"],
-  "currentSpecs": ["specs/current/portable-renderer.spec.md"],
-  "currentSpecsUpdated": false,
+  "status": "archived",
+  "affectedRequirements": [
+    "RENDER-02",
+    "QUAL-02"
+  ],
+  "currentSpecs": [
+    "specs/current/portable-renderer.spec.md"
+  ],
+  "currentSpecsUpdated": true,
   "approval": {
     "by": "aaron.zeng",
     "at": "2026-08-17T15:02:07Z"
@@ -17,5 +22,5 @@
     "reason": ""
   },
   "createdAt": "2026-08-17",
-  "archivedAt": null
+  "archivedAt": "2026-08-17"
 }

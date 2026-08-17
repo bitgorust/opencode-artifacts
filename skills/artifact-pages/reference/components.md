@@ -51,8 +51,9 @@ gives pan/zoom. Title the finding, not the axes.
 
 GitHub alerts — `> [!NOTE]` `[!TIP]` `[!IMPORTANT]` `[!WARNING]` `[!CAUTION]` — become toned
 callout boxes. `- [ ]` / `- [x]` become styled checkboxes. Headings get id anchors. Raw HTML
-is never passed through; broken component specs render as inline error boxes (the page still
-ships — fix and republish).
+is never passed through. CLI/plugin publication reports broken component specs together and
+refuses before permission or writes; standalone rendering retains escaped inline error boxes
+for inspection.
 
 ## Themes (optional)
 

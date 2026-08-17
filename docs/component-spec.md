@@ -109,7 +109,9 @@ header toggle cycles system → dark → light and persists to localStorage
 - GitHub alerts: `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`, `> [!IMPORTANT]`, `> [!CAUTION]`
   → styled callout boxes (post-process rendered `<blockquote>` HTML).
 - Task lists: `- [ ]` / `- [x]` render as styled checkboxes (read-only).
-- Invalid JSON in any component fence → inline error box (existing behavior, reused).
+- CLI/plugin publication aggregates invalid component JSON with other authoring diagnostics
+  and refuses before permission or writes. Standalone rendering retains the escaped inline
+  error box fallback.
 
 ## Mapping to the documented Claude patterns
 

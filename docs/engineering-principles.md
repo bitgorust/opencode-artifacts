@@ -118,6 +118,9 @@ collectively exhausted by [`docs/product-spec.md`](product-spec.md), not repeate
   conditionals scattered across established units.
 - The model authors declarative specifications. Arbitrary per-page JavaScript exists only in
   explicit trusted-HTML mode and does not inherit fixed-renderer guarantees.
+- Declarative publication validates the complete document before permission or writes. Its
+  component/chart schemas are shared with the renderer, diagnostics are bounded and redacted,
+  and standalone rendering retains escaped inline fallbacks for inspection.
 - The portable page is the long-term compatibility layer. Services are progressive
   enhancement; no page-view dependency, account, package runtime, or network is required.
 - Schemas, CLI/tool contracts, component syntax, exports, routes, and host adapters evolve by

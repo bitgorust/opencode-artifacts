@@ -55,6 +55,132 @@ const STAT_TONES = ["good", "bad", "warn", "neutral"] as const;
 const ITEM_TONES = ["good", "bad", "warn", "info", "neutral"] as const;
 const SEVERITIES = ["critical", "high", "medium", "low"] as const;
 
+export interface ComponentIssue {
+  code: string;
+  reason: string;
+  nextAction: string;
+}
+
+function issue(code: string, reason: string, nextAction: string): ComponentIssue[] {
+  return [{ code, reason, nextAction }];
+}
+
+function recordEntries(value: unknown, kind: string): ComponentIssue[] {
+  if (!Array.isArray(value)) return issue(`${kind}-shape`, "expected a JSON array", "provide the documented array schema");
+  return value.flatMap((entry, index) =>
+    asRecord(entry) === undefined
+      ? issue(`${kind}-entry`, `entry ${index + 1} must be an object`, "replace non-object entries")
+      : [],
+  );
+}
+
+function requiredStrings(value: unknown[], kind: string, fields: string[]): ComponentIssue[] {
+  const issues: ComponentIssue[] = [];
+  for (const [index, entry] of value.entries()) {
+    const item = asRecord(entry);
+    if (!item) continue;
+    for (const field of fields) {
+      if (typeof item[field] !== "string" || item[field] === "") {
+        issues.push(...issue(`${kind}-${field}`, `entry ${index + 1} requires string '${field}'`, `add ${field} to every ${kind} entry`));
+      }
+    }
+  }
+  return issues;
+}
+
+export function validateComponent(kind: ComponentKind, source: string): ComponentIssue[] {
+  if (kind === "diff") return source.trim() === "" ? issue("diff-empty", "diff source is empty", "add unified diff lines") : [];
+  if (kind === "mermaid") return source.trim() === "" ? issue("mermaid-empty", "Mermaid source is empty", "add a Mermaid diagram") : [];
+  let value: unknown;
+  try {
+    value = JSON.parse(source);
+  } catch {
+    return issue(`${kind}-json`, "component JSON is invalid", "provide valid JSON matching the documented schema");
+  }
+  if (["stats", "timeline", "findings", "compare"].includes(kind)) {
+    const issues = recordEntries(value, kind);
+    if (!Array.isArray(value)) return issues;
+    const required = kind === "stats" ? ["label", "value"] : kind === "timeline" ? ["time", "title"] : ["title"];
+    issues.push(...requiredStrings(value, kind, required));
+    for (const [index, entry] of value.entries()) {
+      const item = asRecord(entry);
+      if (!item) continue;
+      if (kind === "findings" && !SEVERITIES.includes(str(item, "severity") as typeof SEVERITIES[number])) {
+        issues.push(...issue("findings-severity", `entry ${index + 1} needs an allowlisted severity`, "use critical, high, medium, or low"));
+      }
+      if (kind === "stats") {
+        const direction = str(item, "direction");
+        if (direction !== undefined && direction !== "up" && direction !== "down") {
+          issues.push(...issue("stats-direction", `entry ${index + 1} direction must be up or down`, "correct or remove direction"));
+        }
+      }
+      if (kind === "compare") {
+        const annotations = item["annotations"];
+        if (annotations !== undefined && (!Array.isArray(annotations) || annotations.some((note) => typeof note !== "string"))) {
+          issues.push(...issue("compare-annotations", `entry ${index + 1} annotations must be strings`, "replace non-string annotations"));
+        }
+      }
+    }
+    return issues;
+  }
+  const item = asRecord(value);
+  if (!item) return issue(`${kind}-shape`, "expected a JSON object", "provide the documented object schema");
+  if (kind === "callout") {
+    const tone = str(item, "tone");
+    return tone !== undefined && !ITEM_TONES.includes(tone as typeof ITEM_TONES[number]) ? issue("callout-tone", "tone is not allowlisted", "use good, bad, warn, info, or neutral") : [];
+  }
+  if (kind === "progress") {
+    const done = num(item, "done");
+    const total = num(item, "total");
+    return done === undefined || total === undefined || total <= 0 || done < 0 || done > total ? issue("progress-range", "done and total must describe a finite range", "use 0 <= done <= total and total > 0") : [];
+  }
+  if (kind === "copy") return typeof item["text"] !== "string" ? issue("copy-text", "copy text is missing", "add string 'text'") : [];
+  if (kind === "decisions") {
+    if (!Array.isArray(item["questions"])) return issue("decisions-questions", "questions must be an array", "add the documented questions array");
+    const ids = new Set<string>();
+    const issues: ComponentIssue[] = [];
+    for (const [index, questionValue] of item["questions"].entries()) {
+      const question = asRecord(questionValue);
+      if (!question || !str(question, "id") || !str(question, "question") || !Array.isArray(question["options"])) {
+        issues.push(...issue("decisions-question", `question ${index + 1} needs id, question, and options`, "complete every question object"));
+        continue;
+      }
+      const id = str(question, "id")!;
+      if (ids.has(id)) issues.push(...issue("decisions-id", `question id '${id}' is duplicated`, "assign stable unique ids"));
+      ids.add(id);
+      for (const [optionIndex, optionValue] of question["options"].entries()) {
+        const option = asRecord(optionValue);
+        if (!option || !str(option, "id") || !str(option, "label")) {
+          issues.push(...issue("decisions-option", `question ${index + 1} option ${optionIndex + 1} needs id and label`, "complete every option object"));
+        }
+      }
+    }
+    return issues;
+  }
+  if (kind === "table") {
+    if (!Array.isArray(item["columns"]) || !Array.isArray(item["rows"])) return issue("table-shape", "columns and rows must be arrays", "add both documented arrays");
+    const keys = new Set<string>();
+    const issues: ComponentIssue[] = [];
+    for (const [index, columnValue] of item["columns"].entries()) {
+      const column = asRecord(columnValue);
+      const key = column && str(column, "key");
+      if (!column || !key || !str(column, "label")) {
+        issues.push(...issue("table-column", `column ${index + 1} needs key and label`, "complete every column object"));
+        continue;
+      }
+      if (keys.has(key)) issues.push(...issue("table-key", `column key '${key}' is duplicated`, "assign unique column keys"));
+      keys.add(key);
+      const type = str(column, "type");
+      if (type !== undefined && type !== "num") issues.push(...issue("table-type", `column ${index + 1} type is unsupported`, "use 'num' or omit type"));
+    }
+    for (const [index, row] of item["rows"].entries()) {
+      if (asRecord(row) === undefined) issues.push(...issue("table-row", `row ${index + 1} must be an object`, "replace non-object rows"));
+    }
+    return issues;
+  }
+  return [];
+}
+
 function renderStats(spec: unknown): string {
   if (!Array.isArray(spec)) return errorBox("stats", "expected a JSON array");
   const cards = spec.map((entry) => {
@@ -315,6 +441,8 @@ function renderTable(spec: unknown): string {
 }
 
 export function renderComponent(kind: ComponentKind, json: string, id?: string): string {
+  const issues = validateComponent(kind, json);
+  if (issues.length > 0) return errorBox(kind, issues[0].reason);
   if (kind === "diff") return renderDiff(json);
   if (kind === "mermaid") return renderMermaid(json);
   let spec: unknown;

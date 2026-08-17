@@ -92,8 +92,9 @@ Grown from observed failures; add new ones as they bite:
 - Vega-Lite `text` channels need `{"field": "..."}` objects, not bare strings.
 - Area charts under layered marks need `"clip": true` or the fill escapes the plot.
 - A chart spec containing `</script>` is safe (payload is `\u003c`-escaped) — don't "fix" it.
-- Malformed component JSON renders an inline error box and the page still ships; fix the spec
-  and republish rather than working around the box.
+- Malformed component JSON is returned with all other detected authoring errors before the
+  publish permission or any write. The standalone renderer retains escaped inline error boxes
+  for inspection; fix every reported spec and publish again.
 - `serve`-mode extras (live reload, decisions persistence, comments) exist only on served
   pages; a `file://` artifact keeps its strict CSP and localStorage-only state.
 - Markdown image paths are worktree-root-relative. The publisher embeds allowlisted local
