@@ -173,12 +173,18 @@ Full reference: [`docs/component-spec.md`](docs/component-spec.md). Short versio
 - **Markdown extras**: GitHub alerts (`> [!WARNING]` etc.), task lists, heading anchors, `##` sections become cards
 - **Local images**: ordinary `![meaningful alt](path/to/image.png)` resolves from the worktree root and embeds PNG/JPEG/GIF/WebP or constrained static SVG. Use the exact title `"decorative"` with empty alt only for an intentionally decorative image. URLs, absolute paths, traversal, and symlinks are refused.
 - **Local fonts**: `font: path/to/project.woff2` uses the same contained, MIME-checked pipeline and a generated `@font-face`; it never permits a viewer network request or arbitrary CSS.
+- **Bounded design tokens**: `.opencode/artifact-tokens.json` supplies project defaults and one
+  version-1 `design-tokens` JSON fence supplies prompt overrides. Only documented
+  color, font, spacing, radius, and density slots are accepted; prompt > project > theme >
+  built-in precedence and provenance are recorded in the portable page.
 - CLI/plugin publication preflights the whole document and refuses all detected errors before
   permission or writes. Standalone rendering still degrades broken specs to escaped inline
   error boxes for resilient inspection; warnings remain visible on successful publication.
 
 Worked examples for every canonical pattern: [`examples/patterns/`](examples/patterns/) with
 browser-verified screenshots in [`docs/evidence/patterns/`](docs/evidence/patterns/).
+The bounded-token fixture and desktop/mobile offline observations are in
+[`docs/evidence/renderer/goal-3-design-tokens-2026-08-17.md`](docs/evidence/renderer/goal-3-design-tokens-2026-08-17.md).
 
 ## Sharing and hosting
 

@@ -121,6 +121,9 @@ collectively exhausted by [`docs/product-spec.md`](product-spec.md), not repeate
 - Declarative publication validates the complete document before permission or writes. Its
   component/chart schemas are shared with the renderer, diagnostics are bounded and redacted,
   and standalone rendering retains escaped inline fallbacks for inspection.
+- Visual configuration follows prompt > bounded project file > curated theme > built-in
+  precedence. Sources are versioned, size/type/contrast checked atomically, retain per-token
+  provenance, and can populate only fixed CSS-variable slots—never CSS syntax or code.
 - The portable page is the long-term compatibility layer. Services are progressive
   enhancement; no page-view dependency, account, package runtime, or network is required.
 - Schemas, CLI/tool contracts, component syntax, exports, routes, and host adapters evolve by

@@ -3,6 +3,7 @@ import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { renderArtifact, renderRawHtml } from "./render.ts";
 import type { PortableAssets } from "./assets.ts";
+import type { ResolvedDesignTokens } from "./design-tokens.ts";
 import { formatPreflight, preflightDocument, trustedHtmlDiagnostic } from "./preflight.ts";
 import { FilePublisher, slugify } from "./publisher.ts";
 import { GitHubPagesPublisher } from "./github-pages.ts";
@@ -109,6 +110,7 @@ async function renderCommand(args: string[]): Promise<void> {
     process.exit(1);
   }
   let assets: PortableAssets | undefined;
+  let designTokens: ResolvedDesignTokens | undefined;
   if (format === "html") {
     console.error(`warning: ${trustedHtmlDiagnostic().message}`);
   } else {
@@ -120,9 +122,10 @@ async function renderCommand(args: string[]): Promise<void> {
     }
     for (const warning of preflight.diagnostics) console.error(`warning: ${warning.code} at ${warning.line}:${warning.column}: ${warning.message}`);
     assets = preflight.assets;
+    designTokens = preflight.designTokens;
   }
   const rendered =
-    format === "html" ? renderRawHtml(markdown, title ? { title } : {}) : renderArtifact(markdown, { assets });
+    format === "html" ? renderRawHtml(markdown, title ? { title } : {}) : renderArtifact(markdown, { assets, designTokens });
   const finalTitle = title ?? rendered.meta.title ?? "Artifact";
   const finalFindings = scanSensitive(rendered.html);
   if (finalFindings.length > 0 && !force) {

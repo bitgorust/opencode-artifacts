@@ -1,0 +1,44 @@
+{
+  "capturedAt": "2026-08-17T15:51:26.616Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "offlineEmulation": true,
+  "usefulContentMs": 396,
+  "observations": {
+    "activeElement": "",
+    "bodyFontFamily": "Georgia, Charter, \"Times New Roman\", serif",
+    "chartVisuals": 0,
+    "computedDesign": {
+      "accent": "#6d28d9",
+      "pageBackground": "#f5f1ff",
+      "radius": "8px",
+      "surface": "#ffffff",
+      "text": "#211735"
+    },
+    "csp": "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'",
+    "decisionButtons": 0,
+    "designProvenance": "{\"pageBackground\":\"prompt\",\"surface\":\"prompt\",\"text\":\"prompt\",\"mutedText\":\"prompt\",\"border\":\"prompt\",\"accent\":\"prompt\",\"font\":\"prompt\",\"spacing\":\"prompt\",\"radius\":\"prompt\",\"density\":\"prompt\"}",
+    "designTokens": true,
+    "fontSetStatus": "loaded",
+    "horizontalOverflow": false,
+    "imageComplete": false,
+    "imageHash": null,
+    "imageNaturalWidth": 0,
+    "imageSource": null,
+    "keyboardSelected": false,
+    "pageBytes": 35349,
+    "pageTheme": "report",
+    "projectFontFaces": [],
+    "readyState": "complete",
+    "tableCaptions": [],
+    "tables": 1,
+    "viewport": {
+      "height": 1457,
+      "width": 1440
+    }
+  },
+  "browserLogs": [],
+  "requestUrls": [
+    "file:///evidence/goal-3-design-tokens.html"
+  ],
+  "networkRequestUrls": []
+}

@@ -47,6 +47,11 @@ Decide the treatment before writing — the theme is part of the read, not an af
 Set it in frontmatter (`theme: report`). When nothing fits, `default` is always respectable —
 an over-styled page is worse than a plain one.
 
+If the project contains `.opencode/artifact-tokens.json`, its bounded version-1 visual tokens
+automatically outrank the theme. Use one `design-tokens` JSON fence only when the request needs
+an explicit per-page override; it outranks the project file. Never write CSS, selectors, URLs,
+or font names into tokens—use only the documented values in `reference/components.md`.
+
 ## Pre-publish checklist
 
 1. The title names the page like a product (2–4 words, no appended explainer)

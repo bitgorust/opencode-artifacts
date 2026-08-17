@@ -211,6 +211,24 @@
       "status": "approved"
     },
     {
+      "path": "docs/evidence/renderer/goal-3-design-tokens-desktop-2026-08-17.png",
+      "sha256": "84ebacab7a6258b611aa73973ad9ca9f1da29eb88b8f4498b4d5e64111f78e84",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/design-tokens.md rendered offline in Chromium 151 at desktop width",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/renderer/goal-3-design-tokens-mobile-2026-08-17.png",
+      "sha256": "6f7d64d0183cbd7632dea94f73aedf3cd0a1263b9fc16bb848df3cfd90badaad",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/design-tokens.md rendered offline in Chromium 151 at narrow width",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
       "path": "docs/evidence/renderer/goal-3-portable-assets-chromium-2026-08-17.png",
       "sha256": "de64548e9c0e40b594f31b3bc84cb09d261ecc73c3dd5b756ecd5ac74a7a529d",
       "provenance": "repository-generated browser capture",

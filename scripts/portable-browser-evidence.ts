@@ -8,9 +8,12 @@ const endpoint = process.argv[2] ?? "http://127.0.0.1:4444";
 const pageUrl = process.argv[3];
 const screenshotPath = process.argv[4];
 const reportPath = process.argv[5];
+const viewportWidth = Number(process.argv[6] ?? 1440);
+const viewportHeight = Number(process.argv[7] ?? 1600);
 if (!pageUrl || !screenshotPath || !reportPath) {
-  throw new Error("usage: portable-browser-evidence <webdriver-url> <page-url> <screenshot-path> <report-path>");
+  throw new Error("usage: portable-browser-evidence <webdriver-url> <page-url> <screenshot-path> <report-path> [width] [height]");
 }
+if (!Number.isInteger(viewportWidth) || !Number.isInteger(viewportHeight) || viewportWidth < 320 || viewportHeight < 480) throw new Error("viewport is invalid");
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   const response = await fetch(`${endpoint}${path}`, {
@@ -38,7 +41,7 @@ const sessionId = session.sessionId;
 const route = `/session/${sessionId}`;
 
 try {
-  await request("POST", `${route}/window/rect`, { width: 1440, height: 1600, x: 0, y: 0 });
+  await request("POST", `${route}/window/rect`, { width: viewportWidth, height: viewportHeight, x: 0, y: 0 });
   await request("POST", `${route}/goog/cdp/execute`, {
     cmd: "Network.enable",
     params: {},
@@ -99,6 +102,18 @@ try {
         fontSetStatus: document.fonts.status,
         projectFontFaces: Array.from(document.fonts).filter((face) => face.family.includes('Artifact Project')).map((face) => ({ family: face.family, status: face.status })),
         bodyFontFamily: getComputedStyle(document.body).fontFamily,
+        viewport: { width: innerWidth, height: innerHeight },
+        horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        designTokens: document.documentElement.hasAttribute('data-design-tokens'),
+        pageTheme: document.documentElement.getAttribute('data-page-theme'),
+        designProvenance: document.querySelector('meta[name="artifact-design-provenance"]')?.getAttribute('content'),
+        computedDesign: {
+          pageBackground: getComputedStyle(document.documentElement).getPropertyValue('--page-bg').trim(),
+          surface: getComputedStyle(document.documentElement).getPropertyValue('--card-bg').trim(),
+          text: getComputedStyle(document.documentElement).getPropertyValue('--ink').trim(),
+          accent: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+          radius: getComputedStyle(document.documentElement).getPropertyValue('--radius').trim(),
+        },
         pageBytes: new TextEncoder().encode(document.documentElement.outerHTML).length,
       };
     `,

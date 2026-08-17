@@ -10,6 +10,7 @@ import {
   type RenderedArtifact,
 } from "./render.ts";
 import { AssetPreflightError, type PortableAssets } from "./assets.ts";
+import type { ResolvedDesignTokens } from "./design-tokens.ts";
 import { parseDocument } from "./markdown.ts";
 import { formatPreflight, preflightDocument, trustedHtmlDiagnostic, type AuthoringDiagnostic } from "./preflight.ts";
 import { FilePublisher, slugify, StaleArtifactError } from "./publisher.ts";
@@ -199,6 +200,7 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             }
             let preflightWarnings: AuthoringDiagnostic[] = [];
             let portableAssets: PortableAssets | undefined;
+            let designTokens: ResolvedDesignTokens | undefined;
             if (args.format === "html") {
               preflightWarnings = [trustedHtmlDiagnostic()];
             } else {
@@ -207,11 +209,12 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
               if (errors.length > 0 || preflight.omitted > 0) return formatPreflight(preflight);
               preflightWarnings = preflight.diagnostics;
               portableAssets = preflight.assets;
+              designTokens = preflight.designTokens;
             }
             const rendered: RenderedArtifact =
               args.format === "html"
                 ? renderRawHtml(args.markdown, args.title ? { title: args.title } : {})
-                : renderArtifact(args.markdown, { assets: portableAssets });
+                : renderArtifact(args.markdown, { assets: portableAssets, designTokens });
             const finalFindings = scanSensitive(rendered.html);
             if (finalFindings.length > 0 && args.force !== true) {
               return `Publish blocked: the final portable bytes contain credential-looking strings: ${formatFindings(finalFindings)}. If these are intentional, call again with force: true.`;

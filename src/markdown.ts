@@ -24,11 +24,17 @@ export interface ComponentBlock {
   json: string;
 }
 
+export interface DesignTokenBlock {
+  json: string;
+  line: number;
+}
+
 export interface ParsedDocument {
   meta: Frontmatter;
   bodyHtml: string;
   charts: ChartSpec[];
   components: ComponentBlock[];
+  designTokens: DesignTokenBlock[];
   warnings: string[];
 }
 
@@ -39,9 +45,9 @@ export interface ParseDocumentOptions {
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
 const KEY_VALUE_RE = /^([A-Za-z][A-Za-z0-9_-]*)\s*:\s*(.*)$/;
 
-function parseFrontmatter(source: string, warnings: string[]): { meta: Frontmatter; body: string } {
+function parseFrontmatter(source: string, warnings: string[]): { meta: Frontmatter; body: string; lineOffset: number } {
   const match = source.match(FRONTMATTER_RE);
-  if (!match) return { meta: {}, body: source };
+  if (!match) return { meta: {}, body: source, lineOffset: 0 };
   const meta: Frontmatter = {};
   for (const line of match[1].split(/\r?\n/)) {
     if (!line.trim()) continue;
@@ -60,14 +66,15 @@ function parseFrontmatter(source: string, warnings: string[]): { meta: Frontmatt
     else if (key === "font") meta.font = value;
     else warnings.push(`frontmatter key ignored: ${key}`);
   }
-  return { meta, body: source.slice(match[0].length) };
+  return { meta, body: source.slice(match[0].length), lineOffset: (match[0].match(/\n/g) ?? []).length };
 }
 
 export function parseDocument(source: string, options: ParseDocumentOptions = {}): ParsedDocument {
   const warnings: string[] = [];
-  const { meta, body } = parseFrontmatter(source, warnings);
+  const { meta, body, lineOffset } = parseFrontmatter(source, warnings);
   const charts: ChartSpec[] = [];
   const components: ComponentBlock[] = [];
+  const designTokens: DesignTokenBlock[] = [];
 
   const md = new MarkdownIt({ html: false, linkify: true });
   const escapeHtml = md.utils.escapeHtml;
@@ -100,9 +107,13 @@ export function parseDocument(source: string, options: ParseDocumentOptions = {}
       components.push({ kind: info as ComponentKind, json: token.content });
       return `<div class="component" data-component-index="${index}"></div>\n`;
     }
+    if (info === "design-tokens") {
+      designTokens.push({ json: token.content, line: (token.map?.[0] ?? 0) + lineOffset + 1 });
+      return "";
+    }
     return `<pre><code class="language-${escapeHtml(info)}">${escapeHtml(token.content)}</code></pre>\n`;
   };
 
   const bodyHtml = md.render(body);
-  return { meta, bodyHtml, charts, components, warnings };
+  return { meta, bodyHtml, charts, components, designTokens, warnings };
 }

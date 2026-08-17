@@ -8,7 +8,7 @@ Reference: the official [Claude Code Artifact guide](https://code.claude.com/doc
 `docs/page-quality-benchmark.md` (comparative quality gate). Official media remains link-only
 unless explicit redistribution authority is recorded.
 
-## Design tokens (adapted from the official visual reference)
+## Built-in design tokens (adapted from the official visual reference)
 
 ```
 --page-bg:        #e9edf2  (light gray-blue)
@@ -35,6 +35,19 @@ unless explicit redistribution authority is recorded.
 
 Dark mode: same hues, backgrounds shifted (page `#151a21`, card `#1f2630`, ink `#e5e7eb`),
 via `color-scheme: light dark` + `@media (prefers-color-scheme: dark)` overrides.
+
+### Bounded project and prompt overrides
+
+The renderer discovers only `.opencode/artifact-tokens.json` for project tokens. A document
+may contain one `design-tokens` JSON fence for explicit prompt-level values. Both use
+`{"schemaVersion":1,"tokens":{...}}`; the shipped authoring reference owns the exact key and
+enum list. Precedence is prompt > project > curated theme > built-in defaults.
+
+Each source is capped at 8 KiB, parsed atomically, contrast checked against its effective lower
+layers, and emitted in deterministic order through fixed CSS-variable slots. Unknown keys,
+non-hex colors, arbitrary font strings, selectors, declarations, URLs, markup, imports, and
+expressions refuse publication before permission or writes. The portable page retains named
+per-token provenance. Trusted HTML does not participate in this bounded token path.
 
 ## Page layout
 

@@ -60,3 +60,19 @@ for inspection.
 Frontmatter `theme:` selects a curated variant: `default` (gray-blue canvas, white cards),
 `report` (warm paper, serif headings), `ops` (dark-first terminal), `editorial` (magazine
 display type). Anything else falls back to `default`.
+
+## Bounded design tokens (optional)
+
+Project defaults live only at `.opencode/artifact-tokens.json`; a page-level prompt override
+uses one `design-tokens` fence. Both use the same atomic versioned form:
+
+```json
+{"schemaVersion":1,"tokens":{"accent":"#6d28d9","font":"serif","spacing":"spacious","radius":"soft","density":"airy"}}
+```
+
+Allowed token names are `pageBackground`, `surface`, `text`, `mutedText`, `border`, `accent`,
+`font`, `spacing`, `radius`, and `density`. Colors are six-digit hex; font is
+`system|serif|mono`; spacing is `compact|comfortable|spacious`; radius is
+`square|sharp|soft|round`; density is `compact|comfortable|airy`. Prompt > project > curated theme >
+built-in defaults. Unknown/unsafe/low-contrast values reject the whole source before publish;
+raw CSS, selectors, URLs, markup, imports, expressions, and remote fonts are never accepted.

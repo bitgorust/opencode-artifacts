@@ -4,6 +4,7 @@ import { renderComponent } from "./components.ts";
 import { runtimeBundle, type RuntimeName } from "./runtime.ts";
 import { escapeHtmlText, slugify } from "./text.ts";
 import { resolvePortableAssets, type AssetLimits, type PortableAssets } from "./assets.ts";
+import { resolveDesignTokens, type ResolvedDesignTokens } from "./design-tokens.ts";
 
 export { escapeHtmlText } from "./text.ts";
 
@@ -24,6 +25,7 @@ export class ArtifactTooLargeError extends Error {
 export interface RenderOptions {
   maxBytes?: number;
   assets?: PortableAssets;
+  designTokens?: ResolvedDesignTokens;
 }
 
 export interface PortableRenderOptions extends AssetLimits {
@@ -58,7 +60,9 @@ export const ARTIFACT_CSS = `:root{color-scheme:light;
 --accent:#6d6bd6;--good:#2f9e6e;--good-bg:#e4f4ec;--bad:#d64550;--bad-bg:#fdeeee;
 --warn:#b45309;--warn-bg:#fdf0dc;--info:#33526e;--info-bg:#dce6f2;
 --card-info-bg:#e3eaf4;--card-warn-bg:#fdeccd;--code-bg:#f3f4f6;
---radius:16px;--shadow:0 1px 3px rgb(15 23 42/.06)}
+--radius:16px;--shadow:0 1px 3px rgb(15 23 42/.06);
+--artifact-font:system-ui,-apple-system,"Segoe UI",sans-serif;--artifact-heading-font:var(--artifact-font);
+--body-pad:1.5rem;--body-pad-bottom:3rem;--section-gap:1.25rem;--section-pad-y:1.5rem;--section-pad-x:1.75rem;--table-font-size:.86rem}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;
 --page-bg:#151a21;--card-bg:#1f2630;--ink:#e5e7eb;--ink-2:#9ca3af;--ink-3:#6b7280;--line:#333d4d;
 --good:#4ade80;--good-bg:#14312a;--bad:#f87171;--bad-bg:#3a2226;--warn:#fbbf24;--warn-bg:#3a2f16;
@@ -69,17 +73,17 @@ export const ARTIFACT_CSS = `:root{color-scheme:light;
 --good:#4ade80;--good-bg:#14312a;--bad:#f87171;--bad-bg:#3a2226;--warn:#fbbf24;--warn-bg:#3a2f16;
 --info:#7ea4c7;--info-bg:#1e2c3d;--card-info-bg:#1e2c3d;--card-warn-bg:#3a2f16;--code-bg:#262e3a;
 --shadow:0 1px 3px rgb(0 0 0/.4)}
-body{margin:0;background:var(--page-bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6}
+body{margin:0;background:var(--page-bg);color:var(--ink);font-family:var(--artifact-font);line-height:1.6}
 .artifact-header{display:flex;align-items:center;gap:.6rem;padding:.9rem 1.5rem;background:var(--card-bg);border-bottom:1px solid var(--line)}
 .theme-toggle{margin-left:auto;background:none;border:1px solid var(--line);border-radius:999px;padding:.25rem .8rem;font-size:.75rem;font-weight:600;color:var(--ink-2);cursor:pointer}
 .theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
 .artifact-header h1{font-size:1.1rem;margin:0;letter-spacing:-.01em}
 .artifact-icon{font-size:1.25rem}
-.artifact-body{max-width:1080px;margin:0 auto;padding:1.5rem 1.5rem 3rem}
+.artifact-body{max-width:1080px;margin:0 auto;padding:var(--body-pad) var(--body-pad) var(--body-pad-bottom)}
 .artifact-body>*:first-child{margin-top:0}
 .artifact-footer{max-width:1080px;margin:0 auto;padding:1rem 1.5rem 2rem;font-size:.8rem;color:var(--ink-3)}
 .artifact-footer a{color:inherit}
-.section-card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem 1.75rem;margin:1.25rem 0}
+.section-card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--section-pad-y) var(--section-pad-x);margin:var(--section-gap) 0}
 .section-card> :first-child{margin-top:0}
 .section-card p,.section-card li{max-width:68ch}
 td,.stat-value,.tl-time,.progress-label,.delta{font-variant-numeric:tabular-nums}
@@ -179,7 +183,7 @@ pre.mermaid{background:var(--card-bg);border:1px solid var(--line);border-radius
 .table-wrap{margin:1rem 0}
 .table-filter{width:100%;max-width:320px;padding:.45rem .8rem;border:1px solid var(--line);border-radius:8px;background:var(--card-bg);color:var(--ink);font:inherit;font-size:.88rem;margin-bottom:.5rem}
 .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
-.data-table{margin:0;font-size:.86rem}
+.data-table{margin:0;font-size:var(--table-font-size)}
 .data-table th{padding:.35rem .55rem;white-space:nowrap}
 .data-table td{padding:.3rem .55rem}
 .th-sort{background:none;border:none;padding:0;font:inherit;font-weight:600;color:inherit;cursor:pointer}
@@ -223,14 +227,14 @@ th[data-dir="desc"] .th-sort::after{content:"↓";opacity:1;color:var(--accent)}
 @media print{body{background:#fff}.section-card,.stat,.variant,.card{box-shadow:none;border:1px solid #ddd}}`;
 
 const THEME_CSS: Record<string, string> = {
-  report: `:root{color-scheme:light;--page-bg:#f6f0e4;--card-bg:#fffdf7;--ink:#2b251a;--ink-2:#6b5f49;--ink-3:#a29378;--line:#e3d9c4;--accent:#b4541e;--code-bg:#f1e9d8}
-h2,.callout-title,.stat-value{font-family:Georgia,Charter,"Times New Roman",serif}`,
-  ops: `:root{color-scheme:dark;--page-bg:#0f140f;--card-bg:#171f17;--ink:#d5e5cf;--ink-2:#8fa389;--ink-3:#5c6b57;--line:#263026;--accent:#4ade80;--code-bg:#131c13;--good:#4ade80;--good-bg:#14311f;--bad:#f87171;--bad-bg:#3a1d1d;--warn:#fbbf24;--warn-bg:#3a2f16;--info:#7ea4c7;--info-bg:#1c2a38;--card-info-bg:#1c2a38;--card-warn-bg:#33290f}
-h2,.callout-title{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:0}`,
-  editorial: `:root{color-scheme:light;--page-bg:#fafafa;--card-bg:#ffffff;--ink:#141414;--ink-2:#525252;--ink-3:#a3a3a3;--line:#e5e5e5;--accent:#141414;--code-bg:#f5f5f5;--radius:4px;--shadow:none}
-h2{font-family:Georgia,Charter,"Times New Roman",serif;font-size:1.6rem;font-weight:500}
+  report: `:root{color-scheme:light;--page-bg:#f6f0e4;--card-bg:#fffdf7;--ink:#2b251a;--ink-2:#6b5f49;--ink-3:#a29378;--line:#e3d9c4;--accent:#b4541e;--code-bg:#f1e9d8;--artifact-heading-font:Georgia,Charter,"Times New Roman",serif}
+h2,.callout-title,.stat-value{font-family:var(--artifact-heading-font)}`,
+  ops: `:root{color-scheme:dark;--page-bg:#0f140f;--card-bg:#171f17;--ink:#d5e5cf;--ink-2:#8fa389;--ink-3:#5c6b57;--line:#263026;--accent:#4ade80;--code-bg:#131c13;--good:#4ade80;--good-bg:#14311f;--bad:#f87171;--bad-bg:#3a1d1d;--warn:#fbbf24;--warn-bg:#3a2f16;--info:#7ea4c7;--info-bg:#1c2a38;--card-info-bg:#1c2a38;--card-warn-bg:#33290f;--artifact-heading-font:ui-monospace,SFMono-Regular,Menlo,monospace}
+h2,.callout-title{font-family:var(--artifact-heading-font);letter-spacing:0}`,
+  editorial: `:root{color-scheme:light;--page-bg:#fafafa;--card-bg:#ffffff;--ink:#141414;--ink-2:#525252;--ink-3:#a3a3a3;--line:#e5e5e5;--accent:#141414;--code-bg:#f5f5f5;--radius:4px;--shadow:none;--artifact-heading-font:Georgia,Charter,"Times New Roman",serif}
+h2{font-family:var(--artifact-heading-font);font-size:1.6rem;font-weight:500}
 .section-card,.stat,.variant,.card{border:1px solid var(--line)}
-.artifact-header h1{font-family:Georgia,Charter,"Times New Roman",serif;font-size:1.35rem;font-weight:500}`,
+.artifact-header h1{font-family:var(--artifact-heading-font);font-size:1.35rem;font-weight:500}`,
 };
 
 const BOOT = `(function () {
@@ -699,6 +703,7 @@ interface AssembleInput {
   needsMermaid: boolean;
   maxBytes: number;
   assetCss?: string;
+  designTokens?: ResolvedDesignTokens;
 }
 
 function assemblePage(input: AssembleInput): string {
@@ -714,11 +719,17 @@ function assemblePage(input: AssembleInput): string {
   const themeAttr =
     input.theme !== undefined && THEME_CSS[input.theme] !== undefined
       ? ` data-page-theme="${input.theme}"`
+      : input.designTokens?.fixesColorMode
+        ? ' data-page-theme="tokens"'
       : "";
+  const designAttr = input.designTokens?.active ? " data-design-tokens" : "";
+  const designMetadata = input.designTokens?.active
+    ? `<meta name="artifact-design-provenance" content="${escapeHtmlText(JSON.stringify(input.designTokens.provenance))}">`
+    : "";
 
   const parts: string[] = [
     "<!doctype html>",
-    `<html lang="en"${themeAttr}>`,
+    `<html lang="en"${themeAttr}${designAttr}>`,
     "<head>",
     '<meta charset="utf-8">',
     `<meta http-equiv="Content-Security-Policy" content="${CSP}">`,
@@ -727,8 +738,9 @@ function assemblePage(input: AssembleInput): string {
     input.description !== undefined
       ? `<meta name="description" content="${escapeHtmlText(input.description)}">`
       : "",
+    designMetadata,
     `<title>${escapeHtmlText(input.title)}</title>`,
-    `<style>${ARTIFACT_CSS}${input.theme !== undefined ? (THEME_CSS[input.theme] ?? "") : ""}${input.assetCss ?? ""}</style>`,
+    `<style>${ARTIFACT_CSS}${input.theme !== undefined ? (THEME_CSS[input.theme] ?? "") : ""}${input.designTokens?.css ?? ""}${input.assetCss ?? ""}</style>`,
     "</head>",
     "<body>",
     `<header class="artifact-header"><span class="artifact-icon">${escapeHtmlText(input.icon)}</span><h1>${escapeHtmlText(input.title)}</h1></header>`,
@@ -759,8 +771,18 @@ function assemblePage(input: AssembleInput): string {
 
 export function renderArtifact(markdown: string, options: RenderOptions = {}): RenderedArtifact {
   const doc = parseDocument(markdown, { assets: options.assets?.bySource });
+  const inlineDesign = options.designTokens === undefined
+    ? resolveDesignTokens(doc.meta.theme, undefined, doc.designTokens.map((block) => block.json))
+    : undefined;
+  const designTokens = options.designTokens ?? inlineDesign?.designTokens;
 
   let bodyHtml = doc.bodyHtml;
+  if (inlineDesign !== undefined && inlineDesign.issues.length > 0) {
+    const errors = inlineDesign.issues
+      .map((item) => `<div class="chart-error">${escapeHtmlText(`Design tokens failed validation: ${item.reason}. ${item.nextAction}`)}</div>`)
+      .join("");
+    bodyHtml = `${errors}${bodyHtml}`;
+  }
   let needsBoot = false;
   let needsMermaid = false;
   doc.components.forEach((block, index) => {
@@ -783,7 +805,8 @@ export function renderArtifact(markdown: string, options: RenderOptions = {}): R
     maxBytes: options.maxBytes ?? DEFAULT_MAX_BYTES,
     assetCss: options.assets?.font === undefined
       ? undefined
-      : `@font-face{font-family:"Artifact Project";src:url(${options.assets.font.dataUri}) format("${fontFormat(options.assets.font.mime)}");font-display:swap}body{font-family:"Artifact Project",system-ui,-apple-system,"Segoe UI",sans-serif}`,
+      : `@font-face{font-family:"Artifact Project";src:url(${options.assets.font.dataUri}) format("${fontFormat(options.assets.font.mime)}");font-display:swap}:root{--artifact-font:"Artifact Project",system-ui,-apple-system,"Segoe UI",sans-serif;--artifact-heading-font:var(--artifact-font)}`,
+    designTokens,
   });
   return { html, meta: doc.meta, chartCount: doc.charts.length };
 }

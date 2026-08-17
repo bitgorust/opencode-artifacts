@@ -3,9 +3,11 @@ import { validateComponent, COMPONENT_KINDS, type ComponentKind } from "./compon
 import { resolvePortableAssets, AssetPreflightError, type PortableAssets } from "./assets.ts";
 import { validateChartSpec } from "./render.ts";
 import { slugify } from "./text.ts";
+import { parseDocument } from "./markdown.ts";
+import { loadProjectDesignTokens, resolveDesignTokens, type ResolvedDesignTokens } from "./design-tokens.ts";
 
 export type DiagnosticSeverity = "error" | "warning";
-export type DiagnosticSource = "frontmatter" | "component" | "chart" | "markdown" | "asset" | "mode";
+export type DiagnosticSource = "frontmatter" | "component" | "chart" | "markdown" | "asset" | "design" | "mode";
 
 export interface AuthoringDiagnostic {
   code: string;
@@ -27,6 +29,7 @@ export interface PreflightResult {
   diagnostics: AuthoringDiagnostic[];
   omitted: number;
   assets?: PortableAssets;
+  designTokens?: ResolvedDesignTokens;
 }
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
@@ -179,6 +182,15 @@ function bounded(diagnostics: AuthoringDiagnostic[], options: PreflightOptions):
 
 export async function preflightDocument(markdown: string, options: PreflightOptions = {}): Promise<PreflightResult> {
   const all = [...frontmatterDiagnostics(markdown), ...markdownDiagnostics(markdown)];
+  const parsed = parseDocument(markdown);
+  const projectDesign = options.worktreeRoot === undefined ? undefined : await loadProjectDesignTokens(options.worktreeRoot);
+  const design = resolveDesignTokens(parsed.meta.theme, projectDesign, parsed.designTokens.map((block) => block.json));
+  for (const designIssue of design.issues) {
+    const line = designIssue.source === "project"
+      ? 1
+      : parsed.designTokens[designIssue.promptIndex ?? 0]?.line ?? 1;
+    all.push(diagnostic(designIssue.code, "error", "design", line, designIssue.reason, designIssue.nextAction));
+  }
   let assets: PortableAssets | undefined;
   if (options.worktreeRoot !== undefined) {
     const assetResult = await preflightAssets(markdown, options.worktreeRoot);
@@ -186,7 +198,11 @@ export async function preflightDocument(markdown: string, options: PreflightOpti
     assets = assetResult.assets;
   }
   const result = bounded(all, options);
-  return { ...result, ...(assets === undefined ? {} : { assets }) };
+  return {
+    ...result,
+    ...(assets === undefined ? {} : { assets }),
+    designTokens: design.designTokens,
+  };
 }
 
 export function trustedHtmlDiagnostic(): AuthoringDiagnostic {
