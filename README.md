@@ -167,9 +167,10 @@ opencode-artifacts import ./bundle
 
 Full reference: [`docs/component-spec.md`](docs/component-spec.md). Short version:
 
-- **Frontmatter**: `title`, `icon` (emoji favicon), `description` (gallery subtitle), and an optional worktree-relative `font` (WOFF/WOFF2/TTF/OTF embedded under `font-src data:`)
+- **Frontmatter**: `title`, `icon`, `description`, explicit `lang`/`dir`, `locale`, `timezone`, and an optional worktree-relative `font` (WOFF/WOFF2/TTF/OTF embedded under `font-src data:`)
 - **Components** (JSON fences): `stats` metric cards, `timeline`, `findings` (severity-coded), `compare` variant cards, `callout` insight cards, `progress`, `diff` (annotated), `copy` (copy-to-session button), `decisions` (workshop rows the session reads back via `artifact_state`)
-- **Charts/diagrams**: ```` ```vega-lite ```` / ```` ```vega ```` / ```` ```echarts ```` / ```` ```mermaid ```` fences; runtimes inline only when used
+- **Charts/diagrams**: ```` ```vega-lite ```` / ```` ```vega ```` / ```` ```echarts ```` require a top-level text `description`; Mermaid starts with `%% summary:`; runtimes inline only when used
+- **Accessible data**: tables require `caption`; `num`, `date`, and `datetime` columns format under the declared locale/time zone, with zoned ISO input for dates
 - **Markdown extras**: GitHub alerts (`> [!WARNING]` etc.), task lists, heading anchors, `##` sections become cards
 - **Local images**: ordinary `![meaningful alt](path/to/image.png)` resolves from the worktree root and embeds PNG/JPEG/GIF/WebP or constrained static SVG. Use the exact title `"decorative"` with empty alt only for an intentionally decorative image. URLs, absolute paths, traversal, and symlinks are refused.
 - **Local fonts**: `font: path/to/project.woff2` uses the same contained, MIME-checked pipeline and a generated `@font-face`; it never permits a viewer network request or arbitrary CSS.

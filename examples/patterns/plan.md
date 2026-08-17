@@ -22,6 +22,7 @@ Move session storage from Redis to Postgres over three deploys, keeping both sto
 ## Schema sketch
 
 ```mermaid
+%% summary: Sessions contain events and both entities carry stable identifiers and timestamps.
 erDiagram
   SESSION ||--o{ EVENT : has
   SESSION {

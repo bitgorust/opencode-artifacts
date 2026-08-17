@@ -94,7 +94,7 @@ test("component preflight and inline fallback share validation", () => {
     ["diff", "", "diff-empty"],
     ["mermaid", "", "mermaid-empty"],
     ["decisions", '{"questions":[{"id":"q","question":"Q","options":[{}]}]}', "decisions-option"],
-    ["table", '{"columns":[{"key":"x","label":"X"},{"key":"x","label":"Y"}],"rows":[]}', "table-key"],
+    ["table", '{"caption":"Values","columns":[{"key":"x","label":"X"},{"key":"x","label":"Y"}],"rows":[]}', "table-key"],
   ];
   for (const [kind, source, code] of cases) {
     assert.equal(validateComponent(kind, source)[0]?.code, code);
@@ -104,7 +104,7 @@ test("component preflight and inline fallback share validation", () => {
 });
 
 test("chart preflight and inline fallback share validation", async () => {
-  const markdown = "```vega-lite\n{\"mark\":\"not-a-mark\"}\n```";
+  const markdown = "```vega-lite\n{\"description\":\"An invalid chart used for fallback parity.\",\"mark\":\"not-a-mark\"}\n```";
   const result = await preflightDocument(markdown);
   assert.equal(result.diagnostics[0]?.code, "vega-lite-invalid");
   assert.match(renderArtifact(markdown).html, /chart-error/);

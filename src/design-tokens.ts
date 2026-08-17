@@ -55,7 +55,7 @@ const BASE: DesignTokenValues = {
   text: "#111827",
   mutedText: "#4b5563",
   border: "#e5e7eb",
-  accent: "#6d6bd6",
+  accent: "#5f5dbf",
   font: "system",
   spacing: "comfortable",
   radius: "round",
@@ -69,7 +69,7 @@ const THEME_VALUES: Record<string, Partial<DesignTokenValues>> = {
     text: "#2b251a",
     mutedText: "#6b5f49",
     border: "#e3d9c4",
-    accent: "#b4541e",
+    accent: "#8f3f13",
   },
   ops: {
     pageBackground: "#0f140f",
@@ -194,8 +194,8 @@ function contrastIssue(values: DesignTokenValues, source: "project" | "prompt", 
     [values.text, values.surface, 4.5, "text/surface"],
     [values.mutedText, values.pageBackground, 4.5, "mutedText/pageBackground"],
     [values.mutedText, values.surface, 4.5, "mutedText/surface"],
-    [values.accent, values.pageBackground, 3, "accent/pageBackground"],
-    [values.accent, values.surface, 3, "accent/surface"],
+    [values.accent, values.pageBackground, 4.5, "accent/pageBackground"],
+    [values.accent, values.surface, 4.5, "accent/surface"],
   ];
   const failed = pairs.find(([foreground, background, minimum]) => contrastRatio(foreground, background) < minimum);
   return failed === undefined
@@ -210,7 +210,8 @@ function cssFor(values: DesignTokenValues, provenance: Record<DesignTokenName, D
   const customized = (name: DesignTokenName): boolean => provenance[name] === "project" || provenance[name] === "prompt";
   const declarations: string[] = [];
   if (fixesColorMode) {
-    declarations.push(`--page-bg:${values.pageBackground}`, `--card-bg:${values.surface}`, `--ink:${values.text}`, `--ink-2:${values.mutedText}`, `--line:${values.border}`, `--accent:${values.accent}`);
+    const accentInk = contrastRatio(values.accent, "#ffffff") >= 4.5 ? "#ffffff" : "#111827";
+    declarations.push(`--page-bg:${values.pageBackground}`, `--card-bg:${values.surface}`, `--ink:${values.text}`, `--ink-2:${values.mutedText}`, `--line:${values.border}`, `--accent:${values.accent}`, `--accent-ink:${accentInk}`);
   }
   if (customized("font")) declarations.push(`--artifact-font:${font}`, `--artifact-heading-font:${font}`);
   if (customized("spacing")) declarations.push(`--body-pad:${bodyPad}`, `--body-pad-bottom:${bodyPadBottom}`, `--section-gap:${sectionGap}`);

@@ -14,6 +14,7 @@ controls in one strict-CSP file.
 
 ```vega-lite
 {
+  "description": "Readiness rises steadily from 61 on Monday to 92 on Friday.",
   "data": { "values": [
     { "day": "Mon", "ready": 61 },
     { "day": "Tue", "ready": 68 },

@@ -1,8 +1,10 @@
 # Authoring reference — artifact pages
 
 The `artifact_publish` tool takes `markdown`. Frontmatter (`---` fences) sets `title:`,
-`icon:` (emoji favicon), and `description:` (gallery subtitle). `##` sections become white
-cards on the page. Republish with the same title to update in place; `version: true` keeps
+`icon:` (emoji favicon), `description:` (gallery subtitle), `lang:` (BCP 47), `dir:`
+(`ltr|rtl`), `locale:` (Intl locale), and `timezone:` (IANA zone). Locale defaults to
+`en-US`, time zone to `UTC`, and direction is inferred from the language when omitted. `##`
+sections become white cards on the page. Republish with the same title to update in place; `version: true` keeps
 numbered history; `open: true` opens the browser; `expectedHash` guards against overwriting
 unseen changes; `force: true` overrides the credential scan.
 
@@ -18,9 +20,9 @@ unseen changes; `force: true` overrides the credential scan.
 | ```` ```progress ```` | `{label?, done, total}` | progress bars |
 | ```` ```diff ```` | unified diff text; lines starting `## note:` become annotation rows | annotated diffs |
 | ```` ```copy ```` | `{label?, text}` | copy-to-clipboard button (for handing text back to the session) |
-| ```` ```mermaid ```` | raw mermaid source (not JSON) | diagrams: graph/sequence/ER/... |
+| ```` ```mermaid ```` | first line `%% summary: meaningful equivalent`, then raw Mermaid | diagrams: graph/sequence/ER/... |
 | ```` ```decisions ```` | `{title?, questions: [{id, question, options: [{id, label, note?}]}]}` | workshop rows; answers read back via `artifact_state` |
-| ```` ```table ```` | `{caption?, columns: [{key, label, type?: num}], rows: [{...}]}` | sortable, filterable data tables |
+| ```` ```table ```` | `{caption, columns: [{key, label, type?: num\|date\|datetime}], rows: [{...}]}` | captioned sortable/filterable tables; dates require zoned ISO values |
 
 ## Data honesty (non-negotiable)
 
@@ -43,6 +45,7 @@ unseen changes; `force: true` overrides the credential scan.
 ## Charts
 
 ```` ```vega-lite ```` / ```` ```vega ```` / ```` ```echarts ```` fences take one JSON spec.
+Every chart spec requires a top-level `description` containing its meaningful text equivalent.
 Vega-Lite compiles at render time and runs in the CSP-safe interpreter. Interactivity needs
 no custom JS: vega-lite `params` with `bind` render as sliders/dropdowns; echarts `dataZoom`
 gives pan/zoom. Title the finding, not the axes.

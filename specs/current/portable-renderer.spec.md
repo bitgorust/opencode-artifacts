@@ -41,6 +41,15 @@
   root. It checks every path segment, opens regular files without following the final symlink,
   compares descriptor identity across a bounded read, repeats realpath containment, detects
   MIME from bytes, and never fetches.
+- `RENDER-06`: pages expose a skip link and header/main landmarks, Unicode-safe anchors,
+  meaningful chart/Mermaid equivalents, table captions/filter labels/sort state, progress and
+  decision state, visible focus, keyboard decision/comment flows, reduced motion, narrow and
+  200%-equivalent reflow, and print behavior. `lang`, `dir`, `locale`, and `timezone` are
+  explicit and deterministic; RTL direction can be inferred and numbers/zoned timestamps use
+  the declared locale context. Missing equivalents and invalid metadata refuse publication.
+- `QUAL-04`: semantic tests and retained Chromium desktop, 390-pixel dark/reduced-motion, and
+  200%-equivalent RTL evidence are green. Manual screen-reader evidence is unavailable in the
+  current environment, so accessibility certification and the packet archive gate remain open.
 
 ## Limits
 
@@ -75,6 +84,11 @@ malformed or unknown markup.
 - `examples/patterns/portable-mixed.md` plus
   `docs/evidence/renderer/goal-3-portable-assets-2026-08-17.md` retain the real Chromium
   offline mixed-page and loaded-font observations.
+- `test/accessibility.test.ts`, the served-bridge regression in `test/serve.test.ts`, and
+  `examples/patterns/accessibility-rtl.md` cover semantic equivalents, contrast, Unicode,
+  locale/time-zone/RTL output, keyboard state, reduced motion, reflow, and print behavior.
+  `docs/evidence/renderer/goal-3-accessibility-2026-08-17.md` retains the Chromium 151
+  accessibility-tree, keyboard, desktop/mobile/zoom, console, request, and screenshot results.
 - This evidence is one Linux/Chromium observation. It does not certify a supported browser,
-  OS, mobile, or assistive-technology cell, and it does not complete the remaining Goal 3
-  accessibility or performance packets.
+  OS, physical mobile device, or assistive-technology cell. The screen-reader gate and Goal 3
+  performance packet remain incomplete.

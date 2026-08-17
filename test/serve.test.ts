@@ -25,12 +25,14 @@ async function withServer(
 }
 
 test("serves html with the live-reload snippet injected", async () => {
-  await withServer({ "a.html": "<html><body>hi</body></html>" }, async (url) => {
+  await withServer({ "a.html": "<html><head><script>const decoy='<body>'</script></head><body>hi<script>window.bootSawBridge=!!window.__ARTIFACT_COMMENTS_URL__</script></body></html>" }, async (url) => {
     const res = await fetch(`${url}/a.html`);
     assert.equal(res.status, 200);
     const text = await res.text();
     assert.ok(text.includes('EventSource("/__sse")'));
     assert.ok(text.includes("hi"));
+    assert.ok(text.indexOf("window.__ARTIFACT_COMMENTS_URL__") < text.indexOf("window.bootSawBridge"));
+    assert.ok(text.indexOf("window.bootSawBridge") < text.indexOf('EventSource("/__sse")'));
   });
 });
 

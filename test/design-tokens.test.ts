@@ -60,7 +60,7 @@ test("prompt tokens outrank project and theme with deterministic provenance and 
     const firstHtml = renderArtifact(MARKDOWN, { designTokens: first.designTokens }).html;
     const secondHtml = renderArtifact(MARKDOWN, { designTokens: second.designTokens }).html;
     assert.equal(firstHtml, secondHtml);
-    assert.match(firstHtml, /<html lang="en" data-page-theme="report" data-design-tokens>/);
+    assert.match(firstHtml, /<html lang="en" dir="ltr" data-locale="en-US" data-timezone="UTC" data-page-theme="report" data-design-tokens>/);
     assert.match(firstHtml, /--accent:#8b1e3f/);
     assert.match(firstHtml, /--section-gap:\.9rem/);
     assert.match(firstHtml, /--radius:8px/);
@@ -76,7 +76,7 @@ test("invalid project schemas and contrast are atomic lower-precedence fallbacks
   }, []);
   assert.equal(unknown.issues[0]?.code, "design-token-unknown");
   assert.equal(unknown.designTokens.active, false);
-  assert.equal(unknown.designTokens.values.accent, "#b4541e");
+  assert.equal(unknown.designTokens.values.accent, "#8f3f13");
   assert.equal(unknown.designTokens.provenance.accent, "theme");
 
   const contrast = resolveDesignTokens(undefined, {

@@ -9,6 +9,10 @@ export interface Frontmatter {
   theme?: string;
   source?: string;
   font?: string;
+  lang?: string;
+  dir?: string;
+  locale?: string;
+  timezone?: string;
 }
 
 export type ChartKind = "vega-lite" | "vega" | "echarts";
@@ -64,6 +68,10 @@ function parseFrontmatter(source: string, warnings: string[]): { meta: Frontmatt
     else if (key === "theme") meta.theme = value;
     else if (key === "source") meta.source = value;
     else if (key === "font") meta.font = value;
+    else if (key === "lang") meta.lang = value;
+    else if (key === "dir") meta.dir = value;
+    else if (key === "locale") meta.locale = value;
+    else if (key === "timezone") meta.timezone = value;
     else warnings.push(`frontmatter key ignored: ${key}`);
   }
   return { meta, body: source.slice(match[0].length), lineOffset: (match[0].match(/\n/g) ?? []).length };

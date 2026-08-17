@@ -1,0 +1,248 @@
+{
+  "capturedAt": "2026-08-17T16:25:48.147Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "fixture": "http://127.0.0.1:4173/accessibility-rtl.html",
+  "requested": {
+    "viewportWidth": 1280,
+    "viewportHeight": 1000,
+    "colorScheme": "light",
+    "reducedMotion": "no-preference",
+    "zoomPercent": 200
+  },
+  "usefulContentMs": 816,
+  "keyboard": {
+    "skipFocus": "skip-link",
+    "skipTargetFocus": "artifact-main",
+    "decisionTrace": {
+      "active": "hold",
+      "checked": "true",
+      "selected": "hold"
+    },
+    "tableSortTrace": {
+      "direction": "ascending",
+      "label": "الفئة"
+    },
+    "commentDialogFocus": "artifact-comment-input",
+    "commentEscapeFocus": "comment-launcher",
+    "commentSaveTrace": {
+      "active": "comment-launcher",
+      "count": 1,
+      "dialogOpen": false
+    },
+    "themeTrace": {
+      "label": "Theme: dark. Activate to switch.",
+      "pressed": null,
+      "state": "dark"
+    }
+  },
+  "observations": {
+    "animationDuration": "0s",
+    "audit": [],
+    "chartSummary": "ترتفع الإشارة من ثلاث نقاط إلى خمس نقاط خلال يومين.",
+    "colorScheme": "light",
+    "computedColors": {
+      "accent": "#a8a6ff",
+      "page": "#151a21",
+      "surface": "#1f2630",
+      "text": "#e5e7eb"
+    },
+    "dir": "rtl",
+    "focusOutline": "solid",
+    "headings": [
+      {
+        "level": 1,
+        "name": "مراجعة الإشارات"
+      },
+      {
+        "level": 1,
+        "name": "مراجعة الإشارات"
+      },
+      {
+        "level": 2,
+        "name": "حالة المراجعة"
+      },
+      {
+        "level": 2,
+        "name": "اتجاه الإشارة"
+      },
+      {
+        "level": 2,
+        "name": "سجل القياسات"
+      },
+      {
+        "level": 2,
+        "name": "القرار التالي"
+      },
+      {
+        "level": "2",
+        "name": "Comments (1)"
+      }
+    ],
+    "horizontalOverflow": false,
+    "interactiveVisible": {
+      "comments": true,
+      "filter": true,
+      "theme": true
+    },
+    "landmarks": {
+      "aside": 2,
+      "footer": 0,
+      "header": 1,
+      "main": 1
+    },
+    "lang": "ar",
+    "locale": "ar-EG",
+    "progress": {
+      "max": "4",
+      "name": "تقدم المراجعة",
+      "now": "3"
+    },
+    "radioStates": [
+      {
+        "checked": "false",
+        "name": "نشربعد اكتمال المراجعة",
+        "tabindex": "-1"
+      },
+      {
+        "checked": "true",
+        "name": "انتظار",
+        "tabindex": "0"
+      }
+    ],
+    "readyState": "complete",
+    "reducedMotion": false,
+    "tableCaption": "سجل الإشارات",
+    "tableCount": "2 rows",
+    "timezone": "Asia/Riyadh",
+    "viewport": {
+      "devicePixelRatio": 2,
+      "height": 500,
+      "method": "Chromium device metrics: half CSS viewport at 2 physical pixels per CSS pixel",
+      "preZoomWidth": 1280,
+      "requestedZoom": 200,
+      "width": 640
+    }
+  },
+  "accessibilityTree": [
+    {
+      "role": "RootWebArea",
+      "name": "مراجعة الإشارات"
+    },
+    {
+      "role": "banner",
+      "name": ""
+    },
+    {
+      "role": "main",
+      "name": ""
+    },
+    {
+      "role": "button",
+      "name": "Add comment"
+    },
+    {
+      "role": "heading",
+      "name": "مراجعة الإشارات"
+    },
+    {
+      "role": "button",
+      "name": "Theme: dark. Activate to switch."
+    },
+    {
+      "role": "heading",
+      "name": "مراجعة الإشارات"
+    },
+    {
+      "role": "note",
+      "name": "Note"
+    },
+    {
+      "role": "heading",
+      "name": "Comments (1)"
+    },
+    {
+      "role": "button",
+      "name": "Resolve comment: Page comment"
+    },
+    {
+      "role": "heading",
+      "name": "حالة المراجعة"
+    },
+    {
+      "role": "progressbar",
+      "name": "تقدم المراجعة"
+    },
+    {
+      "role": "heading",
+      "name": "اتجاه الإشارة"
+    },
+    {
+      "role": "figure",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "سجل القياسات"
+    },
+    {
+      "role": "table",
+      "name": "سجل الإشارات"
+    },
+    {
+      "role": "status",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "القرار التالي"
+    },
+    {
+      "role": "radiogroup",
+      "name": "ما الخطوة التالية؟"
+    },
+    {
+      "role": "image",
+      "name": "ترتفع الإشارة من ثلاث نقاط إلى خمس نقاط خلال يومين."
+    },
+    {
+      "role": "caption",
+      "name": ""
+    },
+    {
+      "role": "radio",
+      "name": "نشر بعد اكتمال المراجعة"
+    },
+    {
+      "role": "radio",
+      "name": "انتظار"
+    },
+    {
+      "role": "button",
+      "name": "Sort by الفئة"
+    },
+    {
+      "role": "button",
+      "name": "Sort by العدد"
+    },
+    {
+      "role": "button",
+      "name": "Sort by وقت الالتقاط"
+    }
+  ],
+  "printObservation": {
+    "commentsHidden": true,
+    "filterHidden": true,
+    "pageBackground": "rgb(255, 255, 255)",
+    "themeHidden": true
+  },
+  "browserLogs": [],
+  "requestUrls": [
+    "http://127.0.0.1:4173/accessibility-rtl.html",
+    "http://127.0.0.1:4173/__state/accessibility-rtl",
+    "http://127.0.0.1:4173/__comments/accessibility-rtl",
+    "http://127.0.0.1:4173/__sse",
+    "http://127.0.0.1:4173/__state/accessibility-rtl",
+    "http://127.0.0.1:4173/__comments/accessibility-rtl"
+  ],
+  "externalHttpRequests": []
+}

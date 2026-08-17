@@ -90,7 +90,7 @@ test("renderArtifact substitutes component placeholders and keeps charts intact"
     '[{"label":"A","value":"1"}]',
     "```",
     "```echarts",
-    '{"xAxis":{"type":"category","data":["a"]},"yAxis":{"type":"value"},"series":[{"type":"bar","data":[1]}]}',
+    '{"description":"The only category has a value of one.","xAxis":{"type":"category","data":["a"]},"yAxis":{"type":"value"},"series":[{"type":"bar","data":[1]}]}',
     "```",
   ].join("\n");
   const { html } = renderArtifact(md);
@@ -114,8 +114,8 @@ test("github alerts become toned callouts and task lists become checkboxes", () 
   assert.match(html, /alert alert-warn/);
   assert.match(html, /alert-title">Warning</);
   assert.ok(!html.includes("[!WARNING]"));
-  assert.match(html, /<input type="checkbox" checked disabled>/);
-  assert.match(html, /<input type="checkbox" disabled>/);
+  assert.match(html, /<input type="checkbox" checked disabled aria-label="Completed task: done">/);
+  assert.match(html, /<input type="checkbox" disabled aria-label="Open task: todo">/);
 });
 
 test("copy renders a button plus a template carrying the escaped text", () => {
@@ -142,8 +142,8 @@ test("a copy-only page still ships the boot script but no chart runtimes", () =>
 });
 
 test("mermaid fence becomes an escaped pre and inlines the mermaid runtime", () => {
-  const { html } = renderArtifact("```mermaid\ngraph TD\n  A-->B\n```\n");
-  assert.match(html, /<pre class="mermaid">graph TD\n  A--&gt;B<\/pre>/);
+  const { html } = renderArtifact("```mermaid\n%% summary: A leads to B.\ngraph TD\n  A-->B\n```\n");
+  assert.match(html, /<pre class="mermaid" role="img" aria-label="A leads to B\.">graph TD\n  A--&gt;B<\/pre>/);
   assert.ok(html.includes("runtime:mermaid"));
   assert.ok(html.includes("mermaid.initialize"));
   assert.ok(!html.includes("runtime:vega"));
@@ -186,11 +186,11 @@ test("table rejects malformed specs with an error box", () => {
 test("theme frontmatter applies a curated override, unknown themes fall back", () => {  const themed = renderArtifact("---\ntitle: T\ntheme: report\n---\nx\n").html;
   assert.ok(themed.includes("--page-bg:#f6f0e4"));
   assert.ok(themed.includes("Georgia"));
-  assert.ok(themed.includes('<html lang="en" data-page-theme="report">'));
+  assert.ok(themed.includes('<html lang="en" dir="ltr" data-locale="en-US" data-timezone="UTC" data-page-theme="report">'));
 
   const unknown = renderArtifact("---\ntitle: T\ntheme: neon-arcade\n---\nx\n").html;
   assert.ok(!unknown.includes("--page-bg:#f6f0e4"));
-  assert.ok(!unknown.includes('<html lang="en" data-page-theme='));
+  assert.ok(!unknown.includes('data-page-theme='));
 
   const plain = renderArtifact("---\ntitle: T\n---\nx\n").html;
   assert.ok(!plain.includes("Georgia"));
@@ -224,9 +224,9 @@ test("decisions renders option rows with question/option data attributes", () =>
     }),
   );
   assert.match(html, /decisions-title">Open decisions</);
-  assert.match(html, /decision-opt" data-question="layout" data-option="tabs"/);
+  assert.match(html, /class="decision-opt" role="radio" aria-checked="false" tabindex="0" data-question="layout" data-option="tabs"/);
   assert.match(html, /decision-note">deep-linkable</);
-  assert.match(html, /decision-opt" data-question="layout" data-option="dense"/);
+  assert.match(html, /decision-opt" role="radio" aria-checked="false" tabindex="-1" data-question="layout" data-option="dense"/);
 });
 
 test("interactive state failures render actionable live notices", () => {

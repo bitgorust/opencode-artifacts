@@ -2,7 +2,8 @@ import MarkdownIt from "markdown-it";
 import { validateComponent, COMPONENT_KINDS, type ComponentKind } from "./components.ts";
 import { resolvePortableAssets, AssetPreflightError, type PortableAssets } from "./assets.ts";
 import { validateChartSpec } from "./render.ts";
-import { slugify } from "./text.ts";
+import { headingSlugify } from "./text.ts";
+import { canonicalLocale, validTimeZone } from "./locale.ts";
 import { parseDocument } from "./markdown.ts";
 import { loadProjectDesignTokens, resolveDesignTokens, type ResolvedDesignTokens } from "./design-tokens.ts";
 
@@ -33,7 +34,7 @@ export interface PreflightResult {
 }
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
-const KNOWN_FRONTMATTER = new Set(["title", "icon", "description", "theme", "source", "font"]);
+const KNOWN_FRONTMATTER = new Set(["title", "icon", "description", "theme", "source", "font", "lang", "dir", "locale", "timezone"]);
 const THEMES = new Set(["default", "report", "ops", "editorial"]);
 const CHART_KINDS = new Set(["vega-lite", "vega", "echarts"]);
 const ALERT_KINDS = new Set(["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"]);
@@ -67,6 +68,10 @@ function frontmatterDiagnostics(markdown: string): AuthoringDiagnostic[] {
     seen.add(key);
     if (!KNOWN_FRONTMATTER.has(key)) output.push(diagnostic("frontmatter-unknown", "warning", "frontmatter", index + 2, `frontmatter key '${key}' is ignored`, "remove it or use a documented key"));
     if (key === "theme" && parsed[2] !== "" && !THEMES.has(parsed[2].trim())) output.push(diagnostic("theme-unknown", "warning", "frontmatter", index + 2, "unknown theme falls back to default", "use default, report, ops, or editorial"));
+    if (key === "lang" && canonicalLocale(parsed[2].trim()) === undefined) output.push(diagnostic("language-invalid", "error", "frontmatter", index + 2, "lang is not a valid BCP 47 language tag", "use a tag such as en, ar, or zh-Hant"));
+    if (key === "dir" && parsed[2].trim() !== "ltr" && parsed[2].trim() !== "rtl") output.push(diagnostic("direction-invalid", "error", "frontmatter", index + 2, "dir must be ltr or rtl", "choose the document's logical direction"));
+    if (key === "locale" && canonicalLocale(parsed[2].trim()) === undefined) output.push(diagnostic("locale-invalid", "error", "frontmatter", index + 2, "locale is not a valid BCP 47 locale", "use a locale such as en-US, de-DE, or ar-EG"));
+    if (key === "timezone" && !validTimeZone(parsed[2].trim())) output.push(diagnostic("timezone-invalid", "error", "frontmatter", index + 2, "timezone is not a valid IANA time zone", "use a zone such as UTC, Europe/Berlin, or Asia/Tokyo"));
   }
   return output;
 }
@@ -87,12 +92,22 @@ function markdownDiagnostics(markdown: string): AuthoringDiagnostic[] {
         }
       } else if (CHART_KINDS.has(kind)) {
         const result = validateChartSpec({ kind: kind as "vega-lite" | "vega" | "echarts", json: token.content });
-        if (result.error) output.push(diagnostic(result.code ?? `${kind}-invalid`, "error", "chart", line, `chart '${kind}' is invalid`, "provide valid JSON and a valid chart schema"));
+        if (result.error) {
+          const missingSummary = result.code === "chart-summary-missing";
+          output.push(diagnostic(
+            result.code ?? `${kind}-invalid`,
+            "error",
+            "chart",
+            line,
+            missingSummary ? `chart '${kind}' lacks a semantic equivalent` : `chart '${kind}' is invalid`,
+            missingSummary ? "add a meaningful top-level description summarizing the chart" : "provide valid JSON and a valid chart schema",
+          ));
+        }
       }
     }
     if (token.type === "heading_open") {
       const inline = tokens[index + 1];
-      const anchor = slugify(inline?.content ?? "");
+      const anchor = headingSlugify(inline?.content ?? "");
       const first = anchors.get(anchor);
       if (anchor !== "" && first !== undefined) output.push(diagnostic("anchor-duplicate", "error", "markdown", line, `heading anchor '${anchor}' duplicates line ${first}`, "rename one heading so every anchor is unique"));
       else if (anchor !== "") anchors.set(anchor, line);

@@ -211,6 +211,33 @@
       "status": "approved"
     },
     {
+      "path": "docs/evidence/renderer/goal-3-accessibility-desktop-2026-08-17.png",
+      "sha256": "c0196d055b365b98e5ddc92d7719180956bacccfc5950693d4402b76d8bbc9e9",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/accessibility-rtl.md rendered in Chromium 151 at desktop width",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/renderer/goal-3-accessibility-mobile-reduced-2026-08-17.png",
+      "sha256": "67a442c420494c9ed75e53c64ffd839ee0a59622f802b5b813f43495bd0af80f",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/accessibility-rtl.md rendered in Chromium 151 at mobile width with dark and reduced-motion preferences",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/renderer/goal-3-accessibility-zoom-200-2026-08-17.png",
+      "sha256": "b1134713a6c63f842f9bd267a182a76cf50c50a53ea3732bd596c52881495645",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/accessibility-rtl.md rendered in Chromium 151 at a 200%-equivalent CSS viewport",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
       "path": "docs/evidence/renderer/goal-3-design-tokens-desktop-2026-08-17.png",
       "sha256": "84ebacab7a6258b611aa73973ad9ca9f1da29eb88b8f4498b4d5e64111f78e84",
       "provenance": "repository-generated browser capture",
