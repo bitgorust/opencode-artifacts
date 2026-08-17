@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "declarative-authoring-preflight",
+  "title": "Preflight declarative authoring errors",
+  "lane": "standard",
+  "status": "draft",
+  "affectedRequirements": ["RENDER-02", "QUAL-02"],
+  "currentSpecs": ["specs/current/portable-renderer.spec.md"],
+  "currentSpecsUpdated": false,
+  "approval": {
+    "by": "",
+    "at": ""
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-17",
+  "archivedAt": null
+}

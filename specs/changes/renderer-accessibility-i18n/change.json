@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "renderer-accessibility-i18n",
+  "title": "Complete renderer accessibility and internationalization",
+  "lane": "standard",
+  "status": "draft",
+  "affectedRequirements": ["RENDER-06", "QUAL-04"],
+  "currentSpecs": ["specs/current/portable-renderer.spec.md"],
+  "currentSpecsUpdated": false,
+  "approval": {
+    "by": "",
+    "at": ""
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-17",
+  "archivedAt": null
+}
