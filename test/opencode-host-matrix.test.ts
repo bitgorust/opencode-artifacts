@@ -6,8 +6,23 @@ import {
   assertArtifactToolContract,
   boundedLog,
   exactStableMatrix,
+  packFilename,
   parseServerUrl,
 } from "../scripts/opencode-host-matrix.ts";
+
+test("pack filename accepts npm array and keyed-object JSON while requiring one result", () => {
+  assert.equal(packFilename([{ filename: "pkg-1.2.3.tgz" }]), "pkg-1.2.3.tgz");
+  assert.equal(
+    packFilename({ "pkg@1.2.3": { filename: "pkg-1.2.3.tgz" } }),
+    "pkg-1.2.3.tgz",
+  );
+  assert.throws(() => packFilename([]), /exactly one npm pack result/);
+  assert.throws(
+    () => packFilename({ first: { filename: "a.tgz" }, second: { filename: "b.tgz" } }),
+    /exactly one npm pack result/,
+  );
+  assert.throws(() => packFilename({ pkg: { filename: "" } }), /exactly one npm pack result/);
+});
 
 test("stable host matrix deduplicates identical exact current and oldest cells", () => {
   assert.deepEqual(exactStableMatrix("1.18.18", "1.18.18"), {

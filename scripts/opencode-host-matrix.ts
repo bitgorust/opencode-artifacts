@@ -403,16 +403,28 @@ function requiredArgument(name: string): string {
   return value;
 }
 
+export function packFilename(pack: unknown): string {
+  let result: Record<string, unknown> | undefined;
+  if (Array.isArray(pack) && pack.length === 1 && isRecord(pack[0])) {
+    result = pack[0];
+  } else if (isRecord(pack)) {
+    const values = Object.values(pack);
+    if (values.length === 1 && isRecord(values[0])) result = values[0];
+  }
+  const filename = result?.["filename"];
+  if (typeof filename !== "string" || filename.trim() === "") {
+    throw new Error("--pack-json must contain exactly one npm pack result with a filename");
+  }
+  return filename;
+}
+
 async function requestedTarball(): Promise<string> {
   const directIndex = process.argv.indexOf("--tarball");
   const direct = directIndex === -1 ? undefined : process.argv[directIndex + 1];
   if (direct && !direct.startsWith("--")) return direct;
   const packJson = requiredArgument("--pack-json");
   const parsed = JSON.parse(await readFile(resolve(packJson), "utf8")) as unknown;
-  if (!Array.isArray(parsed) || !isRecord(parsed[0]) || typeof parsed[0]["filename"] !== "string") {
-    throw new Error("--pack-json must contain npm pack JSON with a filename");
-  }
-  return parsed[0]["filename"];
+  return packFilename(parsed);
 }
 
 export async function runMatrix(tarballInput: string, outputInput: string): Promise<MatrixEvidence> {
