@@ -45,8 +45,8 @@ test("stable version accepts npm scalar and one-item array output only", () => {
   assert.throws(() => stableVersionFromNpm("next"), /exactly one stable/);
 });
 
-test("host installation explicitly permits the required OpenCode postinstall only", () => {
-  assert.deepEqual(OPENCODE_HOST_INSTALL_FLAGS, ["--ignore-scripts=false", "--no-audit", "--no-fund"]);
+test("host installation suppresses ambient scripts before the matrix runs only OpenCode's exact bootstrap", () => {
+  assert.deepEqual(OPENCODE_HOST_INSTALL_FLAGS, ["--ignore-scripts", "--no-audit", "--no-fund"]);
 });
 
 test("host discovery requires every shipped tool and documented property", () => {
