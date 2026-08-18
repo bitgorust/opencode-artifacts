@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "responsive-visual-composition",
+  "title": "Add responsive visual composition",
+  "lane": "standard",
+  "status": "draft",
+  "affectedRequirements": [
+    "RENDER-06",
+    "RENDER-09",
+    "RENDER-10",
+    "QUAL-04"
+  ],
+  "currentSpecs": [
+    "specs/current/portable-renderer.spec.md"
+  ],
+  "currentSpecsUpdated": false,
+  "approval": {
+    "by": "",
+    "at": ""
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-18",
+  "archivedAt": null
+}
