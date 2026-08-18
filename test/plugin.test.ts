@@ -8,6 +8,8 @@ import { ArtifactsPlugin } from "../src/plugin.ts";
 import { FilePublisher } from "../src/publisher.ts";
 import { replaceArtifactState } from "../src/artifact-state.ts";
 import { emptyArtifactManifestV2, readArtifactManifestV2 } from "../src/artifact-schema.ts";
+import { ArtifactLifecycleStore } from "../src/artifact-lifecycle.ts";
+import { MAX_TOOL_METADATA_BYTES, MAX_TOOL_OUTPUT_BYTES } from "../src/opencode-results.ts";
 
 async function withWorktree(run: (dir: string) => Promise<void>): Promise<void> {
   const dir = await mkdtemp(join(tmpdir(), "plugin-"));
@@ -44,7 +46,16 @@ test("artifact_publish asks permission, publishes, and reports the path", async 
 
     assert.equal(asked.length, 1);
     assert.equal(asked[0].permission, "artifact_publish");
+    assert.equal(asked[0].always.length, 1);
+    assert.notEqual(asked[0].always[0], "*");
+    assert.equal("title" in asked[0].metadata, false);
     assert.match(String(result), /Artifact published to .*demo-page\.html/);
+    assert.equal(typeof result, "object");
+    if (typeof result === "object") {
+      assert.equal(result.metadata?.["artifactResult"]?.schemaVersion, 1);
+      assert.equal(result.metadata?.["artifactResult"]?.operation, "create-or-update");
+      assert.equal(result.metadata?.["artifactResult"]?.visibility, "local");
+    }
 
     const page = await readFile(join(dir, ".opencode", "artifacts", "demo-page.html"), "utf8");
     assert.match(page, /<h1 id="hello">Hello<\/h1>/);
@@ -53,6 +64,48 @@ test("artifact_publish asks permission, publishes, and reports the path", async 
     const gallery = await readFile(join(dir, ".opencode", "artifacts", "index.html"), "utf8");
     assert.match(gallery, /Demo Page/);
   });
+});
+
+test("artifact_publish resolves every authority before mutation and fails closed on denial", async () => {
+  const publish = (await ArtifactsPlugin({} as unknown as PluginInput)).tool?.artifact_publish;
+  assert.ok(publish);
+  const order = ["artifact_publish", "artifact_datasource", "artifact_deploy", "artifact_audience"];
+  for (const denied of order) {
+    await withWorktree(async (dir) => {
+      const asked: Array<Parameters<ToolContext["ask"]>[0]> = [];
+      const ctx: ToolContext = {
+        sessionID: "s-deny",
+        messageID: "m-deny",
+        agent: "test",
+        directory: dir,
+        worktree: dir,
+        abort: new AbortController().signal,
+        metadata: () => {},
+        ask: async (input) => {
+          asked.push(input);
+          if (input.permission === denied) throw new Error("denied by test policy");
+        },
+      };
+      const result = String(await publish.execute({
+        markdown: "---\ntitle: Permission Probe\n---\n# Safe\n",
+        dataSources: [{ name: "latency", command: "/usr/local/bin/collect", args: ["not-in-metadata"] }],
+        deploy: true,
+        target: "github",
+        repo: "team/artifacts",
+      }, ctx));
+      assert.match(result, /"error": "permission-denied"/);
+      assert.match(result, new RegExp(`"permission": "${denied}"`));
+      assert.match(result, /"mutation": "none"/);
+      assert.deepEqual(
+        asked.map((input) => input.permission),
+        order.slice(0, order.indexOf(denied) + 1),
+      );
+      assert.ok(asked.filter((input) => input.permission !== "artifact_publish").every((input) => input.always.length === 0));
+      assert.doesNotMatch(JSON.stringify(asked), /not-in-metadata|# Safe|\/usr\/local\/bin/);
+      await assert.rejects(readFile(join(dir, ".opencode", "artifacts", "manifest.json"), "utf8"));
+      await assert.rejects(readFile(join(dir, ".opencode", "artifacts", ".datasources", "permission-probe.json"), "utf8"));
+    });
+  }
 });
 
 test("artifact_publish blocks credential-looking content unless forced", async () => {  const hooks = await ArtifactsPlugin({} as unknown as PluginInput);
@@ -374,6 +427,104 @@ test("plugin lifecycle tool and publish arguments enforce exact updates and arch
     assert.equal(asked.some((input) => input.permission === "artifact_archive" && input.patterns.includes(id)), true);
     assert.match(String(await lifecycle.execute({ op: "unarchive", artifact: id }, ctx)), /"active": true/);
   });
+});
+
+test("lifecycle reopen resolves exact local and registered references with bounded results", async () => {
+  const opened: string[] = [];
+  const hooks = await ArtifactsPlugin({} as unknown as PluginInput, {
+    launcher: async (target: string) => { opened.push(target); },
+  });
+  const publish = hooks.tool?.artifact_publish;
+  const lifecycle = hooks.tool?.artifact_lifecycle;
+  assert.ok(publish && lifecycle);
+  await withWorktree(async (dir) => {
+    const ctx: ToolContext = {
+      sessionID: "s-reopen",
+      messageID: "m-reopen",
+      agent: "test",
+      directory: dir,
+      worktree: dir,
+      abort: new AbortController().signal,
+      metadata: () => {},
+      ask: async () => {},
+    };
+    const root = join(dir, ".opencode", "artifacts");
+    await mkdir(root, { recursive: true });
+    await writeFile(join(root, "manifest.json"), `${JSON.stringify(emptyArtifactManifestV2(), null, 2)}\n`, "utf8");
+    const created = await publish.execute({ markdown: "---\ntitle: Reopen Me\n---\n# Exact" }, ctx);
+    assert.equal(typeof created, "object");
+    const manifest = await readArtifactManifestV2(root);
+    const id = manifest.slugIndex["reopen-me"];
+    assert.ok(id);
+
+    const local = await lifecycle.execute({ op: "reopen", artifact: "reopen-me" }, ctx);
+    assert.deepEqual(opened, [join(root, "reopen-me.html")]);
+    assert.match(String(local), /"opened"/);
+    if (typeof local === "object") {
+      assert.equal(local.metadata?.["artifactResult"]?.operation, "reopen");
+      assert.equal(local.metadata?.["artifactResult"]?.artifactId, id);
+      assert.equal(local.metadata?.["artifactResult"]?.visibility, "local");
+    }
+
+    const url = "https://example.test/artifacts/reopen-me.html";
+    await new ArtifactLifecycleStore(root).recordDeployment(id, {
+      capability: "public-static",
+      target: "test:public",
+      url,
+    });
+    const remote = await lifecycle.execute({ op: "reopen", artifact: url }, ctx);
+    assert.deepEqual(opened, [join(root, "reopen-me.html"), url]);
+    if (typeof remote === "object") assert.equal(remote.metadata?.["artifactResult"]?.url, url);
+
+    const beforeInvalid = opened.length;
+    const invalid = await lifecycle.execute({ op: "reopen", artifact: "../escape" }, ctx);
+    assert.equal(opened.length, beforeInvalid);
+    assert.match(String(invalid), /reference refused/i);
+
+    const read = await lifecycle.execute({ op: "read", artifact: id }, ctx);
+    assert.equal(typeof read, "object");
+    if (typeof read === "object") {
+      assert.ok(Buffer.byteLength(read.output, "utf8") <= MAX_TOOL_OUTPUT_BYTES);
+      assert.ok(Buffer.byteLength(JSON.stringify(read.metadata), "utf8") <= MAX_TOOL_METADATA_BYTES);
+      assert.match(String(read.metadata?.["artifactResult"]?.path), /\/revisions\//);
+    }
+  });
+});
+
+test("reopen launcher failures and command conflicts remain recoverable", async () => {
+  const hooks = await ArtifactsPlugin({} as unknown as PluginInput, {
+    launcher: async () => { throw new Error("launcher unavailable"); },
+  });
+  const publish = hooks.tool?.artifact_publish;
+  const lifecycle = hooks.tool?.artifact_lifecycle;
+  assert.ok(publish && lifecycle && hooks.config);
+  await withWorktree(async (dir) => {
+    const ctx: ToolContext = {
+      sessionID: "s-launch-fail",
+      messageID: "m-launch-fail",
+      agent: "test",
+      directory: dir,
+      worktree: dir,
+      abort: new AbortController().signal,
+      metadata: () => {},
+      ask: async () => {},
+    };
+    const root = join(dir, ".opencode", "artifacts");
+    await mkdir(root, { recursive: true });
+    await writeFile(join(root, "manifest.json"), `${JSON.stringify(emptyArtifactManifestV2(), null, 2)}\n`, "utf8");
+    await publish.execute({ markdown: "---\ntitle: Launch Fail\n---\n# Exact" }, ctx);
+    const result = await lifecycle.execute({ op: "reopen", artifact: "launch-fail" }, ctx);
+    assert.match(String(result), /launcher accepted/);
+    if (typeof result === "object") assert.equal(result.metadata?.["artifactResult"]?.error, "launch-failed");
+  });
+
+  const config: Parameters<NonNullable<typeof hooks.config>>[0] = { command: {} };
+  await hooks.config(config);
+  assert.match(config.command?.["artifact-reopen"]?.template ?? "", /artifact_lifecycle/);
+  assert.match(config.command?.["artifact-reopen"]?.template ?? "", /\$ARGUMENTS/);
+  config.command!["artifact-reopen"] = { template: "user-owned" };
+  await hooks.config(config);
+  assert.equal(config.command?.["artifact-reopen"]?.template, "user-owned");
 });
 
 test("artifact_comments lists threads and resolves by id", async () => {

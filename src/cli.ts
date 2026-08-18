@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { renderArtifact, renderRawHtml } from "./render.ts";
 import type { PortableAssets } from "./assets.ts";
 import type { ResolvedDesignTokens } from "./design-tokens.ts";
@@ -31,6 +32,7 @@ import {
   planArtifactMigration,
   rollbackArtifactMigration,
 } from "./artifact-migration.ts";
+import { installBundledSkill } from "./skill-installer.ts";
 
 const DEFAULT_DIR = join(".opencode", "artifacts");
 
@@ -53,7 +55,8 @@ function usage(): never {
   opencode-artifacts migrate rollback --migration-id <uuid> [--dir <artifacts-dir>]
   opencode-artifacts deploy --repo <owner/name> [--dir <artifacts-dir>] [--branch <name>] [--force]
   opencode-artifacts deploy --target cloudflare --name <worker> [--dir <artifacts-dir>] [--force]
-  opencode-artifacts init [--global] [--target github|cloudflare] [--repo <owner/name>] [--worker-name <name>] [--yes]`);
+  opencode-artifacts init [--global] [--target github|cloudflare] [--repo <owner/name>] [--worker-name <name>] [--yes]
+  opencode-artifacts skill install --project|--global [--force <exact-destination>]`);
   process.exit(2);
 }
 
@@ -216,7 +219,10 @@ async function restoreCommand(args: string[]): Promise<void> {
   }
 }
 
-async function latestCommand(args: string[]): Promise<void> {
+export async function latestCommand(
+  args: string[],
+  launcher: (path: string) => void = openFile,
+): Promise<string> {
   const dir = optionValue(args, "--dir") ?? DEFAULT_DIR;
   const open = args.includes("--open");
   const publisher = new FilePublisher(resolve(dir));
@@ -226,8 +232,24 @@ async function latestCommand(args: string[]): Promise<void> {
     process.exit(1);
   }
   const path = join(resolve(dir), `${latest.slug}.html`);
-  if (open) openFile(path);
+  if (open) launcher(path);
   console.log(path);
+  return path;
+}
+
+export async function skillCommand(args: string[]): Promise<void> {
+  if (args[0] !== "install") usage();
+  const project = args.includes("--project");
+  const global = args.includes("--global");
+  if (project === global) usage();
+  const forceDestination = optionValue(args, "--force");
+  if (args.includes("--force") && (!forceDestination || forceDestination.startsWith("--"))) usage();
+  const result = await installBundledSkill({
+    scope: project ? "project" : "global",
+    ...(project ? { projectRoot: process.cwd() } : {}),
+    ...(forceDestination === undefined ? {} : { forceDestination }),
+  });
+  console.log(JSON.stringify(result, null, 2));
 }
 
 async function stateCommand(args: string[]): Promise<void> {  const [slug] = positional(args, ["--dir"]);
@@ -443,7 +465,7 @@ async function initCommand(args: string[]): Promise<void> {
   }
 }
 
-async function main(argv: string[]): Promise<void> {
+export async function main(argv: string[]): Promise<void> {
   const [command, ...rest] = argv;
   switch (command) {
     case "render":
@@ -453,7 +475,8 @@ async function main(argv: string[]): Promise<void> {
     case "restore":
       return restoreCommand(rest);
     case "latest":
-      return latestCommand(rest);
+      await latestCommand(rest);
+      return;
     case "state":
       return stateCommand(rest);
     case "list":
@@ -476,12 +499,16 @@ async function main(argv: string[]): Promise<void> {
       return deployCommand(rest);
     case "init":
       return initCommand(rest);
+    case "skill":
+      return skillCommand(rest);
     default:
       usage();
   }
 }
 
-main(process.argv.slice(2)).catch((err: unknown) => {
-  console.error(err instanceof Error ? err.message : String(err));
-  process.exit(1);
-});
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  main(process.argv.slice(2)).catch((err: unknown) => {
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exit(1);
+  });
+}

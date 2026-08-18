@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "opencode-lifecycle-results",
+  "title": "Expose bounded lifecycle results and reopen",
+  "lane": "standard",
+  "status": "archived",
+  "affectedRequirements": [
+    "UX-01",
+    "LIFE-06",
+    "COMPAT-05"
+  ],
+  "currentSpecs": [
+    "specs/current/artifact-lifecycle.spec.md",
+    "specs/current/opencode-integration.spec.md"
+  ],
+  "currentSpecsUpdated": true,
+  "approval": {
+    "by": "aaron.zeng",
+    "at": "2026-08-18T01:48:52Z"
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-18",
+  "archivedAt": "2026-08-18"
+}

@@ -80,6 +80,23 @@ dependencies automatically at startup:
 }
 ```
 
+Install the bundled native skill explicitly after the plugin. Project scope is the safest
+default and writes only `.opencode/skills/artifact-pages` in the current project:
+
+```bash
+npx opencode-artifacts skill install --project
+# or, when you intentionally want it for every project:
+npx opencode-artifacts skill install --global
+```
+
+The global destination is `~/.config/opencode/skills/artifact-pages`. Repeating an identical
+install is a no-op. A differing destination is left unchanged; intentional replacement must
+name it exactly, for example
+`--force /absolute/project/.opencode/skills/artifact-pages`, and retains the prior directory as
+a sibling backup. Remove an installed skill manually only after reviewing that exact directory.
+If installation fails, fix the reported source, parent, symlink, or collision layer and rerun;
+the installer never relies on a repository checkout or writes from package postinstall.
+
 The `file:` spec is only for developing this plugin itself (point OpenCode at your checkout
 after `npm install && npm run build`):
 
@@ -134,8 +151,8 @@ plugin option:
 
 This injects the bundled guidance (adapted from Claude Code's artifact-design skill) into the
 session's system context — visible in the plugin source, off by default, and removable by
-deleting the option. Alternative for non-plugin environments: `cp -r skills/artifact-pages
-~/.agents/skills/` (don't use both).
+deleting the option. Native on-demand discovery from the explicit skill installer is separate;
+do not enable proactive injection merely to make the skill discoverable.
 
 Comment triage at scale: `agents/artifact-comment-analyst.md` is a read-only subagent that
 digests open comment threads into an actionable brief (blocking issues first, with the page's
@@ -162,6 +179,17 @@ opencode-artifacts unarchive <id> [--slug <new-slug>]
 opencode-artifacts export <id> --output ./bundle
 opencode-artifacts import ./bundle
 ```
+
+Stable OpenCode also injects `/artifact-reopen <exact-reference>`, backed by
+`artifact_lifecycle` with `op: "reopen"`. It accepts an exact active ID, slug, contained path,
+or registered URL and never guesses. If a user already owns that command name, the plugin
+leaves it unchanged; `opencode-artifacts latest --open` remains the portable fallback.
+
+Publish and lifecycle tools return the stable host's structured result shape. Human/model text
+is in `output`; `metadata.artifactResult` is a bounded schema-versioned identity, revision,
+path/URL, capability, visibility, outcome, and next-action envelope. Existing operation and
+argument spellings remain accepted, and prior readable text/JSON stays in `output` through at
+least the next supported release after this metadata contract was introduced.
 
 ## Authoring format
 
