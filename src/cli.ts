@@ -32,6 +32,7 @@ import {
   planArtifactMigration,
   rollbackArtifactMigration,
 } from "./artifact-migration.ts";
+import { installBundledSkill } from "./skill-installer.ts";
 
 const DEFAULT_DIR = join(".opencode", "artifacts");
 
@@ -54,7 +55,8 @@ function usage(): never {
   opencode-artifacts migrate rollback --migration-id <uuid> [--dir <artifacts-dir>]
   opencode-artifacts deploy --repo <owner/name> [--dir <artifacts-dir>] [--branch <name>] [--force]
   opencode-artifacts deploy --target cloudflare --name <worker> [--dir <artifacts-dir>] [--force]
-  opencode-artifacts init [--global] [--target github|cloudflare] [--repo <owner/name>] [--worker-name <name>] [--yes]`);
+  opencode-artifacts init [--global] [--target github|cloudflare] [--repo <owner/name>] [--worker-name <name>] [--yes]
+  opencode-artifacts skill install --project|--global [--force <exact-destination>]`);
   process.exit(2);
 }
 
@@ -233,6 +235,21 @@ export async function latestCommand(
   if (open) launcher(path);
   console.log(path);
   return path;
+}
+
+export async function skillCommand(args: string[]): Promise<void> {
+  if (args[0] !== "install") usage();
+  const project = args.includes("--project");
+  const global = args.includes("--global");
+  if (project === global) usage();
+  const forceDestination = optionValue(args, "--force");
+  if (args.includes("--force") && (!forceDestination || forceDestination.startsWith("--"))) usage();
+  const result = await installBundledSkill({
+    scope: project ? "project" : "global",
+    ...(project ? { projectRoot: process.cwd() } : {}),
+    ...(forceDestination === undefined ? {} : { forceDestination }),
+  });
+  console.log(JSON.stringify(result, null, 2));
 }
 
 async function stateCommand(args: string[]): Promise<void> {  const [slug] = positional(args, ["--dir"]);
@@ -482,6 +499,8 @@ export async function main(argv: string[]): Promise<void> {
       return deployCommand(rest);
     case "init":
       return initCommand(rest);
+    case "skill":
+      return skillCommand(rest);
     default:
       usage();
   }

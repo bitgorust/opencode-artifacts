@@ -34,6 +34,12 @@
   command untouched. Stable results use `{title, output, metadata}` with a bounded version-1
   `metadata.artifactResult`; the non-enumerable string conversion returns the same `output` for
   direct legacy callers.
+- `OC-05`, `DIST-01`, `DIST-02`: `opencode-artifacts skill install --project|--global`
+  installs only the reviewed packed `artifact-pages` body and two references into official
+  `.opencode/skills` or `~/.config/opencode/skills` discovery. It is explicit, atomic, and
+  byte-idempotent; no postinstall writes occur. Differing or symlinked destinations refuse.
+  Force replacement requires the exact destination and retains the prior directory as a
+  sibling backup. Proactive plugin injection remains a separate opt-in.
 
 ## Evidence boundary
 
@@ -51,3 +57,6 @@
 - Packed discovery requires the `reopen` enum member and the effective injected command.
   `opencode-artifacts latest --open` is tested separately with an injectable launcher and does
   not depend on the host config hook.
+- Packed-host evidence runs the shipped CLI from the extracted tarball, removes its source
+  package tree, then requires stable `/skill` discovery to return the installed name,
+  description, exact location, and loaded body; reference hashes are retained separately.

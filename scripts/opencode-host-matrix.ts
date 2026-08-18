@@ -87,6 +87,21 @@ export interface MatrixEvidence {
     filesystemUnchanged: boolean;
     executionBoundary: "exact-packed-module";
   };
+  skill: {
+    install: CommandResult;
+    destination: string;
+    sourcePackageRemoved: true;
+    files: Array<{ path: string; sha256: string; bytes: number }>;
+    hosts: Array<{
+      hostVersion: string;
+      name: "artifact-pages";
+      description: string;
+      location: string;
+      contentSha256: string;
+      contentBytes: number;
+      logs: string;
+    }>;
+  };
   result: "pass";
 }
 
@@ -334,6 +349,53 @@ async function readOnlyPackedSmoke(pluginDirectory: string, project: string): Pr
   };
 }
 
+async function probeNativeSkill(input: {
+  hostVersion: string;
+  hostBinary: string;
+  project: string;
+  envRoot: string;
+  destination: string;
+}): Promise<MatrixEvidence["skill"]["hosts"][number]> {
+  const env = { ...cleanEnvironment(input.envRoot), OPENCODE_DISABLE_EXTERNAL_SKILLS: "true" };
+  await Promise.all(Object.values(cleanEnvironment(input.envRoot)).map((path) => mkdir(path, { recursive: true })));
+  const child = spawn(input.hostBinary, ["serve", "--hostname", "127.0.0.1", "--port", "0", "--print-logs"], {
+    cwd: input.project,
+    env: { ...process.env, ...env },
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  const server = await waitForServer(child);
+  try {
+    const health = await fetchJson(`${server.url}/global/health`);
+    if (!isRecord(health) || health["healthy"] !== true || health["version"] !== input.hostVersion) {
+      throw new Error(`unexpected native-skill host health: ${JSON.stringify(health)}`);
+    }
+    const skills = await fetchJson(`${server.url}/skill`);
+    if (!Array.isArray(skills)) throw new Error("native skill endpoint did not return an array");
+    const match = skills.find((value) => isRecord(value) && value["name"] === "artifact-pages");
+    if (!isRecord(match) || typeof match["description"] !== "string" || typeof match["location"] !== "string" || typeof match["content"] !== "string") {
+      throw new Error("stable host did not advertise and load artifact-pages");
+    }
+    const expectedLocation = join(input.destination, "SKILL.md");
+    if (resolve(match["location"]) !== resolve(expectedLocation)) {
+      throw new Error(`stable host selected an unexpected artifact-pages location: ${match["location"]}`);
+    }
+    if (!match["content"].includes("# Artifact Pages") || !match["content"].includes("reference/components.md")) {
+      throw new Error("stable host returned incomplete artifact-pages content");
+    }
+    return {
+      hostVersion: input.hostVersion,
+      name: "artifact-pages",
+      description: match["description"],
+      location: match["location"],
+      contentSha256: createHash("sha256").update(match["content"], "utf8").digest("hex"),
+      contentBytes: Buffer.byteLength(match["content"], "utf8"),
+      logs: server.logs(),
+    };
+  } finally {
+    await stopServer(child);
+  }
+}
+
 function requiredArgument(name: string): string {
   const index = process.argv.indexOf(name);
   const value = index === -1 ? undefined : process.argv[index + 1];
@@ -372,6 +434,7 @@ export async function runMatrix(tarballInput: string, outputInput: string): Prom
     const pluginUrl = pathToFileURL(pluginDirectory).href;
     const matrix = exactStableMatrix(currentStable, OLDEST_TESTED_OPENCODE_VERSION);
     const hosts: Array<{ version: string; command: CommandResult }> = [];
+    const hostBinaries: Array<{ version: string; binary: string }> = [];
     const cliPlugins: Array<{ version: string; command: CommandResult }> = [];
     const routes: ServerResult[] = [];
     for (const version of matrix.versions) {
@@ -383,6 +446,7 @@ export async function runMatrix(tarballInput: string, outputInput: string): Prom
       const hostInstall = await runCommand("npm", ["install", "--prefix", hostRoot, "--no-audit", "--no-fund", `opencode-ai@${version}`], { cwd: work });
       hosts.push({ version, command: hostInstall });
       const hostBinary = join(hostRoot, "node_modules", ".bin", process.platform === "win32" ? "opencode.cmd" : "opencode");
+      hostBinaries.push({ version, binary: hostBinary });
       const cliEnvRoot = join(work, `cli-env-${versionKey}`);
       await Promise.all(Object.values(cleanEnvironment(cliEnvRoot)).map((path) => mkdir(path, { recursive: true })));
       const cliPlugin = await runCommand(hostBinary, ["plugin", pluginUrl], { cwd: cliProject, env: cleanEnvironment(cliEnvRoot) });
@@ -395,6 +459,29 @@ export async function runMatrix(tarballInput: string, outputInput: string): Prom
       );
     }
     const smoke = await readOnlyPackedSmoke(pluginDirectory, join(work, "smoke-project"));
+    const skillProject = join(work, "skill-project");
+    await mkdir(skillProject, { recursive: true });
+    const skillInstall = await runCommand(process.execPath, [join(pluginDirectory, "dist", "cli.js"), "skill", "install", "--project"], { cwd: skillProject });
+    const installedSkill = JSON.parse(skillInstall.output.trim()) as unknown;
+    if (!isRecord(installedSkill) || installedSkill["status"] !== "installed" || typeof installedSkill["destination"] !== "string") {
+      throw new Error(`packed skill installer returned an unexpected result: ${skillInstall.output}`);
+    }
+    const skillDestination = installedSkill["destination"];
+    const skillFiles = await Promise.all(["SKILL.md", "reference/components.md", "reference/visuals.md"].map(async (path) => {
+      const bytes = await readFile(join(skillDestination, ...path.split("/")));
+      return { path, sha256: createHash("sha256").update(bytes).digest("hex"), bytes: bytes.length };
+    }));
+    await rm(packageRoot, { recursive: true, force: true });
+    const skillHosts = [] as MatrixEvidence["skill"]["hosts"];
+    for (const host of hostBinaries) {
+      skillHosts.push(await probeNativeSkill({
+        hostVersion: host.version,
+        hostBinary: host.binary,
+        project: skillProject,
+        envRoot: join(work, `skill-env-${host.version.replaceAll(".", "-")}`),
+        destination: skillDestination,
+      }));
+    }
     const evidence: MatrixEvidence = {
       schemaVersion: 1,
       generatedAt: new Date().toISOString(),
@@ -421,6 +508,13 @@ export async function runMatrix(tarballInput: string, outputInput: string): Prom
       install: { package: packageInstall, currentResolution, hosts, cliPlugins },
       routes,
       smoke,
+      skill: {
+        install: skillInstall,
+        destination: skillDestination,
+        sourcePackageRemoved: true,
+        files: skillFiles,
+        hosts: skillHosts,
+      },
       result: "pass",
     };
     await mkdir(resolve(output, ".."), { recursive: true });
