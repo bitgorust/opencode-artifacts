@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "policyVersion": 1,
-  "reviewedAt": "2026-08-16",
+  "reviewedAt": "2026-08-18",
   "owners": {
     "security": "Security maintainer",
     "privacy": "Privacy maintainer",
@@ -36,6 +36,18 @@
       "scope": "Exact CI tarball install, real plugin tool discovery, CLI render, offline file interaction, and package-tree removal; human first-use absent",
       "testedAt": "2026-08-16",
       "evidence": "docs/evidence/governance/ubuntu-packed-observation-2026-08-16.md"
+    },
+    {
+      "id": "packed-opencode-stable",
+      "class": "tested",
+      "status": "tested",
+      "os": "Ubuntu 24.04.4 LTS, Linux 6.8.0-137-generic, x86_64",
+      "node": "24.19.0",
+      "opencode": "current stable and oldest-tested 1.18.18 (one deduplicated exact cell)",
+      "browser": "not exercised; native host boundary only",
+      "scope": "Exact candidate tarball install, official CLI config mutation, direct config-array load, live health/tool schema discovery, and non-mutating packed lifecycle list without provider inference",
+      "testedAt": "2026-08-18",
+      "evidence": "docs/evidence/opencode-host-verification.md"
     },
     {
       "id": "ubuntu-lts-desktop",

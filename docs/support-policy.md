@@ -1,6 +1,6 @@
 # Support and release policy
 
-Policy version: 1. Last reviewed: 2026-08-16.
+Policy version: 1. Last reviewed: 2026-08-18.
 
 This document owns the Phase 0 D-01 platform decision and D-06 release/supply-chain decision.
 The machine-readable status record is [`governance-policy.json`](governance-policy.json).
@@ -35,9 +35,13 @@ contains the exact OS, Node, OpenCode, browser/device, packed package digest, te
 result. Failed evidence makes a cell unsupported; missing or stale evidence keeps it
 unverified. Family resemblance and CI configuration do not promote a cell.
 
-The initial current and oldest-supported OpenCode versions are the same exact stable 1.x
-version once a complete cell passes. A second host version is not claimed until it receives
-the same packed-host coverage. Re-run a cell when its OS/browser generation changes, the Node
+The initial current and oldest-tested OpenCode versions are both exact `1.18.18`. On
+2026-08-18, one deduplicated packed-host cell passed the official CLI configuration mutation,
+direct config-array loading, live health/tool-schema discovery, and a non-mutating lifecycle
+smoke under clean roots. This is host compatibility evidence, not a supported desktop/browser
+claim. The peer SDK dependency is therefore exact `@opencode-ai/plugin@1.18.18`; no broader
+1.x or V2 beta range is claimed. A second host version is not claimed until it receives the
+same packed-host coverage. Re-run a cell when its OS/browser generation changes, the Node
 or OpenCode support line changes, a relevant runtime/renderer dependency changes, or a defect
 shows the evidence no longer represents users.
 

@@ -55,10 +55,10 @@
     "vega-lite": "^6.4.3"
   },
   "peerDependencies": {
-    "@opencode-ai/plugin": ">=1.0.0"
+    "@opencode-ai/plugin": "1.18.18"
   },
   "devDependencies": {
-    "@opencode-ai/plugin": "^1.0.0",
+    "@opencode-ai/plugin": "1.18.18",
     "@types/markdown-it": "^14.1.2",
     "@types/node": "^24.0.0",
     "typescript": "^5.8.0"

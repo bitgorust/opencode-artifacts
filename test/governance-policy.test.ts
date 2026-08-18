@@ -28,7 +28,9 @@ test("checked-in governance policy is complete and claim-consistent", async () =
 test("support claims cannot pass without exact dated evidence", () => {
   const changed = structuredClone(policy);
   const cells = changed["supportCells"] as Array<Record<string, unknown>>;
-  cells[1]["status"] = "supported";
+  const target = cells.find((cell) => cell["id"] === "ubuntu-lts-desktop");
+  assert.ok(target);
+  target["status"] = "supported";
   const errors = validateGovernancePolicy(changed).join("\n");
   assert.match(errors, /cannot be supported without dated evidence/);
 });
@@ -56,6 +58,17 @@ test("Goal 2 optional platform evidence never becomes support or default enablem
   assert.match(governance, /no later support\/certification gate inherits evidence/);
   assert.match(lifecycle, /schema 2 remains opt-in there/);
   assert.ok((policy["supportCells"] as Array<Record<string, unknown>>).every((cell) => cell["status"] !== "supported"));
+});
+
+test("OpenCode compatibility names only the exact packed stable host cell", () => {
+  const cell = (policy["supportCells"] as Array<Record<string, unknown>>)
+    .find((item) => item["id"] === "packed-opencode-stable");
+  assert.ok(cell);
+  assert.equal(cell["status"], "tested");
+  assert.match(String(cell["opencode"]), /1\.18\.18/);
+  assert.match(String(cell["scope"]), /Exact candidate tarball/);
+  assert.doesNotMatch(String(cell["opencode"]), /V2|1\.x/);
+  assert.equal(policy["reviewedAt"], "2026-08-18");
 });
 
 test("inflated README provenance and mismatched Node claims fail consistency", () => {

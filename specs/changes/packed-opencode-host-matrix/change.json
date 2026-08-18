@@ -6,7 +6,7 @@
   "status": "approved",
   "affectedRequirements": ["OC-01", "OC-02", "OC-03", "OC-04", "QUAL-03"],
   "currentSpecs": ["specs/current/opencode-integration.spec.md"],
-  "currentSpecsUpdated": false,
+  "currentSpecsUpdated": true,
   "approval": {
     "by": "aaron.zeng",
     "at": "2026-08-18T01:48:52Z"
