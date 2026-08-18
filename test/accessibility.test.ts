@@ -89,6 +89,8 @@ test("accessibility preflight refuses missing equivalents and invalid internatio
   assert.equal(validateComponent("mermaid", "graph TD\nA-->B")[0]?.code, "mermaid-summary");
   assert.equal(validateComponent("table", '{"columns":[],"rows":[]}')[0]?.code, "table-caption");
   assert.equal(validateComponent("table", '{"caption":"Dates","columns":[{"key":"at","label":"At","type":"datetime"}],"rows":[{"at":"2026-08-17 15:00"}]}')[0]?.code, "table-date");
+  const composition = await preflightDocument("---\ncomposition: floating\n---\n# x");
+  assert.equal(composition.diagnostics[0]?.code, "composition-invalid");
 });
 
 test("built-in semantic colors meet WCAG AA text contrast floors", () => {

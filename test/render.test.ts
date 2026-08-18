@@ -38,6 +38,24 @@ test("plain markdown artifact carries CSP and escaped title, no chart runtimes",
   assert.ok(!html.includes("runtime:echarts"));
 });
 
+test("bounded composition modes classify visuals and preserve source order", () => {
+  const markdown = [
+    "---", "title: Composed", "composition: split", "---",
+    "A concise lead.",
+    "## Evidence",
+    VEGA_LITE_CHART,
+    "## Decision",
+    "Keep the source order.",
+  ].join("\n");
+  const { html, meta } = renderArtifact(markdown);
+  assert.equal(meta.composition, "split");
+  assert.match(html, /class="artifact-body composition-split"/);
+  assert.match(html, /class="artifact-intro">/);
+  assert.match(html, /class="section-card section-visual"/);
+  assert.ok(html.indexOf("Evidence") < html.indexOf("Decision"));
+  assert.match(html, /@media \(max-width:600px\).*\.composition-split\{display:block\}/);
+});
+
 test("vega-lite chart inlines vega runtimes and compiled spec", () => {
   const { html, chartCount } = renderArtifact(VEGA_LITE_CHART);
   assert.equal(chartCount, 1);

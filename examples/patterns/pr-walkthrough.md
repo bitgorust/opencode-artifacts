@@ -1,6 +1,8 @@
 ---
 title: PR #412 walkthrough — cache TTL config
 icon: 🔀
+composition: split
+source: Synthetic PR diff, captured 2026-08-18
 ---
 
 One config change, one default flipped, one test gap. Reviewers should read the findings top to bottom, then the diff.
@@ -34,3 +36,7 @@ One config change, one default flipped, one test gap. Reviewers should read the 
 
 > [!WARNING]
 > Safe to merge only after the default goes back to 300 and `validate` rejects ttl < 1. The feature flag itself is fine.
+
+```copy
+{ "label": "Copy review verdict", "text": "Request changes on PR #412: restore DEFAULT_TTL_SECONDS to 300 and reject ttlSeconds values below 1. The feature flag itself is acceptable after those fixes." }
+```

@@ -1,6 +1,8 @@
 ---
 title: Deploy failures by service — last 7 days
 icon: 📊
+composition: dashboard
+source: Synthetic deployment telemetry, captured 2026-08-18
 ---
 
 A week of deploy failures across all services, with the two hotspots called out.
@@ -27,7 +29,7 @@ A week of deploy failures across all services, with the two hotspots called out.
   ]},
   "mark": { "type": "bar", "color": "#6d6bd6", "cornerRadiusTopLeft": 4, "cornerRadiusTopRight": 4 },
   "encoding": {
-    "x": { "field": "day", "type": "ordinal", "title": null },
+    "x": { "field": "day", "type": "ordinal", "title": null, "sort": null },
     "y": { "field": "failures", "type": "quantitative", "title": "failed deploys" }
   }
 }

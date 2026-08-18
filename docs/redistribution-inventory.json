@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "reviewedAt": "2026-08-17",
+  "reviewedAt": "2026-08-18",
   "repositoryLicense": "MIT",
   "authoredScopes": [
     { "path": ".github/", "provenance": "repository-authored", "license": "MIT" },
@@ -98,6 +98,150 @@
       "sha256": "1f66acac18a19f7af420c8e48250031da43216cfd9ee2248346c58eab4a30402",
       "provenance": "repository-generated browser capture",
       "source": "repository-authored live gallery with synthetic artifacts",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/compare-desktop.png",
+      "sha256": "e4090b465cb7f55084217071b644cbbd7d542614b13db665f06326f48d6e6f16",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/compare-mobile.png",
+      "sha256": "c09c66f31d998147defe68930f8ff593c85c2fde85297f147fc17f58329dfd6a",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/dashboard-desktop.png",
+      "sha256": "2295021a8ec58b533c3b7a70cc2cd9ff6bbd8c3c7c11779f714e565d2f4e01d2",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/dashboard-mobile.png",
+      "sha256": "bde8a54bba502c6d72fede5efc8287ccde81e2998ae1fe54a8d6bb1c09153e95",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/findings-table-desktop.png",
+      "sha256": "3e34b09ca4d63a957243a8fdf403beda4c342694086e3b4c85f67ffeb8658135",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/findings-table-mobile.png",
+      "sha256": "c0157f607aef3309c77b43253c8ef30e08f43fbd3e7578345adc3939edfcea94",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/incident-desktop.png",
+      "sha256": "e8e449a72bfef2001db37ee4b9a199f0edb899417e5f737cbcfb812bf9b8e438",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/incident-mobile.png",
+      "sha256": "111a7b582b55b847e4f466916dacf9a9b3f9906b4c3b060e7bf4b098ead8c884",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/interactive-decision-desktop.png",
+      "sha256": "0c9306f3558a0a831bdc7c1f7964fd079d7c4860eda0110e4bb25506028072bf",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/interactive-decision-mobile.png",
+      "sha256": "e459fc1e7c953ea02f2f5d81771ff25d1113219acc44a8cbfe54a03c432135ad",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/plan-checklist-desktop.png",
+      "sha256": "3ec11697f5622a771d81839bb4a4f9cf37b502ec2b34ce7c6139054378982147",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/plan-checklist-mobile.png",
+      "sha256": "c58b6327c849f6555af59a8c46527cdd3690b8efa014d90ace206cfef0eba3e4",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/pr-walkthrough-desktop.png",
+      "sha256": "dc5415d05de3b42740721b9a90aba60f4b371a0e96d0a0a68b8613fb7779933a",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/pr-walkthrough-mobile.png",
+      "sha256": "42fe01fcc0ebce9636377ab30c514b915c66ce5136b4a904a6d49e29a9678266",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/system-explainer-desktop.png",
+      "sha256": "258fb47572447071d47e5c9070bf4ca5259a5ab1fddd5a3ab6ab7f2b7e840dc1",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
+      "path": "docs/evidence/page-quality/2026-08-18-local-composition/system-explainer-mobile.png",
+      "sha256": "67ae7867700e0d2b0a4d3be96590d515a0516378769f037ea1b04109f8bd8c33",
+      "provenance": "repository-generated browser capture",
+      "source": "page-quality-v1 repository-authored synthetic fixture rendered in Chromium 151",
       "license": "MIT",
       "attribution": "opencode-artifacts contributors",
       "status": "approved"

@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "corpusId": "page-quality-v1",
+  "cells": 16,
+  "passed": 16,
+  "failed": 0,
+  "maxUsefulContentMs": 971,
+  "maxLayoutShift": 0.032428835614905144,
+  "minPrimaryVisualUtilization": 0.907,
+  "minChartFill": 1,
+  "failures": [],
+  "evidence": [
+    {
+      "report": "compare-desktop.json",
+      "sha256": "0b2162467458a677ef86300cc3db545dce99bfb37fc407507a85efa15bd719e4"
+    },
+    {
+      "report": "compare-mobile.json",
+      "sha256": "42aaa93ae826dd3fa220e726509108542730924a9795d9e6e855ac3f84c8f115"
+    },
+    {
+      "report": "dashboard-desktop.json",
+      "sha256": "b7be7631c5f124188c81ea6a4fe35d44ed10a906c791add7aade7a539d9165fa"
+    },
+    {
+      "report": "dashboard-mobile.json",
+      "sha256": "bfd2b2a9c4ed677e7e241cf9c6b102e0617f0d01e83e738b61a4377df25ed269"
+    },
+    {
+      "report": "findings-table-desktop.json",
+      "sha256": "5d993dadb5d21db607756aeb5981403388e64fdd73c6c3a076765794dfbd7cfb"
+    },
+    {
+      "report": "findings-table-mobile.json",
+      "sha256": "edbd3bc04d62557ec6edcd896acd965d2011461015e44407328fffa5c2aeb469"
+    },
+    {
+      "report": "incident-desktop.json",
+      "sha256": "77177e1945c67bf685665073363d9a705f38f4964e833e29700639982cf1d60a"
+    },
+    {
+      "report": "incident-mobile.json",
+      "sha256": "d74d6777ba1f62e292a8dc1f842bec7050b19fa556a7d8213b89978399d0b3f6"
+    },
+    {
+      "report": "interactive-decision-desktop.json",
+      "sha256": "20b474f267ea7eff01517b0e412302ef24903fc871675176d92520257692f797"
+    },
+    {
+      "report": "interactive-decision-mobile.json",
+      "sha256": "a66e97136da845170d884f62f5a5327f1ad8c9240ec02340f0ffca0a328ca677"
+    },
+    {
+      "report": "plan-checklist-desktop.json",
+      "sha256": "cd1ff0a34abaac0559303daab4b807fe93e2e991beac1798ba12a74cb594a63c"
+    },
+    {
+      "report": "plan-checklist-mobile.json",
+      "sha256": "67755cae201977f84cb7c2aaeae2f04ea63b06d97b4bf0414405cf6936a3e107"
+    },
+    {
+      "report": "pr-walkthrough-desktop.json",
+      "sha256": "56c7f4e8d328ff41847f205e2f8643a99f4e6c11a36c8debbacbd7dc18f17e5f"
+    },
+    {
+      "report": "pr-walkthrough-mobile.json",
+      "sha256": "fdba282ec32bb8ab4859221e5736b39cffb0ef23acca575f3cd56490191f6b94"
+    },
+    {
+      "report": "system-explainer-desktop.json",
+      "sha256": "daec751422d0e06c93c9be701937ed5563e53f270e88701d650e36e5b7e101f5"
+    },
+    {
+      "report": "system-explainer-mobile.json",
+      "sha256": "fce6acd3eee0228187177de4d138225b14104efbe403fa64b0a001357c5f0878"
+    }
+  ]
+}

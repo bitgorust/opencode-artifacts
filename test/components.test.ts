@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { renderComponent } from "../src/components.ts";
+import { renderComponent, validateComponent } from "../src/components.ts";
 import { renderArtifact } from "../src/render.ts";
 
 test("stats renders value, label, and toned delta pill; text is escaped", () => {
@@ -61,6 +61,23 @@ test("callout renders toned insight card", () => {
   const html = renderComponent("callout", JSON.stringify({ tone: "warn", title: "T", body: "B" }));
   assert.match(html, /callout callout-warn/);
   assert.match(html, /callout-title">T</);
+});
+
+test("frame renders bounded semantic mockup content and annotations", () => {
+  const source = JSON.stringify({
+    kind: "mockup",
+    title: "Settings preview",
+    caption: "The preview keeps navigation beside the selected settings group.",
+    content: "Navigation\n  General\n  Security\n\nSelected: Security",
+    annotations: ["Navigation remains visible", "Selection is named in text"],
+  });
+  const html = renderComponent("frame", source);
+  assert.match(html, /<figure class="visual-frame frame-mockup">/);
+  assert.match(html, /<figcaption>The preview keeps navigation/);
+  assert.match(html, /<ol class="frame-annotations">/);
+  assert.deepEqual(validateComponent("frame", source), []);
+  assert.equal(validateComponent("frame", '{"kind":"remote","title":"x","caption":"x","content":"x"}')[0]?.code, "frame-kind");
+  assert.equal(validateComponent("frame", JSON.stringify({ kind: "code", title: "x", caption: "x", content: "x".repeat(8193) }))[0]?.code, "frame-content-size");
 });
 
 test("progress renders a fill proportional to done/total", () => {
@@ -145,6 +162,7 @@ test("mermaid fence becomes an escaped pre and inlines the mermaid runtime", () 
   const { html } = renderArtifact("```mermaid\n%% summary: A leads to B.\ngraph TD\n  A-->B\n```\n");
   assert.match(html, /<pre class="mermaid" role="img" aria-label="A leads to B\.">graph TD\n  A--&gt;B<\/pre>/);
   assert.ok(html.includes("runtime:mermaid"));
+  assert.ok(html.includes("svg.getBBox"));
   assert.ok(html.includes("mermaid.initialize"));
   assert.ok(!html.includes("runtime:vega"));
 

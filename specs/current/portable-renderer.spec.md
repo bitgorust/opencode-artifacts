@@ -51,6 +51,16 @@
   200%-equivalent RTL evidence are green. A named 2026-08-18 user attestation records the
   manual screen-reader checklist passing on Fedora 44, Orca 50.2, and Chrome 151.0.7922.137;
   this closes the packet gate without declaring a broad supported-platform matrix.
+- `QUAL-06`: frontmatter can select one of six bounded nonstandard compositions (`narrative`,
+  `dashboard`, `split`, `dense`, `quiet`, or `full`). The renderer classifies visual, data, and
+  insight sections without changing source order; cards and primary visuals recompose at narrow
+  widths. Vega-Lite defaults to container sizing, Mermaid output is bounded after layout, and the
+  semantic `frame` component provides a fixed mockup/media/code presentation surface.
+- `QUAL-07`: `benchmarks/page-quality/v1/corpus.json` binds eight permission-safe normalized
+  tasks to exact fixture hashes, prompts, required/forbidden facts, reader decisions,
+  interactions, provenance, licenses, and all four required stress cases. Renderer-only local
+  evidence covers 16 desktop/mobile/mode cells, but same-input Claude runs and blinded reviewer
+  evidence remain unverified; no equal-or-better claim is active.
 - `PERF-01`: `benchmarks/renderer/v1/` owns hashed no-runtime, one-chart, and multi-runtime
   fixtures plus the two-core/4 GiB Node 24/Chromium 151 reference profile. Reports retain raw
   cold/warm samples, nearest-rank p50/p95, a five-sample minimum, 250ms scheduler floor,
@@ -110,3 +120,7 @@ malformed or unknown markup.
 - This evidence combines a retained Linux/Chromium automated observation with one named
   Fedora/Orca/Chrome manual assistive-technology attestation. It does not certify a supported
   browser/OS matrix, a physical mobile device, or other assistive-technology combinations.
+- `test/page-quality-corpus.test.ts`, `test/page-quality-local-report.test.ts`, and
+  `docs/evidence/page-quality/2026-08-18-local-composition.md` retain the exact corpus binding and
+  16-cell Chromium renderer-track result. They do not supply comparative, representative-user,
+  platform-support, or release-certification evidence.

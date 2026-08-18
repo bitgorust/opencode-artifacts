@@ -1,6 +1,8 @@
 ---
 title: Tuning playground — wave parameters
 icon: 🎛️
+composition: full
+source: Synthetic tuning inputs, captured 2026-08-18
 ---
 
 Drag the sliders: the charts update live. When the shape looks right, copy the values back into the session.

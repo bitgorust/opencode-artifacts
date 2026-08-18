@@ -1,6 +1,8 @@
 ---
 title: Settings panel — four layout directions
 icon: 🧭
+composition: split
+source: Synthetic design workshop, captured 2026-08-18
 ---
 
 Four distinctly different layouts for the settings panel, varying density and grouping. Tradeoff under each.
