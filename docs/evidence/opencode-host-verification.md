@@ -123,3 +123,29 @@ record as `release-evidence/opencode-host-matrix.json` and retains it with the e
 The `/tmp` path is transient and is not itself release evidence. Bare registry-coordinate
 verification of future candidate bytes remains a post-publication gate; the dated published-
 package probe above covers the already published route only.
+
+### Stable permission policy probe
+
+An additional isolated OpenCode 1.18.18 server loaded this inline policy without a plugin or
+provider turn:
+
+```json
+{
+  "permission": {
+    "*": "allow",
+    "artifact_publish": "ask",
+    "artifact_datasource": "ask",
+    "artifact_deploy": "deny",
+    "artifact_audience": "deny"
+  }
+}
+```
+
+`GET /config` returned those five entries unchanged. This proves the stable host accepts the
+four independent resources and preserves explicit deploy/audience denies beneath broad auto
+allow. It does not claim a provider-selected tool execution: doing that through the native
+server requires a provider turn, which this gate deliberately excludes. The exact ask order,
+denial at every transition, no-write/no-runner result, bounded metadata, and auto-deny property
+are exercised by `test/plugin.test.ts`, `test/opencode-permissions.test.ts`, and the bounded
+model in `test/model/opencode-permission-model.ts`. CI repeats the effective-config assertion
+inside the packed config-array cell.

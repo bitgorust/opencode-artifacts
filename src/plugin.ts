@@ -39,6 +39,10 @@ import {
   ArtifactLifecycleConflictError,
   ArtifactLifecycleStore,
 } from "./artifact-lifecycle.ts";
+import {
+  approvePublishPermissions,
+  ArtifactPermissionDeniedError,
+} from "./opencode-permissions.ts";
 
 function ghPagesCloneDir(repo: string): string {
   return join(homedir(), ".cache", "opencode-artifacts", "ghpages", repo.replace("/", "__"));
@@ -219,12 +223,31 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             if (finalFindings.length > 0 && args.force !== true) {
               return `Publish blocked: the final portable bytes contain credential-looking strings: ${formatFindings(finalFindings)}. If these are intentional, call again with force: true.`;
             }
+            const plannedDeploy = await (async () => {
+              if (!args.deploy) return undefined;
+              const config = await loadConfig(workRoot(ctx));
+              const resolved = resolveDeploy(
+                { repo: args.repo, target: args.target, workerName: args.workerName },
+                config,
+              );
+              if (resolved.target === "github") {
+                if (!resolved.repo) {
+                  throw new Error("deploy target 'github' is missing its repo — run `opencode-artifacts init`");
+                }
+                return { resolved, authority: { target: "github" as const, coordinate: `${resolved.repo}@${resolved.branch ?? "main"}` } };
+              }
+              if (!resolved.workerName) {
+                throw new Error("deploy target 'cloudflare' is missing its workerName — run `opencode-artifacts init`");
+              }
+              return { resolved, authority: { target: "cloudflare" as const, coordinate: resolved.workerName } };
+            })();
 
-            await ctx.ask({
-              permission: "artifact_publish",
-              patterns: [slug],
-              always: ["*"],
-              metadata: { title, slug, format: args.format ?? "markdown", trustedHtml: args.format === "html" },
+            await approvePublishPermissions(ctx, {
+              slug,
+              format: args.format ?? "markdown",
+              trustedHtml: args.format === "html",
+              ...(args.dataSources === undefined ? {} : { dataSources: args.dataSources }),
+              ...(plannedDeploy === undefined ? {} : { deploy: plannedDeploy.authority }),
             });
 
             const localDir = join(workRoot(ctx), ".opencode", "artifacts");
@@ -246,9 +269,8 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
                 inputFormat: args.format ?? "markdown",
               });
               let url: string | undefined;
-              if (args.deploy) {
-                const config = await loadConfig(workRoot(ctx));
-                const resolved = resolveDeploy({ repo: args.repo, target: args.target, workerName: args.workerName }, config);
+              if (plannedDeploy) {
+                const resolved = plannedDeploy.resolved;
                 if (resolved.target === "github" && resolved.repo) {
                   const adapter = new GitHubPagesPublisher(localDir, { repo: resolved.repo, branch: resolved.branch, cloneDir: ghPagesCloneDir(resolved.repo), allowSensitive: args.force === true });
                   const base = await adapter.sync(`publish ${slug} v${status.headRevision}`);
@@ -268,9 +290,8 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             } else {
               if (args.artifact !== undefined || args.expectedRevision !== undefined) throw new Error("artifact and expectedRevision require a migrated schema-2 store");
               const publisher = await (async () => {
-                if (!args.deploy) return new FilePublisher(localDir);
-                const config = await loadConfig(workRoot(ctx));
-                const resolved = resolveDeploy({ repo: args.repo, target: args.target, workerName: args.workerName }, config);
+                if (!plannedDeploy) return new FilePublisher(localDir);
+                const resolved = plannedDeploy.resolved;
                 if (resolved.target === "github" && resolved.repo) return new GitHubPagesPublisher(localDir, { repo: resolved.repo, branch: resolved.branch, cloneDir: ghPagesCloneDir(resolved.repo), allowSensitive: args.force === true });
                 if (resolved.target === "cloudflare" && resolved.workerName) return new CloudflarePublisher(localDir, { workerName: resolved.workerName, stagingDir: cfStagingDir(resolved.workerName), allowSensitive: args.force === true });
                 throw new Error(`deploy target '${resolved.target}' is missing its ${resolved.target === "github" ? "repo" : "workerName"} — run \`opencode-artifacts init\``);
@@ -300,6 +321,14 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
             const warning = preflightWarnings.length === 0 ? "" : `\nPreflight warnings: ${preflightWarnings.map((item) => `${item.code} at ${item.line}:${item.column}`).join(", ")}`;
             return `Artifact published to ${result.path}${result.url ? ` — live at ${result.url}` : ""} (gallery: ${result.gallery}, hash: ${result.hash})${warning}`;
           } catch (err) {
+            if (err instanceof ArtifactPermissionDeniedError) {
+              return JSON.stringify({
+                error: "permission-denied",
+                permission: err.permission,
+                mutation: "none",
+                nextAction: `allow or ask for ${err.permission} at the exact requested scope, then retry`,
+              }, null, 2);
+            }
             if (err instanceof ArtifactTooLargeError) {
               return `Artifact too large: ${err.message}`;
             }

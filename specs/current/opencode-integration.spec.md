@@ -19,6 +19,16 @@
   Tool discovery requests schema metadata only and performs no provider inference. A packed-
   module `artifact_lifecycle list` smoke is non-mutating and separately proves executable
   shipped code without asking a model to select the tool.
+- `UX-03`: `artifact_publish` completes final-byte validation, then asks for every requested
+  authority before its first write or provider call. The order is exact local publication,
+  optional datasource execution, optional provider deployment, then optional public audience.
+  A refusal at any point returns `permission-denied` with `mutation: none`.
+- `OC-06`: stable permission resources are `artifact_publish`, `artifact_datasource`,
+  `artifact_deploy`, and `artifact_audience`. Local remembered scope is bound to one hashed
+  artifact key; elevated scopes use `always: []`. Metadata is bounded and omits authored
+  Markdown, datasource arguments, full executable paths, credentials, and provider output.
+  Stable OpenCode 1.18.18 preserves exact `allow`/`ask`/`deny` rules, including explicit deploy
+  and audience deny entries beneath a broad auto-allow wildcard.
 
 ## Evidence boundary
 
@@ -29,3 +39,7 @@
 - A registry-coordinate check for an unpublished candidate is impossible before publication.
   The bare published-package route remains post-publication evidence; it is not substituted
   for the exact pre-publication tarball.
+- `test/model/opencode-permission-model.ts` exhausts optional-scope subsets and denial
+  transitions. Stable-host evidence confirms policy parsing and exact precedence without
+  provider inference; tool-selection enforcement is covered by injected `ctx.ask` integration
+  because native tool execution otherwise requires a provider turn.

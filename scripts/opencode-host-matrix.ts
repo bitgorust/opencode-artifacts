@@ -16,6 +16,13 @@ export const ARTIFACT_TOOL_CONTRACT = {
   artifact_state: ["slug"],
   artifact_comments: ["slug", "resolveId", "digest", "expectedRevision", "expectedHash", "operationId"],
 } as const;
+export const OPENCODE_PERMISSION_POLICY = {
+  "*": "allow",
+  artifact_publish: "ask",
+  artifact_datasource: "ask",
+  artifact_deploy: "deny",
+  artifact_audience: "deny",
+} as const;
 
 interface CommandResult {
   command: string[];
@@ -39,6 +46,7 @@ interface ServerResult {
   tools: ToolDescription[];
   logs: string;
   config: unknown;
+  effectivePermission?: unknown;
 }
 
 export interface MatrixEvidence {
@@ -237,7 +245,7 @@ async function probeRoute(input: {
 }): Promise<ServerResult> {
   const env = {
     ...cleanEnvironment(input.envRoot),
-    ...(input.route === "config-array" ? { OPENCODE_CONFIG_CONTENT: JSON.stringify({ plugin: [input.pluginUrl] }) } : {}),
+    ...(input.route === "config-array" ? { OPENCODE_CONFIG_CONTENT: JSON.stringify(input.config) } : {}),
   };
   await Promise.all(Object.values(cleanEnvironment(input.envRoot)).map((path) => mkdir(path, { recursive: true })));
   const child = spawn(input.hostBinary, ["serve", "--hostname", "127.0.0.1", "--port", "0", "--print-logs"], {
@@ -254,6 +262,16 @@ async function probeRoute(input: {
     const ids = await fetchJson(`${server.url}/experimental/tool/ids`);
     const tools = await fetchJson(`${server.url}/experimental/tool?provider=opencode&model=big-pickle`);
     assertArtifactToolContract(ids, tools);
+    const effectiveConfig = await fetchJson(`${server.url}/config`);
+    const effectivePermission = isRecord(effectiveConfig) ? effectiveConfig["permission"] : undefined;
+    if (input.route === "config-array") {
+      if (!isRecord(effectivePermission)) throw new Error("stable host omitted configured artifact permissions");
+      for (const [permission, decision] of Object.entries(OPENCODE_PERMISSION_POLICY)) {
+        if (effectivePermission[permission] !== decision) {
+          throw new Error(`stable host changed ${permission} permission from ${decision}`);
+        }
+      }
+    }
     return {
       route: input.route,
       hostVersion: input.hostVersion,
@@ -262,6 +280,7 @@ async function probeRoute(input: {
       tools: (tools as ToolDescription[]).filter((item) => item.id.startsWith("artifact_")),
       logs: server.logs(),
       config: input.config,
+      ...(effectivePermission === undefined ? {} : { effectivePermission }),
     };
   } finally {
     await stopServer(child);
@@ -361,7 +380,7 @@ export async function runMatrix(tarballInput: string, outputInput: string): Prom
       const cliConfig = JSON.parse(await readFile(cliConfigPath, "utf8")) as unknown;
       routes.push(
         await probeRoute({ route: "cli-install", hostVersion: version, hostBinary, project: cliProject, envRoot: cliEnvRoot, pluginUrl, config: cliConfig }),
-        await probeRoute({ route: "config-array", hostVersion: version, hostBinary, project: configProject, envRoot: join(work, `config-env-${versionKey}`), pluginUrl, config: { plugin: [pluginUrl] } }),
+        await probeRoute({ route: "config-array", hostVersion: version, hostBinary, project: configProject, envRoot: join(work, `config-env-${versionKey}`), pluginUrl, config: { plugin: [pluginUrl], permission: OPENCODE_PERMISSION_POLICY } }),
       );
     }
     const smoke = await readOnlyPackedSmoke(pluginDirectory, join(work, "smoke-project"));

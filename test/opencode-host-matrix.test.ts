@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   ARTIFACT_TOOL_CONTRACT,
+  OPENCODE_PERMISSION_POLICY,
   assertArtifactToolContract,
   boundedLog,
   exactStableMatrix,
@@ -46,4 +47,12 @@ test("host startup parsing is loopback-only and logs stay bounded", () => {
   const output = boundedLog("old", "x".repeat(200), 64);
   assert.ok(Buffer.byteLength(output, "utf8") <= 64);
   assert.match(output, /earlier output truncated/);
+});
+
+test("stable permission probe keeps explicit denies under broad auto allow", () => {
+  assert.equal(OPENCODE_PERMISSION_POLICY["*"], "allow");
+  assert.equal(OPENCODE_PERMISSION_POLICY.artifact_publish, "ask");
+  assert.equal(OPENCODE_PERMISSION_POLICY.artifact_datasource, "ask");
+  assert.equal(OPENCODE_PERMISSION_POLICY.artifact_deploy, "deny");
+  assert.equal(OPENCODE_PERMISSION_POLICY.artifact_audience, "deny");
 });
