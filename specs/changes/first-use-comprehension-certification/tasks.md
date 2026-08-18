@@ -1,8 +1,8 @@
 # Tasks: Certify first-use comprehension
 
-- [ ] Confirm proposal validation and human approval.
+- [x] Confirm proposal validation and human approval.
 - [ ] Name the authorized study owner, exact candidate/corpus, target cells, and recruitment plan.
-- [ ] Extend validator/aggregate boundary tests and freeze participant-facing materials.
+- [x] Extend validator/aggregate boundary tests and freeze participant-facing materials.
 - [ ] Run consented README-only first-use sessions for every exact claimed support cell.
 - [ ] Run at least ten eligible representative-primary comprehension sessions.
 - [ ] Validate private records, honor withdrawals, and publish only the non-identifying aggregate/digest.

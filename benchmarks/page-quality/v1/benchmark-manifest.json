@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "corpusId": "page-quality-v1",
+  "systems": ["opencode", "claude"],
+  "taskIds": [
+    "dashboard",
+    "incident",
+    "pr-walkthrough",
+    "system-explainer",
+    "compare",
+    "plan-checklist",
+    "findings-table",
+    "interactive-decision"
+  ],
+  "minimumRunsPerSystemTask": 3,
+  "captureModes": [
+    { "id": "desktop-light", "width": 1440, "height": 900, "colorScheme": "light" },
+    { "id": "mobile-dark", "width": 390, "height": 844, "colorScheme": "dark" }
+  ],
+  "hardGates": [
+    "facts",
+    "interactions",
+    "layout",
+    "composition",
+    "accessibility",
+    "dataHonesty",
+    "offlineBudget"
+  ],
+  "dimensions": [
+    "taskOrientation",
+    "informationHierarchy",
+    "compositionDensity",
+    "typographyReadability",
+    "visualEncoding",
+    "coherenceCraft",
+    "interactionQuality",
+    "responsiveAdaptation"
+  ],
+  "thresholds": {
+    "openCodeBetterOrEquivalent": 0.8,
+    "openCodeDimensionMedian": 4,
+    "minimumReviewers": 3,
+    "requiredReviewerRoles": ["design-ux", "technical"]
+  }
+}

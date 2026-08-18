@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "runId": "pending-authorized-run",
+  "corpusId": "page-quality-v1",
+  "manifestSha256": "2badb79c0f21649b8ed6cb72a25fd8ca2b0a9436faf29d7ce8296384cf5a8897",
+  "authorization": {
+    "status": "pending",
+    "authorizedBy": null,
+    "authorizedAt": null,
+    "claudeAccountScope": null,
+    "modelProtocol": null,
+    "retentionDisposition": null
+  },
+  "generations": [],
+  "reviewers": [],
+  "pairs": []
+}

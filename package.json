@@ -36,7 +36,7 @@
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "node --test --test-concurrency=4 test/*.test.ts",
+    "test": "node --test --test-concurrency=1 test/*.test.ts",
     "check": "node scripts/check-repo.ts",
     "check:links": "node scripts/check-links.ts",
     "check:governance": "node scripts/governance-policy.ts",
@@ -45,6 +45,8 @@
     "spec": "node scripts/spec-workflow.ts",
     "quality:corpus": "node scripts/page-quality-corpus.ts",
     "quality:local": "node scripts/page-quality-local-report.ts",
+    "quality:benchmark": "node scripts/page-quality-benchmark.ts",
+    "quality:certification": "node scripts/local-core-certification.ts",
     "prepare": "git config core.hooksPath .githooks || true",
     "prepublishOnly": "npm run build"
   },

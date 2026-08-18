@@ -1,7 +1,7 @@
 # Tasks: Certify the local artifact core release
 
-- [ ] Confirm proposal validation and human approval.
-- [ ] Implement and model-test the versioned fail-closed certification record.
+- [x] Confirm proposal validation and human approval.
+- [x] Implement and model-test the versioned fail-closed certification record.
 - [ ] Freeze one candidate commit/version/tarball/digest and resolve every applicable requirement row.
 - [ ] Run full code, package, host, browser, migration, security/privacy, performance, and support gates.
 - [ ] Bind audit, license, SBOM, integrity, provenance inputs, and consumer-verification evidence.

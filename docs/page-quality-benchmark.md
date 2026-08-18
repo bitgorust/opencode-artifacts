@@ -155,16 +155,16 @@ Artifact design change.
 
 ## Current status
 
-The repository has a useful renderer regression corpus under `examples/patterns/` and
-`docs/evidence/patterns/`; official visual material remains link-only. The local corpus proves
-pattern coverage and catches regressions; it is not a same-input comparative benchmark.
+`benchmarks/page-quality/v1/` now owns the hash-bound eight-task corpus, frozen benchmark
+manifest, and an empty external-run template. The renderer track has dated Chromium evidence
+for all 16 desktop/mobile/mode cells: responsive chart/diagram sizing, task-aware composition,
+keyboard traces, runtime errors, overflow, clipping, external requests, useful-content timing,
+and layout shift pass the local gate. This resolves the previously observed fixed-size
+dashboard chart defect for the normalized fixture.
 
-A visual audit of the closest dashboard pair found a concrete shortfall: the current
-OpenCode example renders a small fixed-size chart inside a wide card with a large unintended
-blank region, while the official reference uses the canvas for a denser narrative composition
-with large product mockups, an annotated chart, metric hierarchy, and varied card treatments.
-Our strengths are consistency, readable components, data honesty, themes, offline operation,
-and predictable safety. Bespoke composition, responsive visual sizing, and demonstrated
-same-task preference remain roadmap work.
+That local result is regression evidence, not a same-input comparison. Authorized current
+Claude generations, their account/settings/retention protocol, all 24 unselected pairs, and at
+least three independent reviewer distributions remain absent. Official visual material stays
+link-only and no synthetic test score enters the benchmark denominator.
 
 Current verdict: **equal-or-better page quality is a target, not yet a verified capability.**

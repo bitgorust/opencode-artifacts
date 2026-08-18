@@ -1,8 +1,8 @@
 # Tasks: Run the blinded page-quality benchmark
 
-- [ ] Confirm proposal validation and human approval.
+- [x] Confirm proposal validation and human approval.
 - [ ] Obtain explicit Claude account execution authority, settings protocol, and retention disposition.
-- [ ] Freeze manifests, deterministic blinding/randomization, aggregation, confidence, and claim checks.
+- [x] Freeze manifests, deterministic blinding/randomization, aggregation, confidence, and claim checks.
 - [ ] Capture every required OpenCode and Claude generation and interaction trace without cherry-picking.
 - [ ] Run automated/manual hard gates and retain all failures.
 - [ ] Recruit at least three eligible independent reviewers and complete blinded scoring.
