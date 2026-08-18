@@ -1,4 +1,5 @@
 import { escapeHtmlText } from "./text.ts";
+import { formatZonedTimestamp, isZonedIsoTimestamp, type LocaleContext } from "./locale.ts";
 
 export type ComponentKind =
   | "stats"
@@ -44,7 +45,7 @@ function num(record: Record<string, unknown>, key: string): number | undefined {
 }
 
 function errorBox(kind: string, reason: string): string {
-  return `<div class="chart-error">${escapeHtmlText(`Component '${kind}' failed to render: ${reason}`)}</div>`;
+  return `<div class="chart-error" role="alert">${escapeHtmlText(`Component '${kind}' failed to render: ${reason}`)}</div>`;
 }
 
 function toneClass(prefix: string, tone: string | undefined, allowed: readonly string[]): string {
@@ -54,6 +55,165 @@ function toneClass(prefix: string, tone: string | undefined, allowed: readonly s
 const STAT_TONES = ["good", "bad", "warn", "neutral"] as const;
 const ITEM_TONES = ["good", "bad", "warn", "info", "neutral"] as const;
 const SEVERITIES = ["critical", "high", "medium", "low"] as const;
+
+export interface ComponentIssue {
+  code: string;
+  reason: string;
+  nextAction: string;
+}
+
+export interface ComponentRenderContext {
+  locale: LocaleContext;
+}
+
+const DEFAULT_CONTEXT: ComponentRenderContext = {
+  locale: { lang: "en", dir: "ltr", locale: "en-US", timeZone: "UTC" },
+};
+
+function mermaidParts(source: string): { summary?: string; body: string } {
+  const lines = source.trim().split("\n");
+  const match = lines[0]?.match(/^%%\s*summary:\s*(.+)$/i);
+  return { summary: match?.[1].trim(), body: match ? lines.slice(1).join("\n").trim() : source.trim() };
+}
+
+function issue(code: string, reason: string, nextAction: string): ComponentIssue[] {
+  return [{ code, reason, nextAction }];
+}
+
+function recordEntries(value: unknown, kind: string): ComponentIssue[] {
+  if (!Array.isArray(value)) return issue(`${kind}-shape`, "expected a JSON array", "provide the documented array schema");
+  return value.flatMap((entry, index) =>
+    asRecord(entry) === undefined
+      ? issue(`${kind}-entry`, `entry ${index + 1} must be an object`, "replace non-object entries")
+      : [],
+  );
+}
+
+function requiredStrings(value: unknown[], kind: string, fields: string[]): ComponentIssue[] {
+  const issues: ComponentIssue[] = [];
+  for (const [index, entry] of value.entries()) {
+    const item = asRecord(entry);
+    if (!item) continue;
+    for (const field of fields) {
+      if (typeof item[field] !== "string" || item[field] === "") {
+        issues.push(...issue(`${kind}-${field}`, `entry ${index + 1} requires string '${field}'`, `add ${field} to every ${kind} entry`));
+      }
+    }
+  }
+  return issues;
+}
+
+export function validateComponent(kind: ComponentKind, source: string): ComponentIssue[] {
+  if (kind === "diff") return source.trim() === "" ? issue("diff-empty", "diff source is empty", "add unified diff lines") : [];
+  if (kind === "mermaid") {
+    if (source.trim() === "") return issue("mermaid-empty", "Mermaid source is empty", "add a Mermaid diagram");
+    const parsed = mermaidParts(source);
+    if (!parsed.summary) return issue("mermaid-summary", "Mermaid diagram needs a text summary", "start with %% summary: followed by the diagram's meaning");
+    if (parsed.body === "") return issue("mermaid-empty", "Mermaid diagram body is empty", "add diagram syntax after the summary");
+    return [];
+  }
+  let value: unknown;
+  try {
+    value = JSON.parse(source);
+  } catch {
+    return issue(`${kind}-json`, "component JSON is invalid", "provide valid JSON matching the documented schema");
+  }
+  if (["stats", "timeline", "findings", "compare"].includes(kind)) {
+    const issues = recordEntries(value, kind);
+    if (!Array.isArray(value)) return issues;
+    const required = kind === "stats" ? ["label", "value"] : kind === "timeline" ? ["time", "title"] : ["title"];
+    issues.push(...requiredStrings(value, kind, required));
+    for (const [index, entry] of value.entries()) {
+      const item = asRecord(entry);
+      if (!item) continue;
+      if (kind === "findings" && !SEVERITIES.includes(str(item, "severity") as typeof SEVERITIES[number])) {
+        issues.push(...issue("findings-severity", `entry ${index + 1} needs an allowlisted severity`, "use critical, high, medium, or low"));
+      }
+      if (kind === "stats") {
+        const direction = str(item, "direction");
+        if (direction !== undefined && direction !== "up" && direction !== "down") {
+          issues.push(...issue("stats-direction", `entry ${index + 1} direction must be up or down`, "correct or remove direction"));
+        }
+      }
+      if (kind === "compare") {
+        const annotations = item["annotations"];
+        if (annotations !== undefined && (!Array.isArray(annotations) || annotations.some((note) => typeof note !== "string"))) {
+          issues.push(...issue("compare-annotations", `entry ${index + 1} annotations must be strings`, "replace non-string annotations"));
+        }
+      }
+    }
+    return issues;
+  }
+  const item = asRecord(value);
+  if (!item) return issue(`${kind}-shape`, "expected a JSON object", "provide the documented object schema");
+  if (kind === "callout") {
+    const tone = str(item, "tone");
+    return tone !== undefined && !ITEM_TONES.includes(tone as typeof ITEM_TONES[number]) ? issue("callout-tone", "tone is not allowlisted", "use good, bad, warn, info, or neutral") : [];
+  }
+  if (kind === "progress") {
+    const done = num(item, "done");
+    const total = num(item, "total");
+    return done === undefined || total === undefined || total <= 0 || done < 0 || done > total ? issue("progress-range", "done and total must describe a finite range", "use 0 <= done <= total and total > 0") : [];
+  }
+  if (kind === "copy") return typeof item["text"] !== "string" ? issue("copy-text", "copy text is missing", "add string 'text'") : [];
+  if (kind === "decisions") {
+    if (!Array.isArray(item["questions"])) return issue("decisions-questions", "questions must be an array", "add the documented questions array");
+    const ids = new Set<string>();
+    const issues: ComponentIssue[] = [];
+    for (const [index, questionValue] of item["questions"].entries()) {
+      const question = asRecord(questionValue);
+      if (!question || !str(question, "id") || !str(question, "question") || !Array.isArray(question["options"])) {
+        issues.push(...issue("decisions-question", `question ${index + 1} needs id, question, and options`, "complete every question object"));
+        continue;
+      }
+      const id = str(question, "id")!;
+      if (ids.has(id)) issues.push(...issue("decisions-id", `question id '${id}' is duplicated`, "assign stable unique ids"));
+      ids.add(id);
+      for (const [optionIndex, optionValue] of question["options"].entries()) {
+        const option = asRecord(optionValue);
+        if (!option || !str(option, "id") || !str(option, "label")) {
+          issues.push(...issue("decisions-option", `question ${index + 1} option ${optionIndex + 1} needs id and label`, "complete every option object"));
+        }
+      }
+    }
+    return issues;
+  }
+  if (kind === "table") {
+    if (!Array.isArray(item["columns"]) || !Array.isArray(item["rows"])) return issue("table-shape", "columns and rows must be arrays", "add both documented arrays");
+    if (!str(item, "caption")) return issue("table-caption", "table caption is required", "add a concise caption describing the table");
+    const keys = new Set<string>();
+    const issues: ComponentIssue[] = [];
+    const dateColumns: Array<{ key: string; type: "date" | "datetime" }> = [];
+    for (const [index, columnValue] of item["columns"].entries()) {
+      const column = asRecord(columnValue);
+      const key = column && str(column, "key");
+      if (!column || !key || !str(column, "label")) {
+        issues.push(...issue("table-column", `column ${index + 1} needs key and label`, "complete every column object"));
+        continue;
+      }
+      if (keys.has(key)) issues.push(...issue("table-key", `column key '${key}' is duplicated`, "assign unique column keys"));
+      keys.add(key);
+      const type = str(column, "type");
+      if (type !== undefined && type !== "num" && type !== "date" && type !== "datetime") issues.push(...issue("table-type", `column ${index + 1} type is unsupported`, "use num, date, datetime, or omit type"));
+      if (type === "date" || type === "datetime") dateColumns.push({ key, type });
+    }
+    for (const [index, row] of item["rows"].entries()) {
+      const record = asRecord(row);
+      if (record === undefined) {
+        issues.push(...issue("table-row", `row ${index + 1} must be an object`, "replace non-object rows"));
+        continue;
+      }
+      for (const column of dateColumns) {
+        const value = record[column.key];
+        if (value !== undefined && (typeof value !== "string" || !isZonedIsoTimestamp(value))) {
+          issues.push(...issue("table-date", `row ${index + 1} '${column.key}' needs an ISO timestamp with time zone`, "use a timestamp ending in Z or an explicit offset"));
+        }
+      }
+    }
+    return issues;
+  }
+  return [];
+}
 
 function renderStats(spec: unknown): string {
   if (!Array.isArray(spec)) return errorBox("stats", "expected a JSON array");
@@ -170,7 +330,7 @@ function renderProgress(spec: unknown): string {
   const label = str(item, "label");
   const percent = Math.min(100, Math.round((done / total) * 100));
   return [
-    '<div class="progress">',
+    `<div class="progress" role="progressbar" aria-label="${escapeHtmlText(label ?? "Progress")}" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${done}">`,
     `<div class="progress-label">${escapeHtmlText(label ?? "Progress")} — ${done}/${total}</div>`,
     `<div class="progress-track"><div class="progress-fill" style="width:${percent}%"></div></div>`,
     "</div>",
@@ -205,9 +365,9 @@ function renderCopy(spec: unknown, id: string | undefined): string {  const item
 }
 
 function renderMermaid(source: string): string {
-  const trimmed = source.trim();
-  if (trimmed === "") return errorBox("mermaid", "empty diagram source");
-  return `<pre class="mermaid">${escapeHtmlText(trimmed)}</pre>`;
+  const parsed = mermaidParts(source);
+  if (!parsed.summary || parsed.body === "") return errorBox("mermaid", "missing summary or diagram source");
+  return `<figure class="diagram-frame"><pre class="mermaid" role="img" aria-label="${escapeHtmlText(parsed.summary)}">${escapeHtmlText(parsed.body)}</pre><figcaption class="diagram-summary">${escapeHtmlText(parsed.summary)}</figcaption></figure>`;
 }
 
 function renderDecisions(spec: unknown): string {
@@ -216,21 +376,22 @@ function renderDecisions(spec: unknown): string {
   const questions = item["questions"];
   if (!Array.isArray(questions)) return errorBox("decisions", "missing 'questions' array");
 
-  const blocks = questions.map((entry) => {
+  const blocks = questions.map((entry, questionIndex) => {
     const question = asRecord(entry);
     if (!question) return errorBox("decisions", "questions must be objects");
     const qid = str(question, "id") ?? "q";
     const text = str(question, "question") ?? "";
     const options = Array.isArray(question["options"]) ? question["options"] : [];
+    const groupId = `decision-question-${questionIndex}`;
     const buttons = options
-      .map((optEntry) => {
+      .map((optEntry, optionIndex) => {
         const opt = asRecord(optEntry);
         if (!opt) return "";
         const oid = str(opt, "id") ?? "opt";
         const label = str(opt, "label") ?? "";
         const note = str(opt, "note");
         return [
-          `<button type="button" class="decision-opt" data-question="${escapeHtmlText(qid)}" data-option="${escapeHtmlText(oid)}">`,
+          `<button type="button" class="decision-opt" role="radio" aria-checked="false" tabindex="${optionIndex === 0 ? "0" : "-1"}" data-question="${escapeHtmlText(qid)}" data-option="${escapeHtmlText(oid)}">`,
           `<span class="decision-label">${escapeHtmlText(label)}</span>`,
           note !== undefined
             ? `<span class="decision-note">${escapeHtmlText(note)}</span>`
@@ -241,8 +402,8 @@ function renderDecisions(spec: unknown): string {
       .join("");
     return [
       '<div class="decision">',
-      `<div class="decision-question">${escapeHtmlText(text)}</div>`,
-      `<div class="decision-options" role="group">${buttons}</div>`,
+      `<div class="decision-question" id="${groupId}">${escapeHtmlText(text)}</div>`,
+      `<div class="decision-options" role="radiogroup" aria-labelledby="${groupId}">${buttons}</div>`,
       "</div>",
     ].join("");
   });
@@ -257,7 +418,7 @@ function renderDecisions(spec: unknown): string {
   ].join("");
 }
 
-function renderTable(spec: unknown): string {
+function renderTable(spec: unknown, context: ComponentRenderContext, id: string | undefined): string {
   const item = asRecord(spec);
   if (!item) return errorBox("table", "expected a JSON object");
   const columns = item["columns"];
@@ -272,7 +433,9 @@ function renderTable(spec: unknown): string {
     const key = str(col, "key");
     const label = str(col, "label");
     if (!key || !label) return undefined;
-    return { key, label, type: str(col, "type") === "num" ? "num" : "text" };
+    const rawType = str(col, "type");
+    const type = rawType === "num" || rawType === "date" || rawType === "datetime" ? rawType : "text";
+    return { key, label, type };
   });
   if (cols.some((c) => c === undefined)) {
     return errorBox("table", "each column needs 'key' and 'label'");
@@ -281,7 +444,7 @@ function renderTable(spec: unknown): string {
   const head = cols
     .map(
       (c) =>
-        `<th scope="col" data-type="${c!.type}"${c!.type === "num" ? ' class="num"' : ""}><button type="button" class="th-sort">${escapeHtmlText(c!.label)}</button></th>`,
+        `<th scope="col" aria-sort="none" data-type="${c!.type}"${c!.type === "num" ? ' class="num"' : ""}><button type="button" class="th-sort" aria-label="Sort by ${escapeHtmlText(c!.label)}">${escapeHtmlText(c!.label)}</button></th>`,
     )
     .join("");
 
@@ -292,9 +455,13 @@ function renderTable(spec: unknown): string {
         .map((c) => {
           const raw = record[c!.key];
           const isNum = c!.type === "num" && typeof raw === "number" && Number.isFinite(raw);
+          const isDate = (c!.type === "date" || c!.type === "datetime") && typeof raw === "string";
+          const formattedDate = isDate ? formatZonedTimestamp(raw, context.locale, c!.type === "datetime") : undefined;
           const display = isNum
-            ? raw.toLocaleString("en-US")
-            : escapeHtmlText(raw === undefined || raw === null ? "—" : String(raw));
+            ? new Intl.NumberFormat(context.locale.locale).format(raw)
+            : formattedDate !== undefined
+              ? `<time datetime="${escapeHtmlText(String(raw))}">${escapeHtmlText(formattedDate)}</time>`
+              : escapeHtmlText(raw === undefined || raw === null ? "—" : String(raw));
           const dataV = isNum ? ` data-v="${raw}"` : ` data-v="${escapeHtmlText(String(raw ?? ""))}"`;
           return `<td${c!.type === "num" ? ' class="num"' : ""}${dataV}>${display}</td>`;
         })
@@ -304,17 +471,22 @@ function renderTable(spec: unknown): string {
     .join("\n");
 
   const caption = str(item, "caption");
+  const tableId = escapeHtmlText(id ?? "table-0");
+  const countId = `${tableId}-count`;
   return [
     '<div class="table-wrap">',
-    '<input class="table-filter" type="search" placeholder="Filter rows…" aria-label="Filter rows">',
-    `<div class="table-scroll"><table class="data-table"><thead><tr>${head}</tr></thead>`,
+    `<label class="sr-only" for="${tableId}-filter">Filter ${escapeHtmlText(caption ?? "table")} rows</label>`,
+    `<input id="${tableId}-filter" class="table-filter" type="search" placeholder="Filter rows…" aria-describedby="${countId}">`,
+    `<div class="table-scroll"><table class="data-table" aria-describedby="${countId}"><caption>${escapeHtmlText(caption ?? "Table")}</caption><thead><tr>${head}</tr></thead>`,
     `<tbody>${body}</tbody></table></div>`,
-    `<div class="table-meta"><span class="table-count">${rows.length} rows</span>${caption ? `<span class="table-caption">${escapeHtmlText(caption)}</span>` : ""}</div>`,
+    `<div class="table-meta"><span id="${countId}" class="table-count" role="status" aria-live="polite">${rows.length} rows</span></div>`,
     "</div>",
   ].join("\n");
 }
 
-export function renderComponent(kind: ComponentKind, json: string, id?: string): string {
+export function renderComponent(kind: ComponentKind, json: string, id?: string, context: ComponentRenderContext = DEFAULT_CONTEXT): string {
+  const issues = validateComponent(kind, json);
+  if (issues.length > 0) return errorBox(kind, issues[0].reason);
   if (kind === "diff") return renderDiff(json);
   if (kind === "mermaid") return renderMermaid(json);
   let spec: unknown;
@@ -341,6 +513,6 @@ export function renderComponent(kind: ComponentKind, json: string, id?: string):
     case "decisions":
       return renderDecisions(spec);
     case "table":
-      return renderTable(spec);
+      return renderTable(spec, context, id);
   }
 }

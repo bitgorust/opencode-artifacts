@@ -48,7 +48,8 @@ collectively exhausted by [`docs/product-spec.md`](product-spec.md), not repeate
 - Markdown uses `markdown-it` with `html: false`; raw HTML never passes through Markdown mode.
   Trusted HTML is a separately permissioned execution surface, never an implicit fallback.
 - Every emitted page carries the strict on-disk CSP: `default-src 'none'; script-src
-  'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'`. Served or
+  'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'`.
+  The `font-src` allowance is confined to embedded bytes and grants no network authority. Served or
   hosted copies may relax `connect-src` only to the documented self boundary; the portable
   file never changes. No `unsafe-eval`, ever—Vega uses its `ast: true` interpreter.
   [check:csp-no-unsafe-eval] [check:vega-interpreter]
@@ -117,6 +118,12 @@ collectively exhausted by [`docs/product-spec.md`](product-spec.md), not repeate
   conditionals scattered across established units.
 - The model authors declarative specifications. Arbitrary per-page JavaScript exists only in
   explicit trusted-HTML mode and does not inherit fixed-renderer guarantees.
+- Declarative publication validates the complete document before permission or writes. Its
+  component/chart schemas are shared with the renderer, diagnostics are bounded and redacted,
+  and standalone rendering retains escaped inline fallbacks for inspection.
+- Visual configuration follows prompt > bounded project file > curated theme > built-in
+  precedence. Sources are versioned, size/type/contrast checked atomically, retain per-token
+  provenance, and can populate only fixed CSS-variable slots—never CSS syntax or code.
 - The portable page is the long-term compatibility layer. Services are progressive
   enhancement; no page-view dependency, account, package runtime, or network is required.
 - Schemas, CLI/tool contracts, component syntax, exports, routes, and host adapters evolve by

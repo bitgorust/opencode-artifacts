@@ -5,6 +5,7 @@ import { ArtifactTooLargeError, renderArtifact, renderRawHtml } from "../src/ren
 const VEGA_LITE_CHART = [
   "```vega-lite",
   JSON.stringify({
+    description: "Category A has a value of one.",
     data: { values: [{ a: "A", b: 1 }] },
     mark: "bar",
     encoding: {
@@ -18,6 +19,7 @@ const VEGA_LITE_CHART = [
 const ECHARTS_CHART = [
   "```echarts",
   JSON.stringify({
+    description: "The line rises from three on Monday to five on Tuesday.",
     xAxis: { type: "category", data: ["Mon", "Tue"] },
     yAxis: { type: "value" },
     series: [{ type: "line", data: [3, 5] }],
@@ -29,7 +31,7 @@ test("plain markdown artifact carries CSP and escaped title, no chart runtimes",
   const { html, meta, chartCount } = renderArtifact("---\ntitle: My <b>Report</b>\n---\n# Hi\n");
   assert.equal(meta.title, "My <b>Report</b>");
   assert.equal(chartCount, 0);
-  assert.match(html, /Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'"/);
+  assert.match(html, /Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src data:; connect-src 'none'"/);
   assert.match(html, /<title>My &lt;b&gt;Report&lt;\/b&gt;<\/title>/);
   assert.match(html, /<h1 id="hi">Hi<\/h1>/);
   assert.ok(!html.includes("runtime:vega"));
@@ -62,7 +64,7 @@ test("invalid chart spec becomes an inline error entry, page still ships", () =>
 });
 
 test("chart spec cannot break out of the script tag", () => {
-  const evil = ["```echarts", JSON.stringify({ title: { text: "</script><script>alert(1)</script>" } }), "```"].join("\n");
+  const evil = ["```echarts", JSON.stringify({ description: "A safe summary for an unsafe title payload.", title: { text: "</script><script>alert(1)</script>" } }), "```"].join("\n");
   const { html } = renderArtifact(evil);
   assert.ok(!html.includes("</script><script>alert(1)</script>"));
   assert.ok(html.includes("\\u003c/script>"));

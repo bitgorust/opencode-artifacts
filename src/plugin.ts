@@ -9,6 +9,10 @@ import {
   renderRawHtml,
   type RenderedArtifact,
 } from "./render.ts";
+import { AssetPreflightError, type PortableAssets } from "./assets.ts";
+import type { ResolvedDesignTokens } from "./design-tokens.ts";
+import { parseDocument } from "./markdown.ts";
+import { formatPreflight, preflightDocument, trustedHtmlDiagnostic, type AuthoringDiagnostic } from "./preflight.ts";
 import { FilePublisher, slugify, StaleArtifactError } from "./publisher.ts";
 import { GitHubPagesPublisher } from "./github-pages.ts";
 import { CloudflarePublisher } from "./cloudflare-publisher.ts";
@@ -187,23 +191,40 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
         async execute(args, ctx) {
           let slug = "artifact";
           try {
-            const rendered: RenderedArtifact =
-              args.format === "html"
-                ? renderRawHtml(args.markdown, args.title ? { title: args.title } : {})
-                : renderArtifact(args.markdown);
-            const title = args.title ?? rendered.meta.title ?? "Artifact";
+            const parsedTitle = args.format === "html" ? undefined : parseDocument(args.markdown).meta.title;
+            const title = args.title ?? parsedTitle ?? "Artifact";
             slug = slugify(title);
-
             const findings = scanSensitive(`${args.markdown}\n${title}`);
             if (findings.length > 0 && args.force !== true) {
               return `Publish blocked: the content contains credential-looking strings: ${formatFindings(findings)}. If these are intentional (e.g. redacted examples), call again with force: true.`;
+            }
+            let preflightWarnings: AuthoringDiagnostic[] = [];
+            let portableAssets: PortableAssets | undefined;
+            let designTokens: ResolvedDesignTokens | undefined;
+            if (args.format === "html") {
+              preflightWarnings = [trustedHtmlDiagnostic()];
+            } else {
+              const preflight = await preflightDocument(args.markdown, { worktreeRoot: workRoot(ctx) });
+              const errors = preflight.diagnostics.filter((item) => item.severity === "error");
+              if (errors.length > 0 || preflight.omitted > 0) return formatPreflight(preflight);
+              preflightWarnings = preflight.diagnostics;
+              portableAssets = preflight.assets;
+              designTokens = preflight.designTokens;
+            }
+            const rendered: RenderedArtifact =
+              args.format === "html"
+                ? renderRawHtml(args.markdown, args.title ? { title: args.title } : {})
+                : renderArtifact(args.markdown, { assets: portableAssets, designTokens });
+            const finalFindings = scanSensitive(rendered.html);
+            if (finalFindings.length > 0 && args.force !== true) {
+              return `Publish blocked: the final portable bytes contain credential-looking strings: ${formatFindings(finalFindings)}. If these are intentional, call again with force: true.`;
             }
 
             await ctx.ask({
               permission: "artifact_publish",
               patterns: [slug],
               always: ["*"],
-              metadata: { title, slug },
+              metadata: { title, slug, format: args.format ?? "markdown", trustedHtml: args.format === "html" },
             });
 
             const localDir = join(workRoot(ctx), ".opencode", "artifacts");
@@ -276,10 +297,14 @@ export const ArtifactsPlugin: Plugin = async (_input, options) => {
                 hash: result.hash,
               },
             });
-            return `Artifact published to ${result.path}${result.url ? ` — live at ${result.url}` : ""} (gallery: ${result.gallery}, hash: ${result.hash})`;
+            const warning = preflightWarnings.length === 0 ? "" : `\nPreflight warnings: ${preflightWarnings.map((item) => `${item.code} at ${item.line}:${item.column}`).join(", ")}`;
+            return `Artifact published to ${result.path}${result.url ? ` — live at ${result.url}` : ""} (gallery: ${result.gallery}, hash: ${result.hash})${warning}`;
           } catch (err) {
             if (err instanceof ArtifactTooLargeError) {
               return `Artifact too large: ${err.message}`;
+            }
+            if (err instanceof AssetPreflightError) {
+              return JSON.stringify({ error: err.code, path: err.assetPath, message: err.message, nextAction: err.nextAction }, null, 2);
             }
             if (err instanceof StaleArtifactError) {
               const currentPath = join(workRoot(ctx), ".opencode", "artifacts", `${slug}.html`);

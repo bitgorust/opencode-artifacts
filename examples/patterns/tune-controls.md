@@ -9,6 +9,7 @@ Drag the sliders: the charts update live. When the shape looks right, copy the v
 
 ```vega-lite
 {
+  "description": "Interactive controls change the frequency and amplitude of the displayed sine wave.",
   "params": [
     { "name": "freq", "value": 2, "bind": { "input": "range", "min": 0.5, "max": 8, "step": 0.5, "name": "Frequency " } },
     { "name": "amp", "value": 1, "bind": { "input": "range", "min": 0.2, "max": 3, "step": 0.2, "name": "Amplitude " } }
@@ -27,6 +28,7 @@ Drag the sliders: the charts update live. When the shape looks right, copy the v
 
 ```echarts
 {
+  "description": "The twelve-week series rises overall from 12 to 40 with several temporary dips.",
   "xAxis": { "type": "category", "data": ["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"] },
   "yAxis": { "type": "value" },
   "dataZoom": [{ "type": "slider" }],

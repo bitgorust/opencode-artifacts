@@ -10,8 +10,15 @@ export const NAME_RE = /^[a-z0-9-]+$/;
  */
 export function prepareServedHtml(text: string, options: { liveReload?: boolean } = {}): string {
   const relaxed = text.replace("connect-src 'none'", "connect-src 'self'");
-  const snippet =
-    options.liveReload === false ? BRIDGE_SNIPPET : BRIDGE_SNIPPET + LIVE_RELOAD_SNIPPET;
-  const at = relaxed.lastIndexOf("</body>");
-  return at === -1 ? relaxed + snippet : relaxed.slice(0, at) + snippet + relaxed.slice(at);
+  const headEnd = relaxed.indexOf("</head>");
+  const bodyStart = relaxed.indexOf("<body", headEnd === -1 ? 0 : headEnd + 7);
+  const bodyOpenEnd = bodyStart === -1 ? -1 : relaxed.indexOf(">", bodyStart);
+  const bridged = bodyOpenEnd === -1
+    ? BRIDGE_SNIPPET + relaxed
+    : relaxed.slice(0, bodyOpenEnd + 1) + BRIDGE_SNIPPET + relaxed.slice(bodyOpenEnd + 1);
+  if (options.liveReload === false) return bridged;
+  const bodyEnd = bridged.lastIndexOf("</body>");
+  return bodyEnd === -1
+    ? bridged + LIVE_RELOAD_SNIPPET
+    : bridged.slice(0, bodyEnd) + LIVE_RELOAD_SNIPPET + bridged.slice(bodyEnd);
 }

@@ -8,7 +8,7 @@ Reference: the official [Claude Code Artifact guide](https://code.claude.com/doc
 `docs/page-quality-benchmark.md` (comparative quality gate). Official media remains link-only
 unless explicit redistribution authority is recorded.
 
-## Design tokens (adapted from the official visual reference)
+## Built-in design tokens (adapted from the official visual reference)
 
 ```
 --page-bg:        #e9edf2  (light gray-blue)
@@ -20,10 +20,10 @@ unless explicit redistribution authority is recorded.
 --ink-2:          #4b5563
 --ink-3:          #9ca3af
 --line:           #e5e7eb
---accent:         #6d6bd6  (periwinkle, chart fill / pills)
---good:           #2f9e6e  on #e4f4ec
---bad:            #d64550  on #fdeeee
---warn:           #b45309  on #fdf0dc
+--accent:         #5f5dbf  (AA periwinkle, chart fill / pills)
+--good:           #237a52  on #e4f4ec
+--bad:            #b42335  on #fdeeee
+--warn:           #92400e  on #fdf0dc
 --info:           #33526e  on #dce6f2
 --card-bad-bg:    #fdeeee  (whole metric card tinted when tone=bad)
 --card-info-bg:   #e3eaf4  (insight card, blue-gray)
@@ -35,6 +35,34 @@ unless explicit redistribution authority is recorded.
 
 Dark mode: same hues, backgrounds shifted (page `#151a21`, card `#1f2630`, ink `#e5e7eb`),
 via `color-scheme: light dark` + `@media (prefers-color-scheme: dark)` overrides.
+
+### Accessibility and internationalization
+
+Declarative pages expose a skip link, header/main landmarks, Unicode-safe heading anchors,
+visible focus, control names/state, reduced-motion behavior, responsive reflow, and a print
+mode that removes interactive chrome. Frontmatter accepts `lang`, `dir`, `locale`, and
+`timezone`; the deterministic fallback is English (`en-US`), left-to-right, and UTC. RTL
+languages infer RTL direction unless `dir` is explicit.
+
+Every chart requires a top-level `description`, every Mermaid fence begins with
+`%% summary: ...`, and every table requires `caption`. Tables accept `num`, `date`, and
+`datetime`; date values are zoned ISO timestamps and render under the declared locale and IANA
+time zone. Missing equivalents or invalid locale metadata refuse CLI/plugin publication.
+Decisions use radio semantics and arrow-key navigation. Served comments expose a named
+launcher and dialog with Escape/cancel/save focus restoration.
+
+### Bounded project and prompt overrides
+
+The renderer discovers only `.opencode/artifact-tokens.json` for project tokens. A document
+may contain one `design-tokens` JSON fence for explicit prompt-level values. Both use
+`{"schemaVersion":1,"tokens":{...}}`; the shipped authoring reference owns the exact key and
+enum list. Precedence is prompt > project > curated theme > built-in defaults.
+
+Each source is capped at 8 KiB, parsed atomically, contrast checked against its effective lower
+layers, and emitted in deterministic order through fixed CSS-variable slots. Unknown keys,
+non-hex colors, arbitrary font strings, selectors, declarations, URLs, markup, imports, and
+expressions refuse publication before permission or writes. The portable page retains named
+per-token provenance. Trusted HTML does not participate in this bounded token path.
 
 ## Page layout
 
@@ -109,7 +137,9 @@ header toggle cycles system → dark → light and persists to localStorage
 - GitHub alerts: `> [!NOTE]`, `> [!TIP]`, `> [!WARNING]`, `> [!IMPORTANT]`, `> [!CAUTION]`
   → styled callout boxes (post-process rendered `<blockquote>` HTML).
 - Task lists: `- [ ]` / `- [x]` render as styled checkboxes (read-only).
-- Invalid JSON in any component fence → inline error box (existing behavior, reused).
+- CLI/plugin publication aggregates invalid component JSON with other authoring diagnostics
+  and refuses before permission or writes. Standalone rendering retains the escaped inline
+  error box fallback.
 
 ## Mapping to the documented Claude patterns
 

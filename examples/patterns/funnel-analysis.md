@@ -18,6 +18,7 @@ theme: report
 
 ```vega-lite
 {
+  "description": "Conversion holds near 33 percent before falling to roughly 24 percent after the March 19 release.",
   "data": { "values": [
     {"day": "Mar 11", "rate": 33.4}, {"day": "Mar 12", "rate": 33.1}, {"day": "Mar 13", "rate": 33.8},
     {"day": "Mar 14", "rate": 32.9}, {"day": "Mar 15", "rate": 33.5}, {"day": "Mar 16", "rate": 33.2},

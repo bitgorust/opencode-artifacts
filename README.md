@@ -55,6 +55,7 @@ output stays diff-friendly and cheap in tokens.
 - **Live reload**: `opencode-artifacts serve` refreshes open pages on every republish
 - **Sharing**: cost-free public snapshots via GitHub Pages or a user-operated Cloudflare Worker + KV; Cloudflare Access is a manual, unverified perimeter
 - **Safe by default**: no raw HTML passthrough, credential-pattern scan blocks accidental secret leaks, no external requests at view time
+- **Contained local images**: Markdown images beneath the worktree are MIME-checked and embedded as hashed data URIs; missing, external, symlinked, active, oversized, or unlabelled inputs fail before publication
 
 ## Install
 
@@ -166,14 +167,25 @@ opencode-artifacts import ./bundle
 
 Full reference: [`docs/component-spec.md`](docs/component-spec.md). Short version:
 
-- **Frontmatter**: `title`, `icon` (emoji favicon), `description` (gallery subtitle)
+- **Frontmatter**: `title`, `icon`, `description`, explicit `lang`/`dir`, `locale`, `timezone`, and an optional worktree-relative `font` (WOFF/WOFF2/TTF/OTF embedded under `font-src data:`)
 - **Components** (JSON fences): `stats` metric cards, `timeline`, `findings` (severity-coded), `compare` variant cards, `callout` insight cards, `progress`, `diff` (annotated), `copy` (copy-to-session button), `decisions` (workshop rows the session reads back via `artifact_state`)
-- **Charts/diagrams**: ```` ```vega-lite ```` / ```` ```vega ```` / ```` ```echarts ```` / ```` ```mermaid ```` fences; runtimes inline only when used
+- **Charts/diagrams**: ```` ```vega-lite ```` / ```` ```vega ```` / ```` ```echarts ```` require a top-level text `description`; Mermaid starts with `%% summary:`; runtimes inline only when used
+- **Accessible data**: tables require `caption`; `num`, `date`, and `datetime` columns format under the declared locale/time zone, with zoned ISO input for dates
 - **Markdown extras**: GitHub alerts (`> [!WARNING]` etc.), task lists, heading anchors, `##` sections become cards
-- Broken specs degrade to inline error boxes; the page always ships
+- **Local images**: ordinary `![meaningful alt](path/to/image.png)` resolves from the worktree root and embeds PNG/JPEG/GIF/WebP or constrained static SVG. Use the exact title `"decorative"` with empty alt only for an intentionally decorative image. URLs, absolute paths, traversal, and symlinks are refused.
+- **Local fonts**: `font: path/to/project.woff2` uses the same contained, MIME-checked pipeline and a generated `@font-face`; it never permits a viewer network request or arbitrary CSS.
+- **Bounded design tokens**: `.opencode/artifact-tokens.json` supplies project defaults and one
+  version-1 `design-tokens` JSON fence supplies prompt overrides. Only documented
+  color, font, spacing, radius, and density slots are accepted; prompt > project > theme >
+  built-in precedence and provenance are recorded in the portable page.
+- CLI/plugin publication preflights the whole document and refuses all detected errors before
+  permission or writes. Standalone rendering still degrades broken specs to escaped inline
+  error boxes for resilient inspection; warnings remain visible on successful publication.
 
 Worked examples for every canonical pattern: [`examples/patterns/`](examples/patterns/) with
 browser-verified screenshots in [`docs/evidence/patterns/`](docs/evidence/patterns/).
+The bounded-token fixture and desktop/mobile offline observations are in
+[`docs/evidence/renderer/goal-3-design-tokens-2026-08-17.md`](docs/evidence/renderer/goal-3-design-tokens-2026-08-17.md).
 
 ## Sharing and hosting
 

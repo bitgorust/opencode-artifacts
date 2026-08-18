@@ -27,6 +27,7 @@ icon: 🚨
 
 ```echarts
 {
+  "description": "Server errors spike from 4 to 63 per minute at 14:05, then recover to 3 by 14:30.",
   "xAxis": { "type": "category", "data": ["13:50", "13:55", "14:00", "14:05", "14:10", "14:15", "14:20", "14:25", "14:30"] },
   "yAxis": { "type": "value", "name": "5xx / min" },
   "series": [{ "type": "line", "areaStyle": {}, "smooth": true, "data": [2, 4, 41, 63, 58, 47, 22, 9, 3] }]

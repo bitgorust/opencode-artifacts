@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "profile": "renderer-linux-container-v1",
+  "referenceEnvironment": {
+    "platform": "linux",
+    "arch": "x64",
+    "nodeMajor": 24,
+    "cpuQuotaCores": 2,
+    "memoryLimitBytes": 4294967296,
+    "browserName": "chrome",
+    "browserMajor": 151
+  },
+  "sampling": {
+    "cliSamples": 12,
+    "browserSamples": 7,
+    "minimumSamples": 5,
+    "noiseFloorMs": 250,
+    "maxRelativeP95Spread": 1
+  },
+  "workloads": {
+    "no-runtime": {
+      "fixture": "no-runtime.md",
+      "runtimeBundles": [],
+      "cliP95Ms": 2000,
+      "browserUsefulContentMs": 1500,
+      "browserKeyboardAdditionalMs": 1000,
+      "warningBytes": 131072,
+      "hardBytes": 196608
+    },
+    "one-chart": {
+      "fixture": "one-chart.md",
+      "runtimeBundles": ["vega", "vega-embed"],
+      "cliP95Ms": 5000,
+      "browserUsefulContentMs": 3000,
+      "browserKeyboardAdditionalMs": 1000,
+      "warningBytes": 1048576,
+      "hardBytes": 1572864
+    },
+    "multi-runtime": {
+      "fixture": "multi-runtime.md",
+      "runtimeBundles": ["vega", "vega-embed", "echarts", "mermaid"],
+      "cliP95Ms": 5000,
+      "browserUsefulContentMs": 5000,
+      "browserKeyboardAdditionalMs": 1000,
+      "warningBytes": 6291456,
+      "hardBytes": 8388608
+    }
+  }
+}

@@ -18,6 +18,7 @@ A week of deploy failures across all services, with the two hotspots called out.
 
 ```vega-lite
 {
+  "description": "Daily failures peak at 14 on Wednesday and fall to 5 by Saturday before ending at 7.",
   "data": { "values": [
     { "day": "Mon", "failures": 6 }, { "day": "Tue", "failures": 9 },
     { "day": "Wed", "failures": 14 }, { "day": "Thu", "failures": 12 },

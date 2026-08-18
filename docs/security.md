@@ -41,3 +41,10 @@ For a suspected credential or release compromise:
 Never paste tokens, private advisory content, raw participant data, or private artifacts into
 public issues, diagnostics, fixtures, or release evidence. Secret scanning reduces accidental
 exposure but is not exhaustive; final audience-bound bytes and staged metadata require review.
+
+Markdown design configuration is data-only. The renderer reads at most the documented 8 KiB
+project token file without following its file or parent-directory symlinks, accepts one
+versioned prompt fence, validates fixed names/types and contrast atomically, and emits only
+fixed CSS-variable slots. It never accepts selectors, declarations, URLs, markup, imports,
+expressions, arbitrary font stacks, or raw CSS; trusted HTML remains a separately disclosed
+permission mode.

@@ -115,6 +115,7 @@ test("advisory payloads stay data in the page and the app exposes no Vega View g
   const markdown = [
     "```vega",
     JSON.stringify({
+      description: "The security fixture contains one category with one amount.",
       data: [{ name: "table", values: [{ category: "A", amount: 28 }] }],
       signals: [
         { name: "gadget", value: null, on: [{ events: { type: "mousemove", source: "window" }, update: VEGA_GLOBAL_GADGET }] },
@@ -124,6 +125,7 @@ test("advisory payloads stay data in the page and the app exposes no Vega View g
     "```",
     "```echarts",
     JSON.stringify({
+      description: "The security fixture retains hostile series labels as inert data.",
       tooltip: {},
       xAxis: {},
       yAxis: {},

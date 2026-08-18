@@ -2,6 +2,9 @@
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { renderArtifact, renderRawHtml } from "./render.ts";
+import type { PortableAssets } from "./assets.ts";
+import type { ResolvedDesignTokens } from "./design-tokens.ts";
+import { formatPreflight, preflightDocument, trustedHtmlDiagnostic } from "./preflight.ts";
 import { FilePublisher, slugify } from "./publisher.ts";
 import { GitHubPagesPublisher } from "./github-pages.ts";
 import { CloudflarePublisher } from "./cloudflare-publisher.ts";
@@ -106,9 +109,31 @@ async function renderCommand(args: string[]): Promise<void> {
     );
     process.exit(1);
   }
+  let assets: PortableAssets | undefined;
+  let designTokens: ResolvedDesignTokens | undefined;
+  if (format === "html") {
+    console.error(`warning: ${trustedHtmlDiagnostic().message}`);
+  } else {
+    const preflight = await preflightDocument(markdown, { worktreeRoot: process.cwd() });
+    const errors = preflight.diagnostics.filter((item) => item.severity === "error");
+    if (errors.length > 0 || preflight.omitted > 0) {
+      console.error(formatPreflight(preflight));
+      process.exit(1);
+    }
+    for (const warning of preflight.diagnostics) console.error(`warning: ${warning.code} at ${warning.line}:${warning.column}: ${warning.message}`);
+    assets = preflight.assets;
+    designTokens = preflight.designTokens;
+  }
   const rendered =
-    format === "html" ? renderRawHtml(markdown, title ? { title } : {}) : renderArtifact(markdown);
+    format === "html" ? renderRawHtml(markdown, title ? { title } : {}) : renderArtifact(markdown, { assets, designTokens });
   const finalTitle = title ?? rendered.meta.title ?? "Artifact";
+  const finalFindings = scanSensitive(rendered.html);
+  if (finalFindings.length > 0 && !force) {
+    console.error(
+      `publish blocked: final portable bytes contain credential-looking strings: ${formatFindings(finalFindings)}. Re-run with --force to publish anyway.`,
+    );
+    process.exit(1);
+  }
 
   let outPath: string;
   if (out) {

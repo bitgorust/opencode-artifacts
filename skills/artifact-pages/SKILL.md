@@ -47,6 +47,11 @@ Decide the treatment before writing — the theme is part of the read, not an af
 Set it in frontmatter (`theme: report`). When nothing fits, `default` is always respectable —
 an over-styled page is worse than a plain one.
 
+If the project contains `.opencode/artifact-tokens.json`, its bounded version-1 visual tokens
+automatically outrank the theme. Use one `design-tokens` JSON fence only when the request needs
+an explicit per-page override; it outranks the project file. Never write CSS, selectors, URLs,
+or font names into tokens—use only the documented values in `reference/components.md`.
+
 ## Pre-publish checklist
 
 1. The title names the page like a product (2–4 words, no appended explainer)
@@ -54,6 +59,8 @@ an over-styled page is worse than a plain one.
 3. Every chart's title states the finding, not the axes
 4. Components carry `tone` where attention matters
 5. No error boxes survive to publish — fix and re-render first
+6. Every local Markdown image has meaningful alt text; use `![](path "decorative")` only when
+   the image genuinely adds no information
 
 ## Naming (adapted from Claude Code's artifact-design skill)
 
@@ -90,7 +97,13 @@ Grown from observed failures; add new ones as they bite:
 - Vega-Lite `text` channels need `{"field": "..."}` objects, not bare strings.
 - Area charts under layered marks need `"clip": true` or the fill escapes the plot.
 - A chart spec containing `</script>` is safe (payload is `\u003c`-escaped) — don't "fix" it.
-- Malformed component JSON renders an inline error box and the page still ships; fix the spec
-  and republish rather than working around the box.
+- Malformed component JSON is returned with all other detected authoring errors before the
+  publish permission or any write. The standalone renderer retains escaped inline error boxes
+  for inspection; fix every reported spec and publish again.
 - `serve`-mode extras (live reload, decisions persistence, comments) exist only on served
   pages; a `file://` artifact keeps its strict CSP and localStorage-only state.
+- Markdown image paths are worktree-root-relative. The publisher embeds allowlisted local
+  bytes and refuses URLs, absolute/traversal paths, symlinks, missing alt text, and unsupported
+  or oversized content before asking permission.
+- A project font is opt-in via worktree-root-relative frontmatter `font:` and must be WOFF,
+  WOFF2, TTF, or OTF. The renderer generates the font rule; never add CSS to Markdown.

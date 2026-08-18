@@ -210,6 +210,13 @@ pairs are rated OpenCode equivalent or better, no task family loses a reviewer m
 OpenCode meets or exceeds Claude's median in every rubric dimension while scoring at least
 4/5 absolutely.
 
+Status: **Goal 3's Phase 2 correctness track passed on 2026-08-18**. The portable asset,
+declarative preflight, bounded design-token, accessibility/internationalization, and renderer
+performance packets are archived with offline browser, keyboard/mobile-width, manual
+screen-reader, byte-boundary, and percentile evidence. Phase 2 as a whole remains incomplete:
+the corpus expansion and comparative-quality work in items 8–12, including authorized Claude
+runs and independent reviewers, belongs to Goal 5 and retains its external-input blockers.
+
 ## Phase 3 — Native OpenCode lifecycle
 
 Goal: make artifact behavior feel built into OpenCode rather than merely callable.

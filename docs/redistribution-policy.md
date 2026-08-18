@@ -1,6 +1,6 @@
 # Redistribution and attribution inventory
 
-Policy version: 1. Last reviewed: 2026-08-16.
+Policy version: 1. Last reviewed: 2026-08-17.
 
 The machine-readable [`redistribution-inventory.json`](redistribution-inventory.json) is the
 complete Phase 0 disposition for repository documentation, examples, retained binary assets,
@@ -9,7 +9,9 @@ documentation, fixtures, skills, tests, and generated screenshots are distribute
 root [MIT license](../LICENSE). Every retained binary asset is bound to exact bytes by SHA-256
 and names its source and attribution.
 
-No font file is embedded or redistributed. The renderer uses system font-family fallbacks.
+No font file is retained or redistributed by this repository. The renderer uses system
+fallbacks by default; a user-declared worktree font may be embedded in that user's generated
+page and remains subject to the user's own redistribution authority.
 Runtime dependency terms and the three exceptional branch choices are governed by
 [`license-dispositions.json`](license-dispositions.json) and the exact candidate evidence in
 [`renderer-remediation-2026-08-16.md`](evidence/governance/renderer-remediation-2026-08-16.md).
