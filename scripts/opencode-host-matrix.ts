@@ -125,6 +125,18 @@ export function exactStableMatrix(currentStable: string, oldestTested: string): 
   return { versions, deduplicated: versions.length === 1 };
 }
 
+export function stableVersionFromNpm(value: unknown): string {
+  const version = typeof value === "string"
+    ? value
+    : Array.isArray(value) && value.length === 1 && typeof value[0] === "string"
+      ? value[0]
+      : undefined;
+  if (version === undefined || !/^\d+\.\d+\.\d+$/.test(version)) {
+    throw new Error("npm must resolve exactly one stable OpenCode version");
+  }
+  return version;
+}
+
 export function parseServerUrl(output: string): string | undefined {
   return output.match(/opencode server listening on (http:\/\/127\.0\.0\.1:\d+)/)?.[1];
 }
@@ -436,10 +448,7 @@ export async function runMatrix(tarballInput: string, outputInput: string): Prom
     await mkdir(packageRoot, { recursive: true });
     const packageInstall = await runCommand("npm", ["install", "--prefix", packageRoot, "--ignore-scripts", "--no-audit", "--no-fund", tarball], { cwd: work });
     const currentResolution = await runCommand("npm", ["view", "opencode-ai", "version", "--json"], { cwd: work });
-    const currentStable = JSON.parse(currentResolution.output.trim()) as unknown;
-    if (typeof currentStable !== "string" || !/^\d+\.\d+\.\d+$/.test(currentStable)) {
-      throw new Error(`npm resolved a non-stable OpenCode version: ${currentResolution.output}`);
-    }
+    const currentStable = stableVersionFromNpm(JSON.parse(currentResolution.output.trim()) as unknown);
     const pluginDirectory = join(packageRoot, "node_modules", "opencode-artifacts");
     const manifest = JSON.parse(await readFile(join(pluginDirectory, "package.json"), "utf8")) as { version?: unknown };
     if (typeof manifest.version !== "string") throw new Error("packed package version is missing");

@@ -8,6 +8,7 @@ import {
   exactStableMatrix,
   packFilename,
   parseServerUrl,
+  stableVersionFromNpm,
 } from "../scripts/opencode-host-matrix.ts";
 
 test("pack filename accepts npm array and keyed-object JSON while requiring one result", () => {
@@ -33,6 +34,14 @@ test("stable host matrix deduplicates identical exact current and oldest cells",
     versions: ["1.19.0", "1.18.18"],
     deduplicated: false,
   });
+});
+
+test("stable version accepts npm scalar and one-item array output only", () => {
+  assert.equal(stableVersionFromNpm("1.18.18"), "1.18.18");
+  assert.equal(stableVersionFromNpm(["1.18.18"]), "1.18.18");
+  assert.throws(() => stableVersionFromNpm([]), /exactly one stable/);
+  assert.throws(() => stableVersionFromNpm(["1.18.18", "1.19.0"]), /exactly one stable/);
+  assert.throws(() => stableVersionFromNpm("next"), /exactly one stable/);
 });
 
 test("host discovery requires every shipped tool and documented property", () => {
