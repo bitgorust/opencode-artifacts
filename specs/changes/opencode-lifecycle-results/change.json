@@ -9,7 +9,7 @@
     "specs/current/artifact-lifecycle.spec.md",
     "specs/current/opencode-integration.spec.md"
   ],
-  "currentSpecsUpdated": false,
+  "currentSpecsUpdated": true,
   "approval": {
     "by": "aaron.zeng",
     "at": "2026-08-18T01:48:52Z"

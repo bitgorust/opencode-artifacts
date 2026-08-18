@@ -29,6 +29,11 @@
   Markdown, datasource arguments, full executable paths, credentials, and provider output.
   Stable OpenCode 1.18.18 preserves exact `allow`/`ask`/`deny` rules, including explicit deploy
   and audience deny entries beneath a broad auto-allow wildcard.
+- `LIFE-06`, `COMPAT-05`: the stable lifecycle schema adds `op: "reopen"`. The plugin config
+  hook injects `/artifact-reopen` only when that command name is free, and leaves a user-owned
+  command untouched. Stable results use `{title, output, metadata}` with a bounded version-1
+  `metadata.artifactResult`; the non-enumerable string conversion returns the same `output` for
+  direct legacy callers.
 
 ## Evidence boundary
 
@@ -43,3 +48,6 @@
   transitions. Stable-host evidence confirms policy parsing and exact precedence without
   provider inference; tool-selection enforcement is covered by injected `ctx.ask` integration
   because native tool execution otherwise requires a provider turn.
+- Packed discovery requires the `reopen` enum member and the effective injected command.
+  `opencode-artifacts latest --open` is tested separately with an injectable launcher and does
+  not depend on the host config hook.

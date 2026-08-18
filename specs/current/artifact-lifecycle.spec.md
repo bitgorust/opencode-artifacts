@@ -32,6 +32,15 @@
   restore, preview-bound recoverable archive/unarchive, and checksummed directory export/import.
   Archive confirmation is one-use and head/state/deployment scoped. Irreversible deletion is
   not exposed. Plugin archive confirmation uses a distinct permission request.
+- `LIFE-06`, `UX-01`: plugin lifecycle also exposes `reopen` for one exact active ID, slug,
+  contained path, or registered URL. Local references open the stable contained path; an exact
+  registered URL opens that URL. Invalid, archived, escaping, unregistered, or failed launcher
+  selections open nothing and return a typed next action. Stable configuration injects
+  `/artifact-reopen`; `opencode-artifacts latest --open` remains the standalone fallback.
+- Plugin publish/lifecycle calls return stable host result objects with concise `output` and a
+  bounded `metadata.artifactResult` schema-1 envelope. `String(result)` and `output` preserve
+  prior readable text/JSON. Large reads use an exact immutable revision path plus a bounded
+  preview rather than placing full HTML in metadata.
 - Authoring sources, local state, migration backups/reports, transactions, archive records,
   previews, and exported bundles are not copied into public-static staging by default.
 
@@ -41,6 +50,10 @@
   and restore spelling remain accepted compatibility aliases. Under schema 2, history is
   unconditional, an existing-artifact publish without a precondition refuses, and restore
   requires the expected head. These public changes use the next pre-1.0 minor.
+- `COMPAT-05`: `reopen` and result-envelope schema 1 are additive. Existing lifecycle operation
+  names and argument spellings remain accepted, and the prior text/JSON lives in `output` for
+  the documented deprecation window. User-owned `artifact-reopen` command configuration is
+  preserved rather than overwritten.
 - `QUAL-02`, `QUAL-06`: the Node 24 full suite covers deterministic unit, model, multi-process,
   crash, migration, CLI, plugin, hostile-reference, bundle, and loopback behavior. A real
   two-tab Chromium run verifies visible decision/comment conflicts and a non-mutating quota

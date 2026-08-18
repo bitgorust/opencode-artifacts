@@ -163,6 +163,17 @@ opencode-artifacts export <id> --output ./bundle
 opencode-artifacts import ./bundle
 ```
 
+Stable OpenCode also injects `/artifact-reopen <exact-reference>`, backed by
+`artifact_lifecycle` with `op: "reopen"`. It accepts an exact active ID, slug, contained path,
+or registered URL and never guesses. If a user already owns that command name, the plugin
+leaves it unchanged; `opencode-artifacts latest --open` remains the portable fallback.
+
+Publish and lifecycle tools return the stable host's structured result shape. Human/model text
+is in `output`; `metadata.artifactResult` is a bounded schema-versioned identity, revision,
+path/URL, capability, visibility, outcome, and next-action envelope. Existing operation and
+argument spellings remain accepted, and prior readable text/JSON stays in `output` through at
+least the next supported release after this metadata contract was introduced.
+
 ## Authoring format
 
 Full reference: [`docs/component-spec.md`](docs/component-spec.md). Short version:

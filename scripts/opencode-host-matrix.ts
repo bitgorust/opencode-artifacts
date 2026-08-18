@@ -47,6 +47,7 @@ interface ServerResult {
   logs: string;
   config: unknown;
   effectivePermission?: unknown;
+  effectiveCommand?: unknown;
 }
 
 export interface MatrixEvidence {
@@ -131,6 +132,10 @@ export function assertArtifactToolContract(ids: unknown, tools: unknown): assert
     for (const property of properties) {
       if (!(property in actual)) throw new Error(`${id} schema is missing ${property}`);
     }
+  }
+  const lifecycleOp = byId.get("artifact_lifecycle")?.parameters?.properties?.["op"];
+  if (!isRecord(lifecycleOp) || !Array.isArray(lifecycleOp["enum"]) || !lifecycleOp["enum"].includes("reopen")) {
+    throw new Error("artifact_lifecycle op schema is missing reopen");
   }
 }
 
@@ -264,6 +269,11 @@ async function probeRoute(input: {
     assertArtifactToolContract(ids, tools);
     const effectiveConfig = await fetchJson(`${server.url}/config`);
     const effectivePermission = isRecord(effectiveConfig) ? effectiveConfig["permission"] : undefined;
+    const effectiveCommand = isRecord(effectiveConfig) ? effectiveConfig["command"] : undefined;
+    const reopenCommand = isRecord(effectiveCommand) ? effectiveCommand["artifact-reopen"] : undefined;
+    if (!isRecord(reopenCommand) || typeof reopenCommand["template"] !== "string" || !reopenCommand["template"].includes("artifact_lifecycle")) {
+      throw new Error("stable host omitted the injected artifact-reopen command");
+    }
     if (input.route === "config-array") {
       if (!isRecord(effectivePermission)) throw new Error("stable host omitted configured artifact permissions");
       for (const [permission, decision] of Object.entries(OPENCODE_PERMISSION_POLICY)) {
@@ -281,6 +291,7 @@ async function probeRoute(input: {
       logs: server.logs(),
       config: input.config,
       ...(effectivePermission === undefined ? {} : { effectivePermission }),
+      effectiveCommand: { "artifact-reopen": reopenCommand },
     };
   } finally {
     await stopServer(child);

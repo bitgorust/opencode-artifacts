@@ -24,7 +24,10 @@ test("host discovery requires every shipped tool and documented property", () =>
   const ids = Object.keys(ARTIFACT_TOOL_CONTRACT);
   const tools = Object.entries(ARTIFACT_TOOL_CONTRACT).map(([id, properties]) => ({
     id,
-    parameters: { properties: Object.fromEntries(properties.map((property) => [property, {}])) },
+    parameters: { properties: Object.fromEntries(properties.map((property) => [
+      property,
+      id === "artifact_lifecycle" && property === "op" ? { enum: ["list", "reopen"] } : {},
+    ])) },
   }));
   assert.doesNotThrow(() => assertArtifactToolContract(ids, tools));
   assert.throws(
