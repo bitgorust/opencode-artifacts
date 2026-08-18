@@ -76,6 +76,15 @@
       "status": "approved"
     },
     {
+      "path": "docs/evidence/lifecycle/goal-2-browser-conflict-2026-08-17.png",
+      "sha256": "7dad0994644b24bae412dda64760087d992e00757e1443586e6f8ac7989281b3",
+      "provenance": "repository-generated browser capture",
+      "source": "examples/patterns/workshop.md in the isolated Goal 2 two-client Chromium observation",
+      "license": "MIT",
+      "attribution": "opencode-artifacts contributors",
+      "status": "approved"
+    },
+    {
       "path": "docs/evidence/live-artifact.png",
       "sha256": "edff691758c877801de3b0d77d519ddc9dd15ec271c967e4d0614192f520e2f9",
       "provenance": "repository-generated browser capture",

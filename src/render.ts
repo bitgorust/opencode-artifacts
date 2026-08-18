@@ -166,6 +166,9 @@ pre.mermaid{background:var(--card-bg);border:1px solid var(--line);border-radius
 .decision-opt.selected .decision-label{font-weight:650;color:var(--accent)}
 .decision-note{font-size:.82rem;color:var(--ink-2)}
 .decisions-hint{font-size:.78rem;color:var(--ink-3);margin-top:.5rem}
+.artifact-state-notice{position:fixed;left:50%;top:1rem;transform:translateX(-50%);z-index:30;max-width:min(92vw,640px);padding:.7rem 1rem;border:1px solid var(--warn);border-radius:10px;background:var(--card-warn-bg);color:var(--ink);box-shadow:0 6px 24px rgb(15 23 42/.18);font-size:.86rem}
+.artifact-state-notice[data-scope="comments"]{top:5rem}
+.artifact-state-notice[data-tone="error"]{border-color:var(--bad);background:var(--bad-bg)}
 .table-wrap{margin:1rem 0}
 .table-filter{width:100%;max-width:320px;padding:.45rem .8rem;border:1px solid var(--line);border-radius:8px;background:var(--card-bg);color:var(--ink);font:inherit;font-size:.88rem;margin-bottom:.5rem}
 .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
@@ -224,6 +227,11 @@ h2{font-family:Georgia,Charter,"Times New Roman",serif;font-size:1.6rem;font-wei
 };
 
 const BOOT = `(function () {
+  function operationId() {
+    return window.crypto && window.crypto.randomUUID
+      ? window.crypto.randomUUID()
+      : "00000000-0000-4000-8000-" + Math.random().toString(16).slice(2).padEnd(12, "0").slice(0, 12);
+  }
   var root = document.documentElement;
   if (!root.hasAttribute("data-page-theme")) {
     var header = document.querySelector(".artifact-header");
@@ -302,6 +310,31 @@ const BOOT = `(function () {
     note.textContent = msg;
     setTimeout(function () { note.textContent = ""; }, 1600);
   }
+  function stateNotice(scope, message, tone) {
+    var id = "artifact-state-notice-" + scope;
+    var notice = document.getElementById(id);
+    if (!message) {
+      if (notice && notice.parentNode) notice.parentNode.removeChild(notice);
+      return;
+    }
+    if (!notice) {
+      notice = document.createElement("div");
+      notice.id = id;
+      notice.className = "artifact-state-notice";
+      notice.setAttribute("role", "alert");
+      notice.setAttribute("aria-live", "assertive");
+      notice.setAttribute("data-scope", scope);
+      document.body.appendChild(notice);
+    }
+    notice.setAttribute("data-tone", tone || "warning");
+    notice.textContent = message;
+  }
+  function stateFailureMessage(label, body) {
+    var reason = body && (body.message || body.error) ? String(body.message || body.error) : "request refused";
+    var next = body && body.nextAction ? " " + String(body.nextAction) : " Reload the page and retry.";
+    return label + " were not saved: " + reason + "." + next;
+  }
+  var decisionStateMeta = { revision: 0, contentHash: null };
   document.addEventListener("click", function (ev) {
     var btn = ev.target && ev.target.closest ? ev.target.closest(".copy-btn") : null;
     if (btn) {
@@ -340,8 +373,23 @@ const BOOT = `(function () {
       fetch(window.__ARTIFACT_STATE_URL__ + "/" + encodeURIComponent(slug), {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ answers: state }),
-      }).catch(function () {});
+        body: JSON.stringify({ answers: state, expectedRevision: decisionStateMeta.revision, expectedHash: decisionStateMeta.contentHash || undefined, operationId: operationId() }),
+      }).then(function (r) { return r.json().then(function (body) { return { ok: r.ok, status: r.status, body: body }; }); })
+        .then(function (result) {
+          if (result.ok) {
+            decisionStateMeta.revision = result.body.revision;
+            decisionStateMeta.contentHash = result.body.contentHash;
+            document.documentElement.removeAttribute("data-artifact-state-conflict");
+            stateNotice("decisions", "");
+          } else if (result.status === 409) {
+            decisionStateMeta.revision = result.body.revision;
+            decisionStateMeta.contentHash = result.body.contentHash;
+            document.documentElement.setAttribute("data-artifact-state-conflict", "decisions");
+            stateNotice("decisions", "Decisions changed in another session. Reload to review the latest choices before retrying.");
+          } else {
+            stateNotice("decisions", stateFailureMessage("Decisions", result.body), "error");
+          }
+        }).catch(function () { stateNotice("decisions", "Decisions were not saved because the local service is unavailable. Check the server and retry.", "error"); });
     }
   });
   try {
@@ -351,10 +399,22 @@ const BOOT = `(function () {
       if (el) el.classList.add("selected");
     });
   } catch (e) {}
+  if (window.__ARTIFACT_STATE_URL__) {
+    var initialStateSlug = decodeURIComponent(location.pathname.split("/").pop() || "").replace(/\.html$/, "");
+    fetch(window.__ARTIFACT_STATE_URL__ + "/" + encodeURIComponent(initialStateSlug))
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (data && typeof data.revision === "number") {
+          decisionStateMeta.revision = data.revision;
+          decisionStateMeta.contentHash = data.contentHash;
+        }
+      }).catch(function () {});
+  }
 
   var commentsKey = "artifact-comments:" + location.pathname;
   function commentsUrl() { return window.__ARTIFACT_COMMENTS_URL__ || null; }
   var threads = [];
+  var commentsStateMeta = { revision: 0, contentHash: null };
   var dock = null;
   var popBtn = null;
   var form = null;
@@ -377,8 +437,23 @@ const BOOT = `(function () {
       fetch(url + "/" + encodeURIComponent(slugFromPath()), {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ threads: threads }),
-      }).catch(function () {});
+        body: JSON.stringify({ threads: threads, expectedRevision: commentsStateMeta.revision, expectedHash: commentsStateMeta.contentHash || undefined, operationId: operationId() }),
+      }).then(function (r) { return r.json().then(function (body) { return { ok: r.ok, status: r.status, body: body }; }); })
+        .then(function (result) {
+          if (result.ok) {
+            commentsStateMeta.revision = result.body.revision;
+            commentsStateMeta.contentHash = result.body.contentHash;
+            document.documentElement.removeAttribute("data-artifact-comments-conflict");
+            stateNotice("comments", "");
+          } else if (result.status === 409) {
+            commentsStateMeta.revision = result.body.revision;
+            commentsStateMeta.contentHash = result.body.contentHash;
+            document.documentElement.setAttribute("data-artifact-comments-conflict", "reload-required");
+            stateNotice("comments", "Comments changed in another session. Reload to review the latest thread before retrying.");
+          } else {
+            stateNotice("comments", stateFailureMessage("Comments", result.body), "error");
+          }
+        }).catch(function () { stateNotice("comments", "Comments were not saved because the local service is unavailable. Check the server and retry.", "error"); });
     } else {
       try { localStorage.setItem(commentsKey, JSON.stringify(threads)); } catch (e) {}
     }
@@ -515,6 +590,8 @@ const BOOT = `(function () {
       .then(function (data) {
         if (data && Array.isArray(data.threads)) {
           threads = data.threads;
+          if (typeof data.revision === "number") commentsStateMeta.revision = data.revision;
+          if (typeof data.contentHash === "string") commentsStateMeta.contentHash = data.contentHash;
           try { localStorage.setItem(commentsKey, JSON.stringify(threads)); } catch (e) {}
           renderDock();
         }

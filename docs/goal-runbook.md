@@ -69,7 +69,7 @@ policy approval, provider result, or manual QA outcome.
 | Needed by | Human/external input | If unavailable |
 |---|---|---|
 | Goal 1 | npm package-owner authentication and exact public-preview provider evidence | retain the provider gate as failed/unverified; do not publish preview |
-| Goal 2 | supported OS filesystems for lock/migration/fault tests | do not default-enable the schema on unverified platforms |
+| Goal 2 | supported OS filesystems for lock/migration/fault tests | macOS and Windows native/WSL cells are optional for Goal 2 completion; keep them unverified and do not default-enable the schema there |
 | Goal 3 | supported desktop/mobile browsers, keyboard and screen-reader QA | retain the affected compatibility/accessibility failure |
 | Goal 4 | oldest-supported and current stable OpenCode hosts; release-policy decisions | narrow the support claim or pause certification |
 | Goal 5 | representative-user evidence required by `OUT-02`/`OUT-03`, supported-platform access, authorized current Claude Artifact runs, retention permission, and benchmark reviewers | public preview may continue; keep support, equal-or-better, and local-core certification unverified |
@@ -224,7 +224,9 @@ Goals 3 and 5.
 /goal Execute Goal 2 in docs/goal-runbook.md: implement and verify roadmap Phase 1 so artifact
 identity, revisions, publication, restore, state, and migration are correct across concurrent
 processes and crashes. Preserve compatibility and rollback. Stop only when the canonical
-Phase 1 gate linked below passes on supported write platforms. Deliver on an
+Phase 1 technical gate linked below passes on the observed Node 24 Ubuntu/ext4 cell. Missing
+macOS and Windows native/WSL filesystem observations are optional for this goal only and must
+remain unverified without default schema enablement or inherited support claims. Deliver on an
 agent/goal-2-lifecycle branch with a draft PR unless I authorize otherwise.
 ```
 

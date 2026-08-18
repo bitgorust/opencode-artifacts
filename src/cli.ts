@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { renderArtifact, renderRawHtml } from "./render.ts";
 import { FilePublisher, slugify } from "./publisher.ts";
@@ -16,6 +16,18 @@ import {
 import { formatFindings, scanArtifactDirectory, scanSensitive } from "./guard.ts";
 import { serveArtifacts } from "./serve.ts";
 import { openFile } from "./open.ts";
+import { ArtifactLifecycleStore } from "./artifact-lifecycle.ts";
+import {
+  executeLegacyStateMigration,
+  planLegacyStateMigration,
+  readArtifactState,
+  type DecisionPayload,
+} from "./artifact-state.ts";
+import {
+  executeArtifactMigration,
+  planArtifactMigration,
+  rollbackArtifactMigration,
+} from "./artifact-migration.ts";
 
 const DEFAULT_DIR = join(".opencode", "artifacts");
 
@@ -26,6 +38,16 @@ function usage(): never {
   opencode-artifacts restore <slug> --version <n> [--dir <artifacts-dir>]
   opencode-artifacts latest [--dir <artifacts-dir>] [--open]
   opencode-artifacts state <slug> [--dir <artifacts-dir>]
+  opencode-artifacts list [--dir <artifacts-dir>]
+  opencode-artifacts status <artifact-ref> [--dir <artifacts-dir>]
+  opencode-artifacts read <artifact-ref> [--revision <n>] [--dir <artifacts-dir>]
+  opencode-artifacts archive <artifact-ref> --preview [--dir <artifacts-dir>]
+  opencode-artifacts archive --confirm <token> [--dir <artifacts-dir>]
+  opencode-artifacts unarchive <artifact-id> [--slug <slug>] [--dir <artifacts-dir>]
+  opencode-artifacts export <artifact-ref> --output <directory> [--dir <artifacts-dir>]
+  opencode-artifacts import <bundle-directory> [--dir <artifacts-dir>]
+  opencode-artifacts migrate inspect|apply [--dir <artifacts-dir>]
+  opencode-artifacts migrate rollback --migration-id <uuid> [--dir <artifacts-dir>]
   opencode-artifacts deploy --repo <owner/name> [--dir <artifacts-dir>] [--branch <name>] [--force]
   opencode-artifacts deploy --target cloudflare --name <worker> [--dir <artifacts-dir>] [--force]
   opencode-artifacts init [--global] [--target github|cloudflare] [--repo <owner/name>] [--worker-name <name>] [--yes]`);
@@ -50,14 +72,29 @@ function positional(args: string[], flagsWithValues: string[]): string[] {
   return out;
 }
 
+async function isSchema2Store(dir: string): Promise<boolean> {
+  try {
+    const info = await lstat(join(dir, "manifest.json"));
+    if (info.isSymbolicLink() || !info.isFile()) throw new Error("artifact manifest path is unsafe");
+    const value = JSON.parse(await readFile(join(dir, "manifest.json"), "utf8")) as unknown;
+    return typeof value === "object" && value !== null && "schemaVersion" in value && value.schemaVersion === 2;
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") return false;
+    throw error;
+  }
+}
+
 async function renderCommand(args: string[]): Promise<void> {
-  const [input] = positional(args, ["-o", "--title", "--format"]);
+  const [input] = positional(args, ["-o", "--title", "--format", "--artifact", "--expected-revision", "--expected-hash"]);
   const out = optionValue(args, "-o");
   const title = optionValue(args, "--title");
   const format = optionValue(args, "--format") ?? "markdown";
   const open = args.includes("--open");
   const version = args.includes("--version");
   const force = args.includes("--force");
+  const artifact = optionValue(args, "--artifact");
+  const expectedRevisionArg = optionValue(args, "--expected-revision");
+  const expectedHash = optionValue(args, "--expected-hash");
   if (!input) usage();
   if (format !== "markdown" && format !== "html") usage();
 
@@ -79,18 +116,41 @@ async function renderCommand(args: string[]): Promise<void> {
     await mkdir(dirname(outPath), { recursive: true });
     await writeFile(outPath, rendered.html.replace("<!--artifact:footer-->", ""), "utf8");
   } else {
-    const publisher = new FilePublisher(join(process.cwd(), DEFAULT_DIR));
-    const result = await publisher.publish({
-      slug: slugify(finalTitle),
-      html: rendered.html,
-      title: finalTitle,
-      icon: rendered.meta.icon,
-      description: rendered.meta.description,
-      source: rendered.meta.source,
-      charts: rendered.chartCount,
-      version,
-    });
-    outPath = result.path;
+    const root = join(process.cwd(), DEFAULT_DIR);
+    if (await isSchema2Store(root)) {
+      const expectedRevision = expectedRevisionArg === undefined ? undefined : Number(expectedRevisionArg);
+      const result = await new ArtifactLifecycleStore(root).write({
+        artifact,
+        slug: slugify(finalTitle),
+        html: rendered.html,
+        title: finalTitle,
+        icon: rendered.meta.icon,
+        description: rendered.meta.description,
+        source: rendered.meta.source,
+        charts: rendered.chartCount,
+        expectedRevision,
+        expectedHash,
+        authoringSource: markdown,
+        inputFormat: format,
+      });
+      outPath = result.stablePath ?? join(root, `${result.slug}.html`);
+      if (args.includes("--version")) console.error("warning: --version is deprecated; schema 2 always retains immutable history");
+    } else {
+      if (artifact !== undefined || expectedRevisionArg !== undefined) throw new Error("artifact references and expected revisions require a migrated schema-2 store");
+      const publisher = new FilePublisher(root);
+      const result = await publisher.publish({
+        slug: slugify(finalTitle),
+        html: rendered.html,
+        title: finalTitle,
+        icon: rendered.meta.icon,
+        description: rendered.meta.description,
+        source: rendered.meta.source,
+        charts: rendered.chartCount,
+        version,
+        expectedHash,
+      });
+      outPath = result.path;
+    }
   }
 
   if (open) openFile(outPath);
@@ -111,16 +171,24 @@ async function serveCommand(args: string[]): Promise<void> {
 }
 
 async function restoreCommand(args: string[]): Promise<void> {
-  const [slug] = positional(args, ["--dir", "--version"]);
+  const [slug] = positional(args, ["--dir", "--version", "--revision", "--expected-revision"]);
   const dir = optionValue(args, "--dir") ?? DEFAULT_DIR;
-  const versionArg = optionValue(args, "--version");
+  const versionArg = optionValue(args, "--revision") ?? optionValue(args, "--version");
   if (!slug || versionArg === undefined) usage();
   const version = Number(versionArg);
   if (!Number.isInteger(version) || version < 1) usage();
-
-  const publisher = new FilePublisher(resolve(dir));
-  const result = await publisher.restore(slug, version);
-  console.log(result.path);
+  const root = resolve(dir);
+  if (await isSchema2Store(root)) {
+    const expectedArg = optionValue(args, "--expected-revision");
+    if (expectedArg === undefined) throw new Error("schema-2 restore requires --expected-revision; history remains unchanged");
+    const status = await new ArtifactLifecycleStore(root).restore(slug, version, Number(expectedArg));
+    console.log(JSON.stringify(status, null, 2));
+  } else {
+    const publisher = new FilePublisher(root);
+    const result = await publisher.restore(slug, version);
+    console.error("warning: legacy restore spelling is deprecated; migrate to schema 2 for expected-head protection");
+    console.log(result.path);
+  }
 }
 
 async function latestCommand(args: string[]): Promise<void> {
@@ -140,12 +208,106 @@ async function latestCommand(args: string[]): Promise<void> {
 async function stateCommand(args: string[]): Promise<void> {  const [slug] = positional(args, ["--dir"]);
   const dir = optionValue(args, "--dir") ?? DEFAULT_DIR;
   if (!slug) usage();
+  const root = resolve(dir);
+  if (await isSchema2Store(root)) {
+    const status = await new ArtifactLifecycleStore(root).status(slug);
+    const envelope = await readArtifactState<DecisionPayload>(root, status.id, "decisions");
+    process.stdout.write(`${JSON.stringify({ revision: envelope.revision, contentHash: envelope.contentHash, answers: envelope.payload.answers }, null, 2)}\n`);
+    return;
+  }
   try {
-    process.stdout.write(await readFile(join(resolve(dir), ".state", `${slug}.json`), "utf8"));
+    process.stdout.write(await readFile(join(root, ".state", `${slug}.json`), "utf8"));
   } catch {
     console.error(`no saved state for artifact '${slug}'`);
     process.exit(1);
   }
+}
+
+async function listCommand(args: string[]): Promise<void> {
+  const root = resolve(optionValue(args, "--dir") ?? DEFAULT_DIR);
+  console.log(JSON.stringify({ schemaVersion: 1, artifacts: await new ArtifactLifecycleStore(root).list() }, null, 2));
+}
+
+async function statusCommand(args: string[]): Promise<void> {
+  const [reference] = positional(args, ["--dir"]);
+  if (!reference) usage();
+  const root = resolve(optionValue(args, "--dir") ?? DEFAULT_DIR);
+  console.log(JSON.stringify(await new ArtifactLifecycleStore(root).status(reference), null, 2));
+}
+
+async function readCommand(args: string[]): Promise<void> {
+  const [reference] = positional(args, ["--dir", "--revision"]);
+  if (!reference) usage();
+  const revisionArg = optionValue(args, "--revision");
+  const revision = revisionArg === undefined ? undefined : Number(revisionArg);
+  if (revision !== undefined && (!Number.isSafeInteger(revision) || revision < 1)) usage();
+  const root = resolve(optionValue(args, "--dir") ?? DEFAULT_DIR);
+  const result = await new ArtifactLifecycleStore(root).read(reference, revision);
+  process.stdout.write(result.html);
+}
+
+async function archiveCommand(args: string[]): Promise<void> {
+  const root = resolve(optionValue(args, "--dir") ?? DEFAULT_DIR);
+  const store = new ArtifactLifecycleStore(root);
+  const token = optionValue(args, "--confirm");
+  if (token !== undefined) {
+    console.log(JSON.stringify(await store.archive(token), null, 2));
+    return;
+  }
+  const [reference] = positional(args, ["--dir", "--confirm"]);
+  if (!reference || !args.includes("--preview")) usage();
+  console.log(JSON.stringify(await store.previewArchive(reference), null, 2));
+}
+
+async function unarchiveCommand(args: string[]): Promise<void> {
+  const [artifactId] = positional(args, ["--dir", "--slug"]);
+  if (!artifactId) usage();
+  const root = resolve(optionValue(args, "--dir") ?? DEFAULT_DIR);
+  console.log(JSON.stringify(await new ArtifactLifecycleStore(root).unarchive(artifactId, optionValue(args, "--slug")), null, 2));
+}
+
+async function exportCommand(args: string[]): Promise<void> {
+  const [reference] = positional(args, ["--dir", "--output"]);
+  const output = optionValue(args, "--output");
+  if (!reference || !output) usage();
+  const root = resolve(optionValue(args, "--dir") ?? DEFAULT_DIR);
+  console.log(JSON.stringify(await new ArtifactLifecycleStore(root).exportBundle(reference, output), null, 2));
+}
+
+async function importCommand(args: string[]): Promise<void> {
+  const [bundle] = positional(args, ["--dir"]);
+  if (!bundle) usage();
+  const root = resolve(optionValue(args, "--dir") ?? DEFAULT_DIR);
+  console.log(JSON.stringify(await new ArtifactLifecycleStore(root).importBundle(bundle), null, 2));
+}
+
+async function migrateCommand(args: string[]): Promise<void> {
+  const [operation] = positional(args, ["--dir", "--migration-id"]);
+  const root = resolve(optionValue(args, "--dir") ?? DEFAULT_DIR);
+  if (operation === "rollback") {
+    const migrationId = optionValue(args, "--migration-id");
+    if (!migrationId) usage();
+    console.log(JSON.stringify(await rollbackArtifactMigration(root, migrationId), null, 2));
+    return;
+  }
+  if (operation !== "inspect" && operation !== "apply") usage();
+  const plan = await planArtifactMigration(root);
+  if (operation === "inspect") {
+    console.log(JSON.stringify(plan, null, 2));
+    return;
+  }
+  const result = await executeArtifactMigration(root, plan);
+  const manifest = plan.manifest;
+  const stateMigrations: Array<{ artifactId: string; migrationId: string; stores: number }> = [];
+  if (manifest) {
+    for (const artifact of Object.values(manifest.artifacts)) {
+      const statePlan = await planLegacyStateMigration(root, artifact.id, artifact.slug);
+      if (statePlan.items.length === 0) continue;
+      await executeLegacyStateMigration(root, statePlan);
+      stateMigrations.push({ artifactId: artifact.id, migrationId: statePlan.migrationId, stores: statePlan.items.length });
+    }
+  }
+  console.log(JSON.stringify({ ...result, stateMigrations }, null, 2));
 }
 
 async function deployCommand(args: string[]): Promise<void> {
@@ -269,6 +431,22 @@ async function main(argv: string[]): Promise<void> {
       return latestCommand(rest);
     case "state":
       return stateCommand(rest);
+    case "list":
+      return listCommand(rest);
+    case "status":
+      return statusCommand(rest);
+    case "read":
+      return readCommand(rest);
+    case "archive":
+      return archiveCommand(rest);
+    case "unarchive":
+      return unarchiveCommand(rest);
+    case "export":
+      return exportCommand(rest);
+    case "import":
+      return importCommand(rest);
+    case "migrate":
+      return migrateCommand(rest);
     case "deploy":
       return deployCommand(rest);
     case "init":

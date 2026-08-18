@@ -50,7 +50,7 @@ output stays diff-friendly and cheap in tokens.
 - **Interactive data tables**: the `table` fence gives you sortable, filterable, number-formatted tables with row counts — [license-audit example](docs/evidence/patterns/license-audit.png)
 - **Provenance on every page**: frontmatter `source:` lands in the footer as `Data: …`
 - **Curated themes**: frontmatter `theme: report | ops | editorial` restyles the whole page — [one source, three identities](docs/evidence/patterns/funnel-report.png); unnamed pages follow system dark/light with a three-state header toggle
-- **Gallery + versions**: every publish updates `.opencode/artifacts/index.html`; `version: true` keeps numbered history; `restore` rolls back; a stale-version hash guard prevents blind overwrites
+- **Durable lifecycle (opt-in migration)**: schema-2 stores use opaque artifact IDs, unconditional immutable revisions, cross-process crash recovery, expected-head updates, auditable restore, recoverable archive, and checksummed export/import. Existing and new preview stores remain on the legacy schema until `migrate apply` is explicitly run.
 - **Interactive**: chart-bound controls (vega-lite `params.bind`, echarts `dataZoom`), text-selection comments, workshop decision pages the session can read back
 - **Live reload**: `opencode-artifacts serve` refreshes open pages on every republish
 - **Sharing**: cost-free public snapshots via GitHub Pages or a user-operated Cloudflare Worker + KV; Cloudflare Access is a manual, unverified perimeter
@@ -149,6 +149,17 @@ opencode-artifacts serve                             # http://127.0.0.1:4173, li
 opencode-artifacts restore <slug> --version 1        # roll the stable page back
 opencode-artifacts latest --open                     # reopen the most recent artifact
 opencode-artifacts state <slug>                      # read workshop answers back
+opencode-artifacts migrate inspect                   # bounded legacy repair/migration report
+opencode-artifacts migrate apply                     # explicit backed-up schema-2 migration
+opencode-artifacts list                              # stable IDs, heads, capabilities, references
+opencode-artifacts status <id-or-exact-reference>
+opencode-artifacts read <id-or-exact-reference> --revision 1
+opencode-artifacts restore <id> --revision 1 --expected-revision 3
+opencode-artifacts archive <id> --preview             # returns a head-bound one-use token
+opencode-artifacts archive --confirm <token>          # recoverable; irreversible delete is absent
+opencode-artifacts unarchive <id> [--slug <new-slug>]
+opencode-artifacts export <id> --output ./bundle
+opencode-artifacts import ./bundle
 ```
 
 ## Authoring format
@@ -185,6 +196,9 @@ browser-verified screenshots in [`docs/evidence/patterns/`](docs/evidence/patter
   do not run through each viewer's identity.
 - No complete Node/OpenCode/OS/browser cell currently meets the supported-platform evidence
   gate. Existing Linux host and CI observations have narrower scopes.
+- The crash-safe schema and CAS lifecycle are therefore not enabled by default on empty or
+  legacy stores. `migrate apply` is an explicit preview action with exact local backup and
+  rollback; it does not make the current filesystem a supported platform.
 
 ## Governance and support
 

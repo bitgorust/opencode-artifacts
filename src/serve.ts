@@ -1,8 +1,23 @@
 import { createServer, type ServerResponse, type IncomingMessage } from "node:http";
 import { watch } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { extname, join, normalize, resolve, sep } from "node:path";
 import { NAME_RE, prepareServedHtml } from "./served-html.ts";
+import {
+  ArtifactStateConflictError,
+  ArtifactStateError,
+  artifactDocumentHash,
+  mutateCollectionDocument,
+  readArtifactState,
+  replaceArtifactState,
+  type CollectionPayload,
+  type CommentPayload,
+  type DecisionPayload,
+} from "./artifact-state.ts";
+import {
+  ArtifactMigrationRequiredError,
+  readArtifactManifestV2,
+} from "./artifact-schema.ts";
 
 export { NAME_RE } from "./served-html.ts";
 
@@ -29,6 +44,62 @@ const CONTENT_TYPES: Record<string, string> = {
   ".png": "image/png",
   ".css": "text/css; charset=utf-8",
 };
+
+type StateIdentity = { mode: "legacy" } | { mode: "v2"; artifactId: string };
+
+async function stateIdentity(root: string, slug: string): Promise<StateIdentity> {
+  try {
+    await lstat(join(root, "manifest.json"));
+  } catch (error) {
+    if (typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") {
+      return { mode: "legacy" };
+    }
+    throw error;
+  }
+  try {
+    const manifest = await readArtifactManifestV2(root);
+    const artifactId = manifest.slugIndex[slug];
+    if (!artifactId) throw new ArtifactStateError("invalid", `unknown artifact slug ${slug}`, 0, "list artifacts and use an active reference");
+    return { mode: "v2", artifactId };
+  } catch (error) {
+    if (error instanceof ArtifactMigrationRequiredError) return { mode: "legacy" };
+    throw error;
+  }
+}
+
+function stateEtag(revision: number, hash: string): string {
+  return `"r${revision}-${hash}"`;
+}
+
+function stateFailure(res: ServerResponse, error: unknown): void {
+  if (error instanceof ArtifactStateConflictError) {
+    res.writeHead(409, { "content-type": "application/json; charset=utf-8", etag: stateEtag(error.selectedRevision, error.currentHash) });
+    res.end(JSON.stringify({ error: error.code, revision: error.selectedRevision, contentHash: error.currentHash, current: error.current, nextAction: error.nextAction }));
+    return;
+  }
+  if (error instanceof ArtifactStateError) {
+    const status = error.code === "rate-limit" ? 429 : error.code === "quota" ? 413 : error.code === "corrupt" || error.code === "future-schema" ? 500 : 400;
+    res.writeHead(status, { "content-type": "application/json; charset=utf-8" });
+    res.end(JSON.stringify({ error: error.code, revision: error.selectedRevision, message: error.message, nextAction: error.nextAction }));
+    return;
+  }
+  res.writeHead(400, { "content-type": "application/json; charset=utf-8" });
+  res.end(JSON.stringify({ error: "bad-request" }));
+}
+
+function mutationFields(record: Record<string, unknown>): { expectedRevision: number; expectedHash?: string; operationId: string } {
+  const expectedRevision = record["expectedRevision"];
+  const expectedHash = record["expectedHash"];
+  const operationId = record["operationId"];
+  if (!Number.isSafeInteger(expectedRevision) || typeof operationId !== "string" || (expectedHash !== undefined && typeof expectedHash !== "string")) {
+    throw new ArtifactStateError("invalid", "mutation requires expectedRevision, operationId, and optional expectedHash", 0, "read current state and retry with one UUID operationId");
+  }
+  return {
+    expectedRevision: expectedRevision as number,
+    ...(typeof expectedHash === "string" ? { expectedHash } : {}),
+    operationId,
+  };
+}
 
 function readBody(req: IncomingMessage, maxBytes: number): Promise<string> {
   return new Promise((resolvePromise, rejectPromise) => {
@@ -151,6 +222,164 @@ export async function writeCollection(
   await writeFile(join(dir, `${collection}.json`), `${JSON.stringify(store, null, 2)}\n`, "utf8");
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function jsonRecord(value: unknown): Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new ArtifactStateError("invalid", "request body must be a JSON object", 0, "send a structured mutation body");
+  }
+  return value as Record<string, unknown>;
+}
+
+async function handleV2Db(
+  req: IncomingMessage,
+  res: ServerResponse,
+  url: URL,
+  root: string,
+  artifactId: string,
+  collection: string,
+  id: string | undefined,
+): Promise<void> {
+  const envelope = await readArtifactState<CollectionPayload>(root, artifactId, "collection", collection);
+  if (req.method === "GET" && id === undefined) {
+    const q = url.searchParams.get("q");
+    const limit = Math.min(Number(url.searchParams.get("limit") ?? "50") || 50, 200);
+    const cursor = Math.max(Number(url.searchParams.get("cursor") ?? "0") || 0, 0);
+    let entries = Object.entries(envelope.payload.docs);
+    if (q) {
+      const [field, ...rest] = q.split(":");
+      const want = rest.join(":");
+      entries = entries.filter(([, doc]) => isRecord(doc) && String(doc[field]) === want);
+    }
+    const page = entries.slice(cursor, cursor + limit);
+    const next = cursor + limit < entries.length ? String(cursor + limit) : null;
+    res.writeHead(200, { "content-type": "application/json; charset=utf-8", etag: stateEtag(envelope.revision, envelope.contentHash) });
+    res.end(JSON.stringify({ docs: page.map(([docId, doc]) => ({ id: docId, doc, hash: artifactDocumentHash(doc) })), next_cursor: next, revision: envelope.revision, contentHash: envelope.contentHash }));
+    return;
+  }
+  if (req.method === "GET" && id !== undefined) {
+    const doc = envelope.payload.docs[id];
+    if (doc === undefined) {
+      res.writeHead(404, { "content-type": "application/json; charset=utf-8", etag: stateEtag(envelope.revision, envelope.contentHash) });
+      res.end(JSON.stringify({ error: "not-found", revision: envelope.revision, contentHash: envelope.contentHash }));
+      return;
+    }
+    const hash = artifactDocumentHash(doc);
+    res.writeHead(200, { "content-type": "application/json; charset=utf-8", etag: `"${hash}"` });
+    res.end(JSON.stringify({ id, doc, hash, revision: envelope.revision }));
+    return;
+  }
+  if ((req.method === "PUT" || req.method === "DELETE") && id !== undefined) {
+    const record = jsonRecord(JSON.parse(await readBody(req, MAX_DB_DOC_BYTES + 1024)) as unknown);
+    const expectedRevision = record["expectedRevision"];
+    const operationId = record["operationId"] ?? req.headers["x-operation-id"];
+    let expectedDocumentHash = record["expectedDocumentHash"];
+    if (req.headers["if-none-match"] === "*") expectedDocumentHash = null;
+    const ifMatch = req.headers["if-match"];
+    if (typeof ifMatch === "string") expectedDocumentHash = ifMatch.replace(/^"|"$/g, "");
+    if (
+      !Number.isSafeInteger(expectedRevision) ||
+      typeof operationId !== "string" ||
+      (expectedDocumentHash !== null && typeof expectedDocumentHash !== "string")
+    ) {
+      throw new ArtifactStateError("invalid", "document mutation requires expectedRevision, expectedDocumentHash, and operationId", envelope.revision, "GET the document then retry conditionally");
+    }
+    const result = await mutateCollectionDocument({
+      root,
+      artifactId,
+      collection,
+      id,
+      operation: req.method === "PUT" ? "set" : "delete",
+      ...(req.method === "PUT" ? { document: record["document"] } : {}),
+      expectedRevision: expectedRevision as number,
+      expectedDocumentHash,
+      operationId,
+    });
+    const document = result.envelope.payload.docs[id];
+    res.writeHead(200, { "content-type": "application/json; charset=utf-8", etag: stateEtag(result.envelope.revision, result.envelope.contentHash) });
+    res.end(JSON.stringify({
+      status: result.status,
+      revision: result.revision,
+      contentHash: result.contentHash,
+      warnings: result.warnings,
+      ...(req.method === "PUT" ? { id, doc: document, hash: document === undefined ? null : artifactDocumentHash(document) } : { deleted: id }),
+    }));
+    return;
+  }
+  res.writeHead(405);
+  res.end("method not allowed");
+}
+
+async function handleV2Comments(
+  req: IncomingMessage,
+  res: ServerResponse,
+  root: string,
+  artifactId: string,
+): Promise<void> {
+  const current = await readArtifactState<CommentPayload>(root, artifactId, "comments");
+  if (req.method === "GET") {
+    res.writeHead(200, { "content-type": "application/json; charset=utf-8", etag: stateEtag(current.revision, current.contentHash) });
+    res.end(JSON.stringify({ threads: current.payload.threads, revision: current.revision, contentHash: current.contentHash }));
+    return;
+  }
+  if (req.method === "POST") {
+    const record = jsonRecord(JSON.parse(await readBody(req, MAX_STATE_BODY_BYTES * 4 + 1024)) as unknown);
+    const fields = mutationFields(record);
+    const result = await replaceArtifactState<CommentPayload>({
+      root,
+      artifactId,
+      kind: "comments",
+      ...fields,
+      payload: { threads: record["threads"] as CommentPayload["threads"] },
+    });
+    res.writeHead(200, { "content-type": "application/json; charset=utf-8", etag: stateEtag(result.envelope.revision, result.envelope.contentHash) });
+    res.end(JSON.stringify({ threads: result.envelope.payload.threads, revision: result.revision, contentHash: result.contentHash, status: result.status, warnings: result.warnings }));
+    return;
+  }
+  res.writeHead(405);
+  res.end("method not allowed");
+}
+
+async function handleV2Decisions(
+  req: IncomingMessage,
+  res: ServerResponse,
+  root: string,
+  artifactId: string,
+): Promise<void> {
+  const current = await readArtifactState<DecisionPayload>(root, artifactId, "decisions");
+  if (req.method === "GET") {
+    res.writeHead(200, { "content-type": "application/json; charset=utf-8", etag: stateEtag(current.revision, current.contentHash) });
+    res.end(JSON.stringify({ answers: current.payload.answers, revision: current.revision, contentHash: current.contentHash }));
+    return;
+  }
+  if (req.method === "POST") {
+    const record = jsonRecord(JSON.parse(await readBody(req, MAX_STATE_BODY_BYTES + 1024)) as unknown);
+    const fields = mutationFields(record);
+    let answers: Record<string, string>;
+    if (isRecord(record["answers"]) && Object.values(record["answers"]).every((value) => typeof value === "string")) {
+      answers = record["answers"] as Record<string, string>;
+    } else if (typeof record["question"] === "string" && typeof record["option"] === "string") {
+      answers = { ...current.payload.answers, [record["question"]]: record["option"] };
+    } else {
+      throw new ArtifactStateError("invalid", "decision mutation requires answers or question/option", current.revision, "send a bounded decision mutation");
+    }
+    const result = await replaceArtifactState<DecisionPayload>({
+      root,
+      artifactId,
+      kind: "decisions",
+      ...fields,
+      payload: { answers },
+    });
+    res.writeHead(200, { "content-type": "application/json; charset=utf-8", etag: stateEtag(result.envelope.revision, result.envelope.contentHash) });
+    res.end(JSON.stringify({ answers: result.envelope.payload.answers, revision: result.revision, contentHash: result.contentHash, status: result.status, warnings: result.warnings }));
+    return;
+  }
+  res.writeHead(405);
+  res.end("method not allowed");
+}
+
 interface DataSource {
   name: string;
   command: string;
@@ -267,6 +496,11 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
       }
       void (async () => {
         try {
+          const identity = await stateIdentity(root, slug);
+          if (identity.mode === "v2") {
+            await handleV2Db(req, res, url, root, identity.artifactId, collection, id);
+            return;
+          }
           const store = await readCollection(root, slug, collection);
           if (req.method === "GET" && id === undefined) {
             const q = url.searchParams.get("q");
@@ -319,9 +553,8 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
           }
           res.writeHead(405);
           res.end("method not allowed");
-        } catch {
-          res.writeHead(400);
-          res.end("bad request");
+        } catch (error) {
+          stateFailure(res, error);
         }
       })();
       return;
@@ -336,6 +569,11 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
       }
       void (async () => {
         try {
+          const identity = await stateIdentity(root, slug);
+          if (identity.mode === "v2") {
+            await handleV2Comments(req, res, root, identity.artifactId);
+            return;
+          }
           if (req.method === "GET") {
             const threads = await readThreads(root, slug);
             res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
@@ -360,9 +598,8 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
           }
           res.writeHead(405);
           res.end("method not allowed");
-        } catch {
-          res.writeHead(400);
-          res.end("bad request");
+        } catch (error) {
+          stateFailure(res, error);
         }
       })();
       return;
@@ -377,6 +614,11 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
       }
       void (async () => {
         try {
+          const identity = await stateIdentity(root, slug);
+          if (identity.mode === "v2") {
+            await handleV2Decisions(req, res, root, identity.artifactId);
+            return;
+          }
           if (req.method === "GET") {
             const answers = await readState(root, slug);
             res.writeHead(200, { "content-type": "application/json; charset=utf-8" });
@@ -416,9 +658,8 @@ export async function serveArtifacts(options: ServeOptions): Promise<ServedArtif
           }
           res.writeHead(405);
           res.end("method not allowed");
-        } catch {
-          res.writeHead(400);
-          res.end("bad request");
+        } catch (error) {
+          stateFailure(res, error);
         }
       })();
       return;

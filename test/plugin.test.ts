@@ -5,6 +5,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import type { PluginInput, ToolContext } from "@opencode-ai/plugin";
 import { ArtifactsPlugin } from "../src/plugin.ts";
+import { FilePublisher } from "../src/publisher.ts";
+import { replaceArtifactState } from "../src/artifact-state.ts";
+import { emptyArtifactManifestV2, readArtifactManifestV2 } from "../src/artifact-schema.ts";
 
 async function withWorktree(run: (dir: string) => Promise<void>): Promise<void> {
   const dir = await mkdtemp(join(tmpdir(), "plugin-"));
@@ -270,6 +273,106 @@ test("artifact_db rejects path traversal before filesystem access", async () => 
     );
     assert.match(String(result), /slug and collection must/);
     await assert.rejects(readFile(join(dir, ".opencode", "escaped.json"), "utf8"));
+  });
+});
+
+test("plugin state surfaces expose schema-2 CAS metadata and conditional mutations", async () => {
+  const hooks = await ArtifactsPlugin({} as unknown as PluginInput);
+  const db = hooks.tool?.artifact_db;
+  const state = hooks.tool?.artifact_state;
+  const comments = hooks.tool?.artifact_comments;
+  assert.ok(db && state && comments);
+  await withWorktree(async (dir) => {
+    const ctx: ToolContext = {
+      sessionID: "s1",
+      messageID: "m1",
+      agent: "test",
+      directory: dir,
+      worktree: dir,
+      abort: new AbortController().signal,
+      metadata: () => {},
+      ask: async () => {},
+    };
+    const root = join(dir, ".opencode", "artifacts");
+    const artifactId = "11111111-1111-4111-8111-111111111111";
+    await new FilePublisher(root, { schemaVersion: 2, artifactIdFactory: () => artifactId }).publish({ slug: "board", html: "board" });
+    await replaceArtifactState({
+      root,
+      artifactId,
+      kind: "decisions",
+      expectedRevision: 0,
+      operationId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      payload: { answers: { layout: "tabs" } },
+      now: "2026-08-16T20:00:00Z",
+    });
+    assert.match(String(await state.execute({ slug: "board" }, ctx)), /"revision": 1/);
+
+    const created = String(await db.execute({
+      slug: "board",
+      collection: "notes",
+      op: "set",
+      id: "n1",
+      doc: { text: "hi" },
+      expectedRevision: 0,
+      createOnly: true,
+      operationId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+    }, ctx));
+    assert.match(created, /"status": "committed"/);
+    assert.match(String(await db.execute({ slug: "board", collection: "notes", op: "get", id: "n1" }, ctx)), /"hash"/);
+
+    await replaceArtifactState({
+      root,
+      artifactId,
+      kind: "comments",
+      expectedRevision: 0,
+      operationId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+      payload: { threads: [{ id: "t1", quote: "q", text: "fix", createdAt: "2026-08-16T20:00:00Z", resolved: false }] },
+      now: "2026-08-16T20:00:00Z",
+    });
+    const resolved = String(await comments.execute({
+      slug: "board",
+      resolveId: "t1",
+      expectedRevision: 1,
+      operationId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+    }, ctx));
+    assert.match(resolved, /"revision": 2/);
+  });
+});
+
+test("plugin lifecycle tool and publish arguments enforce exact updates and archive permission", async () => {
+  const hooks = await ArtifactsPlugin({} as unknown as PluginInput);
+  const publish = hooks.tool?.artifact_publish;
+  const lifecycle = hooks.tool?.artifact_lifecycle;
+  assert.ok(publish && lifecycle);
+  await withWorktree(async (dir) => {
+    const asked: Array<Parameters<ToolContext["ask"]>[0]> = [];
+    const ctx: ToolContext = {
+      sessionID: "s1",
+      messageID: "m1",
+      agent: "test",
+      directory: dir,
+      worktree: dir,
+      abort: new AbortController().signal,
+      metadata: () => {},
+      ask: async (input) => { asked.push(input); },
+    };
+    const root = join(dir, ".opencode", "artifacts");
+    await mkdir(root, { recursive: true });
+    await writeFile(join(root, "manifest.json"), `${JSON.stringify(emptyArtifactManifestV2(), null, 2)}\n`, "utf8");
+    const created = String(await publish.execute({ markdown: "---\ntitle: Report\n---\n# One" }, ctx));
+    assert.match(created, /Artifact published/);
+    const manifest = await readArtifactManifestV2(root);
+    const id = manifest.slugIndex.report;
+    const collision = String(await publish.execute({ markdown: "---\ntitle: Report\n---\n# Lost" }, ctx));
+    assert.match(collision, /"error": "stale"/);
+    const updated = String(await publish.execute({ markdown: "---\ntitle: Report\n---\n# Two", artifact: id, expectedRevision: 1 }, ctx));
+    assert.match(updated, /Artifact published/);
+    assert.match(String(await lifecycle.execute({ op: "list" }, ctx)), new RegExp(id));
+    assert.match(String(await lifecycle.execute({ op: "restore", artifact: id, revision: 1, expectedRevision: 2 }, ctx)), /"headRevision": 3/);
+    const preview = JSON.parse(String(await lifecycle.execute({ op: "archive-preview", artifact: id }, ctx))) as { token: string };
+    assert.match(String(await lifecycle.execute({ op: "archive-confirm", token: preview.token }, ctx)), /"active": false/);
+    assert.equal(asked.some((input) => input.permission === "artifact_archive" && input.patterns.includes(id)), true);
+    assert.match(String(await lifecycle.execute({ op: "unarchive", artifact: id }, ctx)), /"active": true/);
   });
 });
 

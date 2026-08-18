@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "artifact-lifecycle-surfaces",
+  "title": "Expose complete artifact lifecycle operations",
+  "lane": "high-risk",
+  "status": "archived",
+  "affectedRequirements": [
+    "LIFE-03",
+    "LIFE-05",
+    "LIFE-06",
+    "UX-01",
+    "UX-02",
+    "UX-04",
+    "UX-06",
+    "SEC-02",
+    "COMPAT-05",
+    "COMPAT-07",
+    "QUAL-02"
+  ],
+  "currentSpecs": [
+    "specs/current/artifact-lifecycle.spec.md"
+  ],
+  "currentSpecsUpdated": true,
+  "approval": {
+    "by": "aaron.zeng",
+    "at": "2026-08-16T20:32:04Z"
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-16",
+  "archivedAt": "2026-08-17"
+}
