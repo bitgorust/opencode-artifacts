@@ -13,7 +13,16 @@
     "corpusVersions": { "pageQuality": "page-quality-v1", "journey": 1 }
   },
   "requirements": [
-    { "id": "code-tests", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    {
+      "id": "code-tests", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
+        "owner": "GitHub Actions run 32161443356", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Install, build, 255 tests, structural assertions, and exact-candidate evidence generation.",
+        "environment": "GitHub ubuntu-latest, Node 24, npm latest"
+      }]
+    },
     {
       "id": "package-host",
       "status": "pass",
@@ -28,16 +37,70 @@
         "environment": "Linux x64, Node 24, OpenCode stable 1.18.18"
       }]
     },
-    { "id": "browser-accessibility", "status": "pending", "applicabilityReason": null, "evidence": [] },
-    { "id": "migrations", "status": "pending", "applicabilityReason": null, "evidence": [] },
-    { "id": "security-privacy", "status": "pending", "applicabilityReason": null, "evidence": [] },
-    { "id": "performance", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    {
+      "id": "browser-accessibility", "status": "pending", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/page-quality/2026-08-18-local-composition.md", "date": "2026-08-18",
+        "owner": "Goal 5 automated browser run", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Sixteen Chromium desktop/mobile/mode cells; manual screen-reader review remains missing.",
+        "environment": "Linux x64, Chromium 151"
+      }]
+    },
+    {
+      "id": "migrations", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
+        "owner": "GitHub Actions run 32161443356", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Schema, lifecycle, migration, rollback, fault-boundary, and transaction tests in the complete suite.",
+        "environment": "GitHub ubuntu-latest, Node 24"
+      }]
+    },
+    {
+      "id": "security-privacy", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
+        "owner": "GitHub Actions run 32161443356", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Adversarial renderer, path, permission, secret-scan, CSP, governance, and privacy-policy checks.",
+        "environment": "GitHub ubuntu-latest, Node 24"
+      }]
+    },
+    {
+      "id": "performance", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-performance.md", "date": "2026-08-18",
+        "owner": "Goal 5 constrained benchmark run", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Three renderer workloads, 36 CLI samples, 42 fresh-profile browser samples, time and byte budgets.",
+        "environment": "Linux x64, Node 24.19.0, Chromium 151, 2 cores, 4 GiB"
+      }]
+    },
     { "id": "support-matrix", "status": "pending", "applicabilityReason": null, "evidence": [] },
     { "id": "page-quality", "status": "pending", "applicabilityReason": null, "evidence": [] },
     { "id": "first-use", "status": "pending", "applicabilityReason": null, "evidence": [] },
     { "id": "comprehension", "status": "pending", "applicabilityReason": null, "evidence": [] },
-    { "id": "audit-license-sbom", "status": "pending", "applicabilityReason": null, "evidence": [] },
-    { "id": "integrity-provenance", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    {
+      "id": "audit-license-sbom", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
+        "owner": "GitHub Actions run 32161443356", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Zero-vulnerability audit, 217-entry license inventory/dispositions, 211-component CycloneDX SBOM, dependency signatures and attestations.",
+        "environment": "GitHub ubuntu-latest, Node 24, npm latest"
+      }]
+    },
+    {
+      "id": "integrity-provenance", "status": "pending", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
+        "owner": "GitHub Actions run 32161443356", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Reproducible pack digest and CI in-toto subject; no registry publication/signature/readback for this candidate.",
+        "environment": "GitHub ubuntu-latest, Node 24, npm latest"
+      }]
+    },
     { "id": "claims-rollback", "status": "pending", "applicabilityReason": null, "evidence": [] }
   ],
   "signoffs": [
@@ -46,7 +109,6 @@
     { "role": "support", "status": "pending", "by": null, "at": null }
   ],
   "blockers": [
-    "Exact-candidate GitHub verification has not passed after the locally verified explicit OpenCode bootstrap fix.",
     "Manual screen-reader review of the new composition behavior is absent.",
     "Authorized current Claude same-input runs and retention disposition are absent.",
     "Three independent benchmark reviewers are absent.",
