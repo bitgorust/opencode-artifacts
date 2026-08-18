@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "recordId": "local-core-2026-08-18-candidate",
+  "level": "local-artifact-core",
+  "decision": "pending",
+  "candidate": {
+    "status": "frozen",
+    "commit": "5503578b48285b9e3fc6e0bf3b679b127607e2b5",
+    "version": "0.15.0",
+    "tarball": "opencode-artifacts-0.15.0.tgz",
+    "sha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+    "sri": "sha512-ErzQBzSxNz/nuxsTfwi5uozrJvK5joo7c6SyHeWz9THM49ETSY5PajdrxdfXq0J86lGAK4HdahCKyEo1gPIjKA==",
+    "corpusVersions": { "pageQuality": "page-quality-v1", "journey": 1 }
+  },
+  "requirements": [
+    { "id": "code-tests", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    {
+      "id": "package-host",
+      "status": "pass",
+      "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-host-matrix.json",
+        "date": "2026-08-18",
+        "owner": "Goal 5 local evidence run",
+        "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Clean temporary install, stable OpenCode discovery, tool schemas, read-only packed smoke, and skill discovery.",
+        "environment": "Linux x64, Node 24, OpenCode stable 1.18.18"
+      }]
+    },
+    { "id": "browser-accessibility", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "migrations", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "security-privacy", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "performance", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "support-matrix", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "page-quality", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "first-use", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "comprehension", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "audit-license-sbom", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "integrity-provenance", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "claims-rollback", "status": "pending", "applicabilityReason": null, "evidence": [] }
+  ],
+  "signoffs": [
+    { "role": "release", "status": "pending", "by": null, "at": null },
+    { "role": "security", "status": "pending", "by": null, "at": null },
+    { "role": "support", "status": "pending", "by": null, "at": null }
+  ],
+  "blockers": [
+    "Exact-candidate GitHub verification has not passed after the npm output compatibility fix.",
+    "Manual screen-reader review of the new composition behavior is absent.",
+    "Authorized current Claude same-input runs and retention disposition are absent.",
+    "Three independent benchmark reviewers are absent.",
+    "Representative-user first-use and comprehension records are absent.",
+    "The exact claimed support matrix is incomplete.",
+    "Accountable release, security, and support sign-offs are absent."
+  ],
+  "claims": {
+    "certification": false,
+    "equalOrBetter": false,
+    "supportedPlatformIds": []
+  },
+  "providerMutationCount": 0
+}

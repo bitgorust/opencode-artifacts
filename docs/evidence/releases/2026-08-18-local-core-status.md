@@ -10,7 +10,10 @@ Cross-candidate evidence and `not-applicable` waivers for Local artifact core ar
 
 Current unresolved prerequisites are:
 
-- no frozen final candidate (Goal 5 implementation is still changing);
+- frozen candidate commit `5503578b48285b9e3fc6e0bf3b679b127607e2b5`, package `0.15.0`,
+  SHA-256 `f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2`;
+  the clean stable-OpenCode host matrix passes, while exact-candidate CI is awaiting a rerun
+  after its strict npm output compatibility fix;
 - no authorized current Claude same-input benchmark or independent reviewer panel;
 - no representative-user first-use/comprehension records;
 - no complete Ubuntu/macOS/Windows/browser/mobile support matrix for the certified target;
@@ -18,6 +21,6 @@ Current unresolved prerequisites are:
 
 The local 16-cell Chromium composition result and earlier preview evidence remain narrowly
 scoped inputs; neither waives these rows. Running
-`npm run quality:certification -- docs/evidence/releases/local-core-certification.template.json`
+`npm run quality:certification -- docs/evidence/releases/2026-08-18-local-core-candidate.json`
 returns the explicit missing rows and sign-offs. No tag, npm publish, deployment, trusted-
 publisher change, or other provider mutation was performed or authorized by this record.
