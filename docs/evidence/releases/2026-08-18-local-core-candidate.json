@@ -5,7 +5,7 @@
   "decision": "pending",
   "candidate": {
     "status": "frozen",
-    "commit": "5503578b48285b9e3fc6e0bf3b679b127607e2b5",
+    "commit": "7c7a63845c5ad1fd5640e29a833cd1f735a65839",
     "version": "0.15.0",
     "tarball": "opencode-artifacts-0.15.0.tgz",
     "sha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
@@ -46,7 +46,7 @@
     { "role": "support", "status": "pending", "by": null, "at": null }
   ],
   "blockers": [
-    "Exact-candidate GitHub verification has not passed after the npm output compatibility fix.",
+    "Exact-candidate GitHub verification has not passed after the explicit OpenCode host postinstall fix.",
     "Manual screen-reader review of the new composition behavior is absent.",
     "Authorized current Claude same-input runs and retention disposition are absent.",
     "Three independent benchmark reviewers are absent.",
