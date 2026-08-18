@@ -1,7 +1,8 @@
 # Goal 3 accessibility and internationalization evidence — 2026-08-17
 
-Scope: implementation evidence for `renderer-accessibility-i18n`. It is a Linux/Chromium
-observation, not screen-reader or supported-platform certification.
+Scope: implementation evidence for `renderer-accessibility-i18n`. It combines the retained
+Linux/Chromium automation below with a dated, user-attested Fedora/Orca/Chrome manual
+screen-reader observation. It does not establish broad supported-platform certification.
 
 ## Automated coverage
 
@@ -51,9 +52,26 @@ Retained artifacts:
 - `goal-3-accessibility-mobile-reduced-2026-08-17.{json,png}`
 - `goal-3-accessibility-zoom-200-2026-08-17.{json,png}`
 
-## Open certification cell
+## Manual screen-reader observation — 2026-08-18
 
-No actual screen reader or equivalent assistive-technology environment is available in this
-workspace. Chrome accessibility-tree output is useful automation but is not a substitute for
-manual AT operation. The packet therefore remains `implementing`; its archive task and the
-manual screen-reader/certification claim remain open while independent Goal 3 work continues.
+Aaron Zeng (`aaron.zeng`) opened the served `examples/patterns/accessibility-rtl.md` fixture
+from a host device through the VPS loopback SSH tunnel and reported that the full manual
+screen-reader checklist passed.
+
+| Field | Observation |
+|---|---|
+| Operating system | Fedora 44 |
+| Screen reader | Orca 50.2 |
+| Browser | Chrome 151.0.7922.137 |
+| Result | Pass |
+
+The attested checklist covered document language/direction and reading order; skip link,
+landmarks, and headings; chart summary and table caption/headers; named controls and exposed
+state; keyboard focus through decisions, sorting, theme, and comments; and understandable
+state-change announcements without relying on color. No OS-level recording or assistive-
+technology transcript was collected, so this record is a named human attestation rather than
+an independently replayable trace.
+
+This closes the packet's mandatory manual assistive-technology cell. The observation does not
+declare Fedora, Orca, or this Chrome build a broadly supported matrix, and it does not supply
+physical-mobile or other browser/OS coverage.

@@ -48,8 +48,9 @@
   explicit and deterministic; RTL direction can be inferred and numbers/zoned timestamps use
   the declared locale context. Missing equivalents and invalid metadata refuse publication.
 - `QUAL-04`: semantic tests and retained Chromium desktop, 390-pixel dark/reduced-motion, and
-  200%-equivalent RTL evidence are green. Manual screen-reader evidence is unavailable in the
-  current environment, so accessibility certification and the packet archive gate remain open.
+  200%-equivalent RTL evidence are green. A named 2026-08-18 user attestation records the
+  manual screen-reader checklist passing on Fedora 44, Orca 50.2, and Chrome 151.0.7922.137;
+  this closes the packet gate without declaring a broad supported-platform matrix.
 - `PERF-01`: `benchmarks/renderer/v1/` owns hashed no-runtime, one-chart, and multi-runtime
   fixtures plus the two-core/4 GiB Node 24/Chromium 151 reference profile. Reports retain raw
   cold/warm samples, nearest-rank p50/p95, a five-sample minimum, 250ms scheduler floor,
@@ -106,6 +107,6 @@ malformed or unknown markup.
 - `test/performance.test.ts`, `scripts/renderer-{cli,browser}-benchmark.ts`, and
   `docs/evidence/renderer/goal-3-performance-2026-08-17.md` retain exact boundary/refusal
   logic and comparable full-distribution CLI/browser reports for all three workloads.
-- This evidence is one Linux/Chromium observation. It does not certify a supported browser,
-  OS, physical mobile device, or assistive-technology cell. The screen-reader gate and Goal 3
-  accessibility packet remain incomplete.
+- This evidence combines a retained Linux/Chromium automated observation with one named
+  Fedora/Orca/Chrome manual assistive-technology attestation. It does not certify a supported
+  browser/OS matrix, a physical mobile device, or other assistive-technology combinations.
