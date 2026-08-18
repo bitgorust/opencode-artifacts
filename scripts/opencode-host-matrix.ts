@@ -23,6 +23,7 @@ export const OPENCODE_PERMISSION_POLICY = {
   artifact_deploy: "deny",
   artifact_audience: "deny",
 } as const;
+export const OPENCODE_HOST_INSTALL_FLAGS = ["--ignore-scripts=false", "--no-audit", "--no-fund"] as const;
 
 interface CommandResult {
   command: string[];
@@ -464,7 +465,7 @@ export async function runMatrix(tarballInput: string, outputInput: string): Prom
       const cliProject = join(work, `cli-project-${versionKey}`);
       const configProject = join(work, `config-project-${versionKey}`);
       await Promise.all([hostRoot, cliProject, configProject].map((path) => mkdir(path, { recursive: true })));
-      const hostInstall = await runCommand("npm", ["install", "--prefix", hostRoot, "--no-audit", "--no-fund", `opencode-ai@${version}`], { cwd: work });
+      const hostInstall = await runCommand("npm", ["install", "--prefix", hostRoot, ...OPENCODE_HOST_INSTALL_FLAGS, `opencode-ai@${version}`], { cwd: work });
       hosts.push({ version, command: hostInstall });
       const hostBinary = join(hostRoot, "node_modules", ".bin", process.platform === "win32" ? "opencode.cmd" : "opencode");
       hostBinaries.push({ version, binary: hostBinary });

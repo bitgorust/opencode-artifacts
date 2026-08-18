@@ -3,6 +3,7 @@ import { test } from "node:test";
 import {
   ARTIFACT_TOOL_CONTRACT,
   OPENCODE_PERMISSION_POLICY,
+  OPENCODE_HOST_INSTALL_FLAGS,
   assertArtifactToolContract,
   boundedLog,
   exactStableMatrix,
@@ -42,6 +43,10 @@ test("stable version accepts npm scalar and one-item array output only", () => {
   assert.throws(() => stableVersionFromNpm([]), /exactly one stable/);
   assert.throws(() => stableVersionFromNpm(["1.18.18", "1.19.0"]), /exactly one stable/);
   assert.throws(() => stableVersionFromNpm("next"), /exactly one stable/);
+});
+
+test("host installation explicitly permits the required OpenCode postinstall only", () => {
+  assert.deepEqual(OPENCODE_HOST_INSTALL_FLAGS, ["--ignore-scripts=false", "--no-audit", "--no-fund"]);
 });
 
 test("host discovery requires every shipped tool and documented property", () => {
