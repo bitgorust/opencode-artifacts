@@ -10,10 +10,10 @@ Cross-candidate evidence and `not-applicable` waivers for Local artifact core ar
 
 Current unresolved prerequisites are:
 
-- frozen candidate commit `7c7a63845c5ad1fd5640e29a833cd1f735a65839`, package `0.15.0`,
+- frozen candidate commit `84f866ed742eeb08ba668115342ef0e5896dead7`, package `0.15.0`,
   SHA-256 `f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2`;
   the clean stable-OpenCode host matrix passes, while exact-candidate CI is awaiting a rerun
-  after its strict npm output and host-postinstall compatibility fixes;
+  after its strict npm output and locally verified explicit host-bootstrap fixes;
 - no authorized current Claude same-input benchmark or independent reviewer panel;
 - no representative-user first-use/comprehension records;
 - no complete Ubuntu/macOS/Windows/browser/mobile support matrix for the certified target;

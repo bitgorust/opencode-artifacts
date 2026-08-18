@@ -1,7 +1,7 @@
 # Goal 5 first-use and comprehension status — 2026-08-18
 
 - Study owner: **unassigned; recruitment is not authorized**.
-- Candidate: commit `7c7a63845c5ad1fd5640e29a833cd1f735a65839`, package `0.15.0`, SHA-256
+- Candidate: commit `84f866ed742eeb08ba668115342ef0e5896dead7`, package `0.15.0`, SHA-256
   `f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2`.
 - Corpus: journey corpus version 1 and participant materials version 1 are frozen.
 - Target install-capable policy cells: Ubuntu LTS desktop, current macOS desktop, previous macOS
