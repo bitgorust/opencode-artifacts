@@ -3,13 +3,13 @@
   "id": "opencode-permission-contracts",
   "title": "Separate OpenCode artifact permissions",
   "lane": "high-risk",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": ["UX-03", "OC-06"],
   "currentSpecs": ["specs/current/opencode-integration.spec.md"],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-18T01:48:52Z"
   },
   "withdrawal": {
     "by": "",

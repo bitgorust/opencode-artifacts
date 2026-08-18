@@ -3,13 +3,13 @@
   "id": "opencode-skill-distribution",
   "title": "Install the artifact skill through official discovery",
   "lane": "standard",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": ["OC-05", "DIST-01", "DIST-02"],
   "currentSpecs": ["specs/current/opencode-integration.spec.md"],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-18T01:48:52Z"
   },
   "withdrawal": {
     "by": "",
