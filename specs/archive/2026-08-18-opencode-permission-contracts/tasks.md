@@ -6,4 +6,4 @@
 - [x] Implement separate local-write, datasource, deploy, and audience resources.
 - [x] Verify stable-host allow/ask/deny and auto mode without a real deployment.
 - [x] Record exact permission traces and update `specs/current/opencode-integration.spec.md`.
-- [ ] Run repository validation and archive the packet.
+- [x] Run repository validation and archive the packet.

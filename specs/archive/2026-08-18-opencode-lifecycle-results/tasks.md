@@ -6,5 +6,5 @@
 - [x] Add exact-reference `reopen` to `artifact_lifecycle` with an injectable launcher.
 - [x] Inject and verify `/artifact-reopen` only through the supported stable config hook.
 - [x] Test old spellings, large results, invalid references, and CLI fallback behavior.
-- [ ] Record host evidence and update lifecycle/OpenCode current specs.
-- [ ] Run repository validation and archive the packet.
+- [x] Record host evidence and update lifecycle/OpenCode current specs.
+- [x] Run repository validation and archive the packet.

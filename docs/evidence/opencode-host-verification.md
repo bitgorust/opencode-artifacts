@@ -80,11 +80,10 @@ Host: Ubuntu 24.04.4 LTS, Linux 6.8.0-137-generic x86_64. Node: 24.19.0.
 OpenCode stable current/oldest-tested: exact 1.18.18. V2 beta was excluded. No model provider
 or inference endpoint was called.
 
-The candidate was built and packed once, then installed from
-`opencode-artifacts-0.15.0.tgz` into an empty dependency prefix with lifecycle scripts
-disabled. The initial verified candidate SHA-256 was
-`901a1ee6439dd97a0142d63aacecdebd67d2660f4a8ad37a96c559e42a4dd5cf`; Goal 4's final
-gate reruns this command and replaces the digest if later packet work changes shipped bytes.
+The final Goal 4 candidate was built and packed once, then installed from
+`opencode-artifacts-0.15.0.tgz` into an empty dependency prefix with candidate lifecycle
+scripts disabled. It contained 69 files, measured 123,449 bytes, and had SHA-256
+`df778eafd2cd17b6f2674224af85767089024d326765f34c5e10bbb60307e091`.
 
 The first attempted shortcut—placing the `.tgz` URL directly in the `plugin` array or passing
 the tarball path directly to `opencode plugin`—was rejected as evidence. Stable OpenCode treats
@@ -118,7 +117,7 @@ exercises safe shipped tool code without asking a provider model to select a too
 recorded one deduplicated version cell because current stable and oldest-tested are identical;
 it explicitly sets `broaderRangeProven: false`.
 
-The local JSON result is `/tmp/goal4-newpack/opencode-host-matrix.json`; CI generates the same
+The local JSON result is `/tmp/goal4-finalpack/opencode-host-matrix.json`; CI generates the same
 record as `release-evidence/opencode-host-matrix.json` and retains it with the exact tarball.
 The `/tmp` path is transient and is not itself release evidence. Bare registry-coordinate
 verification of future candidate bytes remains a post-publication gate; the dated published-
@@ -149,3 +148,38 @@ denial at every transition, no-write/no-runner result, bounded metadata, and aut
 are exercised by `test/plugin.test.ts`, `test/opencode-permissions.test.ts`, and the bounded
 model in `test/model/opencode-permission-model.ts`. CI repeats the effective-config assertion
 inside the packed config-array cell.
+
+### Lifecycle result and reopen observation
+
+Both packed routes advertised the prior lifecycle operations plus additive `reopen`. Effective
+configuration contained `/artifact-reopen` with the exact-reference prompt template. The
+packed direct `list` smoke returned the legacy-readable JSON text and left its fixture
+unchanged; unit/contract tests bind the stable `{title, output, metadata}` result, schema-1
+`metadata.artifactResult`, 16 KiB output cap, 8 KiB metadata cap, exact reopen selection, and
+launch-failure refusal. Provider-free server discovery cannot select and execute a model tool,
+so exact launcher behavior remains injected integration evidence rather than a claimed native
+provider turn.
+
+### Native skill install and load observation
+
+The final harness executed the CLI shipped in the extracted tarball:
+
+```text
+opencode-artifacts skill install --project
+```
+
+It installed exactly these bytes into `.opencode/skills/artifact-pages`:
+
+| File | Bytes | SHA-256 |
+|---|---:|---|
+| `SKILL.md` | 6,454 | `1f8a6377b312d4f7b3759d897e4901cdbc8c82aeb39c60e788913db3e961a117` |
+| `reference/components.md` | 5,047 | `9096365cd1ca3d74fbd86c09051cbca083606839cc12a5431900237f5326df0a` |
+| `reference/visuals.md` | 2,280 | `0228e8d7f496da912e9ba1102bcccb9a82584c1b1ae84f5a9d5734e4a8dd1b99` |
+
+The harness then removed the entire installed candidate package tree and started a fresh stable
+host with external compatibility skill roots disabled. Native `GET /skill` returned exactly
+the project-installed `artifact-pages` location, its complete description, and 5,961-byte body
+with SHA-256 `86dcbaa3b04513cdc08cb60f715419acf1147f7d52cfddc3759f81b7c77589af`.
+This proves official-path advertisement and native body loading without a checkout, proactive
+plugin injection, or provider inference. Reference files were independently readable and
+hash-bound after source removal.

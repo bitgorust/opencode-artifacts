@@ -3,9 +3,17 @@
   "id": "packed-opencode-host-matrix",
   "title": "Verify packed OpenCode host compatibility",
   "lane": "standard",
-  "status": "approved",
-  "affectedRequirements": ["OC-01", "OC-02", "OC-03", "OC-04", "QUAL-03"],
-  "currentSpecs": ["specs/current/opencode-integration.spec.md"],
+  "status": "archived",
+  "affectedRequirements": [
+    "OC-01",
+    "OC-02",
+    "OC-03",
+    "OC-04",
+    "QUAL-03"
+  ],
+  "currentSpecs": [
+    "specs/current/opencode-integration.spec.md"
+  ],
   "currentSpecsUpdated": true,
   "approval": {
     "by": "aaron.zeng",
@@ -17,5 +25,5 @@
     "reason": ""
   },
   "createdAt": "2026-08-18",
-  "archivedAt": null
+  "archivedAt": "2026-08-18"
 }

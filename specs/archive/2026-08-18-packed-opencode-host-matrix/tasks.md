@@ -7,4 +7,4 @@
 - [x] Narrow compatibility metadata/policy to the exact current and oldest-tested releases.
 - [x] Add the packed-host cell to CI and retain exact package/host/config/output evidence.
 - [x] Record failures/exclusions and update `specs/current/opencode-integration.spec.md`.
-- [ ] Run repository validation and archive the packet.
+- [x] Run repository validation and archive the packet.
