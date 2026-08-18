@@ -3,7 +3,7 @@
   "id": "first-use-comprehension-certification",
   "title": "Certify first-use comprehension",
   "lane": "standard",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": [
     "OUT-02",
     "OUT-03",
@@ -17,8 +17,8 @@
   ],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-18T15:22:56Z"
   },
   "withdrawal": {
     "by": "",

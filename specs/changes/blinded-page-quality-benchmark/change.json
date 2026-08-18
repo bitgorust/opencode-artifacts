@@ -3,7 +3,7 @@
   "id": "blinded-page-quality-benchmark",
   "title": "Run the blinded page-quality benchmark",
   "lane": "standard",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": [
     "RENDER-12",
     "QUAL-07"
@@ -13,8 +13,8 @@
   ],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-18T15:22:56Z"
   },
   "withdrawal": {
     "by": "",

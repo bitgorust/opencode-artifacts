@@ -3,7 +3,7 @@
   "id": "responsive-visual-composition",
   "title": "Add responsive visual composition",
   "lane": "standard",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": [
     "RENDER-06",
     "RENDER-09",
@@ -15,8 +15,8 @@
   ],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-18T15:22:56Z"
   },
   "withdrawal": {
     "by": "",

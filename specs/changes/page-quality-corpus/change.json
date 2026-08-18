@@ -3,7 +3,7 @@
   "id": "page-quality-corpus",
   "title": "Establish the canonical page-quality corpus",
   "lane": "standard",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": [
     "RENDER-11",
     "QUAL-07",
@@ -14,8 +14,8 @@
   ],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-18T15:22:56Z"
   },
   "withdrawal": {
     "by": "",

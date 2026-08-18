@@ -3,7 +3,7 @@
   "id": "local-artifact-core-release",
   "title": "Certify the local artifact core release",
   "lane": "high-risk",
-  "status": "draft",
+  "status": "approved",
   "affectedRequirements": [
     "OUT-04",
     "COMPAT-01",
@@ -20,8 +20,8 @@
   ],
   "currentSpecsUpdated": false,
   "approval": {
-    "by": "",
-    "at": ""
+    "by": "aaron.zeng",
+    "at": "2026-08-18T15:22:56Z"
   },
   "withdrawal": {
     "by": "",
