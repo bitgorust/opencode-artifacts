@@ -3,21 +3,24 @@ import assert from "node:assert/strict";
 import { assertPortableHtml, parsePackEntry } from "../scripts/candidate-platform-smoke.ts";
 
 test("candidate platform pack parser requires one complete exact coordinate", () => {
-  assert.deepEqual(parsePackEntry(JSON.stringify([{
+  const entry = {
     filename: "opencode-artifacts-0.15.0.tgz",
     integrity: "sha512-example",
     shasum: "abc123",
     size: 10,
     unpackedSize: 20,
     entryCount: 3,
-  }])), {
+  };
+  const expected = {
     filename: "opencode-artifacts-0.15.0.tgz",
     integrity: "sha512-example",
     shasum: "abc123",
     size: 10,
     unpackedSize: 20,
     entryCount: 3,
-  });
+  };
+  assert.deepEqual(parsePackEntry(JSON.stringify([entry])), expected);
+  assert.deepEqual(parsePackEntry(JSON.stringify({ package: entry })), expected);
   assert.throws(() => parsePackEntry("[]"), /exactly one entry/);
   assert.throws(() => parsePackEntry(JSON.stringify([{ filename: "x" }])), /missing integrity/);
 });

@@ -58,7 +58,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export function parsePackEntry(output: string): PackEntry {
   const value: unknown = JSON.parse(output);
-  const item = Array.isArray(value) && value.length === 1 ? value[0] : undefined;
+  const item = Array.isArray(value) && value.length === 1
+    ? value[0]
+    : isRecord(value) && Object.values(value).length === 1
+      ? Object.values(value)[0]
+      : undefined;
   if (!isRecord(item)) throw new Error("npm pack must return exactly one entry");
   const fields = ["filename", "integrity", "shasum"] as const;
   for (const field of fields) {
