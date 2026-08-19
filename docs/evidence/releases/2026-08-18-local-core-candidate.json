@@ -77,7 +77,16 @@
         "environment": "Linux x64, Node 24.19.0, Chromium 151, 2 cores, 4 GiB"
       }]
     },
-    { "id": "support-matrix", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    {
+      "id": "support-matrix", "status": "pending", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-19-local-core-platform-linux.json", "date": "2026-08-19",
+        "owner": "Goal 5 clean packed-platform smoke", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Linux clean tarball install, installed CLI render, strict offline CSP, package-tree removal, and byte-identical reopen. Browser, representative-user, and support claims are excluded.",
+        "environment": "Linux 6.8.0-137-generic x64, Node 24.19.0"
+      }]
+    },
     { "id": "page-quality", "status": "pending", "applicabilityReason": null, "evidence": [] },
     { "id": "first-use", "status": "pending", "applicabilityReason": null, "evidence": [] },
     { "id": "comprehension", "status": "pending", "applicabilityReason": null, "evidence": [] },
@@ -93,15 +102,33 @@
     },
     {
       "id": "integrity-provenance", "status": "pending", "applicabilityReason": null,
-      "evidence": [{
-        "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
-        "owner": "GitHub Actions run 32161443356", "result": "pass",
-        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
-        "scope": "Reproducible pack digest and CI in-toto subject; no registry publication/signature/readback for this candidate.",
-        "environment": "GitHub ubuntu-latest, Node 24, npm latest"
-      }]
+      "evidence": [
+        {
+          "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
+          "owner": "GitHub Actions run 32161443356", "result": "pass",
+          "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+          "scope": "Reproducible pack digest and CI in-toto subject; no registry publication/signature/readback for this candidate.",
+          "environment": "GitHub ubuntu-latest, Node 24, npm latest"
+        },
+        {
+          "path": "docs/evidence/releases/2026-08-18-local-core-consumer-verification.md", "date": "2026-08-18",
+          "owner": "Goal 5 consumer-verification run", "result": "pass",
+          "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+          "scope": "Two byte-identical packs, SHA-256, npm shasum, SRI, archive shape, and offline verification procedure; registry readback remains absent.",
+          "environment": "Linux x64, Node 24.19.0, two isolated npm caches"
+        }
+      ]
     },
-    { "id": "claims-rollback", "status": "pending", "applicabilityReason": null, "evidence": [] }
+    {
+      "id": "claims-rollback", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-claims.md", "date": "2026-08-18",
+        "owner": "Goal 5 claim and rollback audit", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Exact packaged/public claim surfaces, fail-closed certification, pre-release refusal, and zero-mutation rollback procedure.",
+        "environment": "Frozen candidate archive and repository policy surfaces"
+      }]
+    }
   ],
   "signoffs": [
     { "role": "release", "status": "pending", "by": null, "at": null },

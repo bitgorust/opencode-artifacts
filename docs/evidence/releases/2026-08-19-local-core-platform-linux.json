@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-19T00:35:39.505Z",
+  "result": "pass",
+  "environment": {
+    "platform": "linux",
+    "release": "6.8.0-137-generic",
+    "architecture": "x64",
+    "node": "v24.19.0",
+    "runnerOs": null,
+    "runnerArchitecture": null,
+    "runnerImageOs": null,
+    "runnerImageVersion": null
+  },
+  "candidate": {
+    "filename": "opencode-artifacts-0.15.0.tgz",
+    "integrity": "sha512-ErzQBzSxNz/nuxsTfwi5uozrJvK5joo7c6SyHeWz9THM49ETSY5PajdrxdfXq0J86lGAK4HdahCKyEo1gPIjKA==",
+    "shasum": "9eeff3bbc6f016aaa2b10c71df15e891904a8ad0",
+    "size": 126383,
+    "unpackedSize": 542885,
+    "entryCount": 69,
+    "sha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2"
+  },
+  "install": {
+    "source": "exact-local-tarball",
+    "lifecycleScripts": false,
+    "repositorySourceImported": false
+  },
+  "portableOutput": {
+    "sourceFixture": "benchmarks/renderer/v1/no-runtime.md",
+    "bytes": 43589,
+    "sha256": "ada851484b51bae5fe495c0d4d33f72ca3fcdd3faa6cee06c9d25347c72418e4",
+    "strictOfflineCsp": true,
+    "packageTreeRemovedBeforeReopen": true,
+    "byteIdenticalAfterRemoval": true
+  },
+  "claimBoundary": {
+    "technicalObservationOnly": true,
+    "supportedPlatform": false,
+    "browserCoverage": false,
+    "representativeUserEvidence": false
+  }
+}
