@@ -13,7 +13,7 @@
   "currentSpecs": [
     "specs/current/portable-renderer.spec.md"
   ],
-  "currentSpecsUpdated": false,
+  "currentSpecsUpdated": true,
   "approval": {
     "by": "aaron.zeng",
     "at": "2026-08-18T15:22:56Z"

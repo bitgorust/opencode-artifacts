@@ -1,6 +1,6 @@
 # Support and release policy
 
-Policy version: 1. Last reviewed: 2026-08-18.
+Policy version: 1. Last reviewed: 2026-08-19.
 
 This document owns the Phase 0 D-01 platform decision and D-06 release/supply-chain decision.
 The machine-readable status record is [`governance-policy.json`](governance-policy.json).
@@ -10,9 +10,10 @@ The machine-readable status record is [`governance-policy.json`](governance-poli
 There are currently **no fully supported platform/browser cells**. A dated Ubuntu observation
 installed an exact CI tarball, discovered all tools through real OpenCode, rendered and
 reopened an offline page in one Chromium build, and repeated the reopen after package-tree
-removal. It did not exercise Firefox, the latest two stable browser generations, or a
-consented first-time user following only the README. The target matrix therefore remains
-unverified and blocks a production-readiness claim.
+removal. A newer Goal 5 diagnostic installed one shared exact tarball and exercised its npm-bin
+offline render/removal/reopen path on one Linux, macOS, and Windows CI runner. Neither track
+exercised the complete latest-two browser/device matrix or a consented first-time user following
+only the README. The target matrix therefore remains unverified and blocks a production-readiness claim.
 
 Public preview is nevertheless distributable after its closed technical, security, privacy,
 package-integrity, and supply-chain gates pass. Public preview is explicitly unsupported and
@@ -23,6 +24,7 @@ later release still requires the complete target matrix and OUT-02/OUT-03 eviden
 | Cell | Target | Current status | Evidence or missing scope |
 |---|---|---|---|
 | Ubuntu technical observation | Ubuntu 24.04.4, Node 24.19.0, OpenCode 1.18.18, Chrome for Testing 145.0.7632.6 | Tested, not supported | [Exact packed observation](evidence/governance/ubuntu-packed-observation-2026-08-16.md); Firefox/latest-two/human first-use absent |
+| Goal 5 cross-OS CLI observation | Ubuntu 24 runner, macOS 25.5 arm64 runner, Windows Server 2025 runner; Node 24; exact candidate SHA-256 `6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd` | Tested, not supported | [Exact CI report](evidence/releases/2026-08-19-local-core-ci.md); browsers/devices, Windows 11/WSL, previous macOS, and human first-use absent |
 | Ubuntu desktop | Ubuntu 24.04 LTS, Node 24, stable OpenCode 1.x, latest two Chromium/Firefox | Unverified | Exact combined run absent |
 | macOS desktop | Current and previous macOS, Node 24, stable OpenCode 1.x, latest two Safari/Chromium/Firefox | Unverified | Machines/runs absent |
 | Windows desktop | Windows 11 native and WSL 2, Node 24, stable OpenCode 1.x, latest two Chromium/Firefox | Unverified | Machines/runs absent |

@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-19T03:37:56.715Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "fixture": "http://127.0.0.1:4173/plan-checklist.html",
+  "requested": {
+    "width": 390,
+    "height": 844,
+    "colorScheme": "dark",
+    "reducedMotion": true
+  },
+  "usefulContentMs": 421,
+  "ready": true,
+  "keyboard": {
+    "firstTab": {
+      "className": "skip-link",
+      "tag": "A",
+      "text": "Skip to main content"
+    }
+  },
+  "observations": {
+    "chartGeometry": [],
+    "clippedText": [],
+    "colorScheme": "dark",
+    "composition": "composition-quiet",
+    "diagramGeometry": [],
+    "documentHorizontalOverflow": false,
+    "headings": [
+      "Release 2.14 checklist",
+      "Must land before tag",
+      "Post-tag",
+      "Notes"
+    ],
+    "interactive": {
+      "buttons": 1,
+      "radios": 0,
+      "ranges": 0
+    },
+    "layoutShift": 0,
+    "mainHorizontalOverflow": false,
+    "readyState": "complete",
+    "reducedMotion": true,
+    "renderErrors": [],
+    "sections": [
+      {
+        "classes": "section-card",
+        "heading": "Must land before tag",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 343
+      },
+      {
+        "classes": "section-card",
+        "heading": "Post-tag",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 343
+      },
+      {
+        "classes": "section-card",
+        "heading": "Notes",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 343
+      }
+    ],
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 701,
+      "width": 390
+    }
+  },
+  "accessibilityTree": [
+    {
+      "role": "RootWebArea",
+      "name": "Release 2.14 checklist"
+    },
+    {
+      "role": "banner",
+      "name": ""
+    },
+    {
+      "role": "main",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "Release 2.14 checklist"
+    },
+    {
+      "role": "button",
+      "name": "Theme: system. Activate to switch."
+    },
+    {
+      "role": "heading",
+      "name": "Must land before tag"
+    },
+    {
+      "role": "heading",
+      "name": "Post-tag"
+    },
+    {
+      "role": "heading",
+      "name": "Notes"
+    }
+  ],
+  "browserLogs": [],
+  "requestUrls": [
+    "http://127.0.0.1:4173/plan-checklist.html"
+  ],
+  "externalHttpRequests": []
+}

@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "recordId": "local-core-2026-08-19-candidate",
+  "level": "local-artifact-core",
+  "decision": "refused",
+  "candidate": {
+    "status": "frozen",
+    "commit": "2908d52ef94bb0f8cf74d7f2be021ada78a0d661",
+    "version": "0.15.0",
+    "tarball": "opencode-artifacts-0.15.0.tgz",
+    "sha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+    "sri": "sha512-X9IgvKCHvs1Q5QegNWoBcdId/tIkqlrF0dNSlfSPCCj2Lehrfbl+j4HF2QSVHUNtGFRpGMw6OhDYHLKKARDXfQ==",
+    "corpusVersions": { "pageQuality": "page-quality-v1", "journey": 1 }
+  },
+  "requirements": [
+    {
+      "id": "code-tests", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-19-local-core-ci.md", "date": "2026-08-19",
+        "owner": "GitHub Actions run 32212321648", "result": "pass",
+        "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+        "scope": "Install, build, 258 tests, structural assertions, and exact-candidate evidence generation.",
+        "environment": "GitHub ubuntu-latest, Node 24, npm latest"
+      }]
+    },
+    {
+      "id": "package-host",
+      "status": "pass",
+      "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-19-local-core-host-matrix.json",
+        "date": "2026-08-19",
+        "owner": "GitHub Actions run 32212321648",
+        "result": "pass",
+        "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+        "scope": "Clean temporary install, stable OpenCode discovery, tool schemas, read-only packed smoke, and skill discovery.",
+        "environment": "Linux x64, Node 24, OpenCode stable 1.18.18"
+      }]
+    },
+    {
+      "id": "browser-accessibility", "status": "pending", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/page-quality/2026-08-19-local-composition.md", "date": "2026-08-19",
+        "owner": "Goal 5 automated browser run", "result": "pass",
+        "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+        "scope": "Sixteen Chromium desktop/mobile/mode cells; manual screen-reader review remains missing.",
+        "environment": "Linux x64, Chromium 151"
+      }]
+    },
+    {
+      "id": "migrations", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-19-local-core-ci.md", "date": "2026-08-19",
+        "owner": "GitHub Actions run 32212321648", "result": "pass",
+        "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+        "scope": "Schema, lifecycle, migration, rollback, fault-boundary, and transaction tests in the complete suite.",
+        "environment": "GitHub ubuntu-latest, Node 24"
+      }]
+    },
+    {
+      "id": "security-privacy", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-19-local-core-ci.md", "date": "2026-08-19",
+        "owner": "GitHub Actions run 32212321648", "result": "pass",
+        "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+        "scope": "Adversarial renderer, path, permission, secret-scan, CSP, governance, and privacy-policy checks.",
+        "environment": "GitHub ubuntu-latest, Node 24"
+      }]
+    },
+    {
+      "id": "performance", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-19-local-core-performance.md", "date": "2026-08-19",
+        "owner": "Goal 5 constrained benchmark run", "result": "pass",
+        "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+        "scope": "Three renderer workloads, 36 CLI samples, 42 fresh-profile browser samples, time and byte budgets.",
+        "environment": "Linux x64, Node 24.19.0, Chromium 151, 2 cores, 4 GiB"
+      }]
+    },
+    {
+      "id": "support-matrix", "status": "pending", "applicabilityReason": null,
+      "evidence": [
+        {
+          "path": "docs/evidence/releases/2026-08-19-local-core-platform-linux.json", "date": "2026-08-19",
+          "owner": "GitHub Actions run 32212321648", "result": "pass",
+          "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+          "scope": "Exact shared tarball clean install, npm-bin render, strict offline CSP, package-tree removal, and byte-identical reopen. Browser, representative-user, and support claims are excluded.",
+          "environment": "Ubuntu 24 runner image 20260810.271.1, Linux 6.17.0-1022-azure x64, Node 24.19.0"
+        },
+        {
+          "path": "docs/evidence/releases/2026-08-19-local-core-platform-macos.json", "date": "2026-08-19",
+          "owner": "GitHub Actions run 32212321648", "result": "pass",
+          "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+          "scope": "Exact shared tarball clean install, npm-bin render, strict offline CSP, package-tree removal, and byte-identical reopen. Browser, representative-user, previous-macOS, and support claims are excluded.",
+          "environment": "macOS 25.5.0 arm64, runner image macos26 20260728.0273.1, Node 24.18.0"
+        },
+        {
+          "path": "docs/evidence/releases/2026-08-19-local-core-platform-windows.json", "date": "2026-08-19",
+          "owner": "GitHub Actions run 32212321648", "result": "pass",
+          "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+          "scope": "Exact shared tarball clean install, npm-bin render, strict offline CSP, package-tree removal, and byte-identical reopen. Windows 11, WSL, browser, representative-user, and support claims are excluded.",
+          "environment": "Windows Server 2025 10.0.26100 x64, runner image win25-vs2026 20260810.198.2, Node 24.19.0"
+        }
+      ]
+    },
+    {
+      "id": "page-quality", "status": "pending", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/page-quality/2026-08-19-benchmark-status.md", "date": "2026-08-19",
+        "owner": "Goal 5 benchmark status audit", "result": "pass",
+        "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+        "scope": "Accurately records the passing local 16-cell renderer track and zero authorized comparative runs or reviewer distributions.",
+        "environment": "page-quality-v1 corpus; comparative environment not yet authorized"
+      }]
+    },
+    {
+      "id": "first-use", "status": "pending", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/journeys/goal-5-status-2026-08-19.md", "date": "2026-08-19",
+        "owner": "Goal 5 journey status audit", "result": "pass",
+        "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+        "scope": "Accurately records no authorized study owner, zero eligible README-only sessions, and every claimed support cell missing.",
+        "environment": "journey corpus version 1; human collection not started"
+      }]
+    },
+    {
+      "id": "comprehension", "status": "pending", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/journeys/goal-5-status-2026-08-19.md", "date": "2026-08-19",
+        "owner": "Goal 5 journey status audit", "result": "pass",
+        "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+        "scope": "Accurately records zero of ten required eligible representative-primary comprehension sessions.",
+        "environment": "journey corpus version 1; human collection not started"
+      }]
+    },
+    {
+      "id": "audit-license-sbom", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-19-local-core-ci.md", "date": "2026-08-19",
+        "owner": "GitHub Actions run 32212321648", "result": "pass",
+        "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+        "scope": "Zero-vulnerability audit, 217-entry license inventory/dispositions, 211-component CycloneDX SBOM, dependency signatures and attestations.",
+        "environment": "GitHub ubuntu-latest, Node 24, npm latest"
+      }]
+    },
+    {
+      "id": "integrity-provenance", "status": "pending", "applicabilityReason": null,
+      "evidence": [
+        {
+          "path": "docs/evidence/releases/2026-08-19-local-core-ci.md", "date": "2026-08-19",
+          "owner": "GitHub Actions run 32212321648", "result": "pass",
+          "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+          "scope": "Reproducible pack digest and CI in-toto subject; no registry publication/signature/readback for this candidate.",
+          "environment": "GitHub ubuntu-latest, Node 24, npm latest"
+        },
+        {
+          "path": "docs/evidence/releases/2026-08-19-local-core-consumer-verification.md", "date": "2026-08-19",
+          "owner": "Goal 5 consumer-verification run", "result": "pass",
+          "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+          "scope": "Two byte-identical packs, SHA-256, npm shasum, SRI, archive shape, and offline verification procedure; registry readback remains absent.",
+          "environment": "Linux x64, Node 24.19.0, two isolated npm caches"
+        }
+      ]
+    },
+    {
+      "id": "claims-rollback", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-19-local-core-claims.md", "date": "2026-08-19",
+        "owner": "Goal 5 claim and rollback audit", "result": "pass",
+        "candidateSha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd",
+        "scope": "Exact packaged/public claim surfaces, fail-closed certification, pre-release refusal, and zero-mutation rollback procedure.",
+        "environment": "Frozen candidate archive and repository policy surfaces"
+      }]
+    }
+  ],
+  "signoffs": [
+    { "role": "release", "status": "pending", "by": null, "at": null },
+    { "role": "security", "status": "pending", "by": null, "at": null },
+    { "role": "support", "status": "pending", "by": null, "at": null }
+  ],
+  "blockers": [
+    "Independent corpus ambiguity, neutrality, privacy, and redistribution review is absent.",
+    "Manual screen-reader review of the new composition behavior is absent.",
+    "Authorized current Claude same-input runs and retention disposition are absent.",
+    "Three independent benchmark reviewers are absent.",
+    "Representative-user first-use and comprehension records are absent.",
+    "The exact claimed support matrix is incomplete.",
+    "Candidate registry integrity, signature, and published provenance readback are absent because publication is not authorized.",
+    "Accountable release, security, and support sign-offs are absent."
+  ],
+  "claims": {
+    "certification": false,
+    "equalOrBetter": false,
+    "supportedPlatformIds": []
+  },
+  "providerMutationCount": 0
+}

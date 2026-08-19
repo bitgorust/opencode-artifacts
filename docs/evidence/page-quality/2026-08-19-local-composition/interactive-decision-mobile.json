@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-19T03:38:12.386Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "fixture": "http://127.0.0.1:4173/interactive-decision.html",
+  "requested": {
+    "width": 390,
+    "height": 844,
+    "colorScheme": "dark",
+    "reducedMotion": true
+  },
+  "usefulContentMs": 1215,
+  "ready": true,
+  "keyboard": {
+    "firstTab": {
+      "className": "skip-link",
+      "tag": "A",
+      "text": "Skip to main content"
+    },
+    "range": {
+      "before": "2",
+      "after": "2.5"
+    },
+    "copy": "Copied"
+  },
+  "observations": {
+    "chartGeometry": [
+      {
+        "childHeight": 390,
+        "childWidth": 311,
+        "height": 390,
+        "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" class=\"marks\" width=\"311\" height=\"390\" viewBox=\"0 0 311 390\" st",
+        "width": 311
+      },
+      {
+        "childHeight": 390,
+        "childWidth": 311,
+        "height": 390,
+        "markup": "<div style=\"position: relative; width: 311px; height: 390px; padding: 0px; margin: 0px; border-width: 0px;\"><canvas data-zr-dom-id=\"zr_0.0\" width=\"311\" height=\"",
+        "width": 311
+      }
+    ],
+    "clippedText": [],
+    "colorScheme": "dark",
+    "composition": "composition-full",
+    "diagramGeometry": [],
+    "documentHorizontalOverflow": false,
+    "headings": [
+      "Tuning playground — wave parameters",
+      "Frequency and amplitude",
+      "Noisy series with zoom",
+      "Bring the result back"
+    ],
+    "interactive": {
+      "buttons": 2,
+      "radios": 0,
+      "ranges": 2
+    },
+    "layoutShift": 0.032428835614905144,
+    "mainHorizontalOverflow": false,
+    "readyState": "complete",
+    "reducedMotion": true,
+    "renderErrors": [],
+    "sections": [
+      {
+        "classes": "section-card section-visual",
+        "heading": "Frequency and amplitude",
+        "utilization": 0.907,
+        "visualWidth": 311,
+        "width": 343
+      },
+      {
+        "classes": "section-card section-visual",
+        "heading": "Noisy series with zoom",
+        "utilization": 0.907,
+        "visualWidth": 311,
+        "width": 343
+      },
+      {
+        "classes": "section-card",
+        "heading": "Bring the result back",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 343
+      }
+    ],
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 701,
+      "width": 390
+    }
+  },
+  "accessibilityTree": [
+    {
+      "role": "RootWebArea",
+      "name": "Tuning playground — wave parameters"
+    },
+    {
+      "role": "banner",
+      "name": ""
+    },
+    {
+      "role": "main",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "Tuning playground — wave parameters"
+    },
+    {
+      "role": "button",
+      "name": "Theme: system. Activate to switch."
+    },
+    {
+      "role": "heading",
+      "name": "Frequency and amplitude"
+    },
+    {
+      "role": "figure",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "Noisy series with zoom"
+    },
+    {
+      "role": "figure",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "Bring the result back"
+    },
+    {
+      "role": "image",
+      "name": "The twelve-week series rises overall from 12 to 40 with several temporary dips."
+    },
+    {
+      "role": "button",
+      "name": "Copy as prompt"
+    },
+    {
+      "role": "slider",
+      "name": "Frequency 2.5"
+    },
+    {
+      "role": "slider",
+      "name": "Amplitude 1"
+    }
+  ],
+  "browserLogs": [],
+  "requestUrls": [
+    "http://127.0.0.1:4173/interactive-decision.html"
+  ],
+  "externalHttpRequests": []
+}

@@ -121,6 +121,7 @@ malformed or unknown markup.
   Fedora/Orca/Chrome manual assistive-technology attestation. It does not certify a supported
   browser/OS matrix, a physical mobile device, or other assistive-technology combinations.
 - `test/page-quality-corpus.test.ts`, `test/page-quality-local-report.test.ts`, and
-  `docs/evidence/page-quality/2026-08-18-local-composition.md` retain the exact corpus binding and
-  16-cell Chromium renderer-track result. They do not supply comparative, representative-user,
-  platform-support, or release-certification evidence.
+  `docs/evidence/page-quality/2026-08-19-local-composition.md` retain the refrozen exact-candidate
+  corpus binding and 16-cell Chromium renderer-track result. The earlier Fedora/Orca attestation
+  predates these composition changes and does not close their manual screen-reader gate. None of
+  this supplies comparative, representative-user, platform-support, or release-certification evidence.

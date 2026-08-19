@@ -156,11 +156,12 @@ Artifact design change.
 ## Current status
 
 `benchmarks/page-quality/v1/` now owns the hash-bound eight-task corpus, frozen benchmark
-manifest, and an empty external-run template. The renderer track has dated Chromium evidence
-for all 16 desktop/mobile/mode cells: responsive chart/diagram sizing, task-aware composition,
-keyboard traces, runtime errors, overflow, clipping, external requests, useful-content timing,
-and layout shift pass the local gate. This resolves the previously observed fixed-size
-dashboard chart defect for the normalized fixture.
+manifest, and an empty external-run template. The refrozen candidate's
+[dated Chromium report](evidence/page-quality/2026-08-19-local-composition.md) covers all 16
+desktop/mobile/mode cells: responsive chart/diagram sizing, task-aware composition, keyboard
+traces, runtime errors, overflow, clipping, external requests, useful-content timing, and layout
+shift pass the local gate. This resolves the previously observed fixed-size dashboard chart
+defect for the normalized fixture.
 
 That local result is regression evidence, not a same-input comparison. Authorized current
 Claude generations, their account/settings/retention protocol, all 24 unselected pairs, and at

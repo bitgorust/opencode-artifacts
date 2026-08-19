@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-19T03:32:28.102Z",
+  "generatedAt": "2026-08-19T03:35:42.993Z",
   "result": "pass",
   "environment": {
-    "platform": "linux",
-    "release": "6.17.0-1022-azure",
+    "platform": "win32",
+    "release": "10.0.26100",
     "architecture": "x64",
     "node": "v24.19.0",
-    "runnerOs": "Linux",
+    "runnerOs": "Windows",
     "runnerArchitecture": "X64",
-    "runnerImageOs": "ubuntu24",
-    "runnerImageVersion": "20260810.271.1"
+    "runnerImageOs": "win25-vs2026",
+    "runnerImageVersion": "20260810.198.2"
   },
   "candidate": {
     "filename": "opencode-artifacts-0.15.0.tgz",

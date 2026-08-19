@@ -1,12 +1,19 @@
 # Evidence: Run the blinded page-quality benchmark
 
-Add one section for every affected requirement ID. Link syntax is
-`[@test](path)`, `[@manual](path)`, or `[@model](path)` and targets must exist before archive.
-Do not hide failed or excluded results.
+## Requirement: RENDER-12
 
-## Requirement: REPLACE-ID
+- Validation: the equal-or-better claim requires 24 unselected outputs per system and at least
+  three eligible blinded reviewers across all eight task families.
+- Verification: aggregation, hard-gate, threshold, denominator, blinding, and mutation tests pass;
+  the dated status reports zero authorized Claude runs, zero comparison OpenCode runs, and zero reviewers.
+- Result: incomplete; equal-or-better remains disabled without substituting generated judgments.
+- Evidence: [@test](test/page-quality-benchmark.test.ts) [@manual](docs/evidence/page-quality/2026-08-19-benchmark-status.md)
 
-- Validation: [NEEDS CLARIFICATION: evidence that this solves the intended user problem]
-- Verification: [NEEDS CLARIFICATION: evidence that implementation satisfies the contract]
-- Result: pass / fail / not applicable with reason
-- Evidence: pending approved implementation.
+## Requirement: QUAL-07
+
+- Validation: settings, authority, retention, hashes, traces, labels, scores, and failures must map
+  exactly once to the frozen corpus.
+- Verification: the fail-closed validator rejects missing, duplicate, leaked, unauthorized, or
+  incomplete inputs and accepts the empty external-run template only as incomplete status.
+- Result: harness pass; evidence collection is not authorized and the comparative report is absent.
+- Evidence: [@test](test/page-quality-benchmark.test.ts) [@manual](docs/evidence/page-quality/2026-08-19-benchmark-status.md)

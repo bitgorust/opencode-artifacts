@@ -1,0 +1,936 @@
+{
+  "schemaVersion": 1,
+  "benchmark": "renderer-browser-v1",
+  "capturedAt": "2026-08-19T03:36:34.450Z",
+  "configPath": "benchmarks/renderer/v1/budgets.json",
+  "configSha256": "bf6961cdb235d513d4e604659bba19cd4fa4f8bbf059998552c5e65cb7a2b90e",
+  "percentileMethod": "nearest-rank",
+  "navigationState": "new WebDriver session and browser profile for every cold sample",
+  "excludedSetup": [
+    "Selenium container start",
+    "artifact rendering",
+    "local server start",
+    "session creation before navigation",
+    "report serialization"
+  ],
+  "environment": {
+    "profile": "renderer-linux-container-v1",
+    "platform": "linux",
+    "arch": "x64",
+    "nodeMajor": 24,
+    "cpuQuotaCores": 2,
+    "memoryLimitBytes": 4294967296,
+    "browserName": "chrome",
+    "browserMajor": 151,
+    "browserVersion": "151.0.7922.108",
+    "cgroupCpuMax": null,
+    "cgroupMemoryMax": null,
+    "constraintSource": "explicit Docker constraints; verify retained docker inspect values"
+  },
+  "expectedEnvironment": {
+    "profile": "renderer-linux-container-v1",
+    "platform": "linux",
+    "arch": "x64",
+    "nodeMajor": 24,
+    "cpuQuotaCores": 2,
+    "memoryLimitBytes": 4294967296,
+    "browserName": "chrome",
+    "browserMajor": 151
+  },
+  "environmentComparison": {
+    "comparable": true,
+    "mismatches": []
+  },
+  "sampling": {
+    "cliSamples": 12,
+    "browserSamples": 7,
+    "minimumSamples": 5,
+    "noiseFloorMs": 250,
+    "maxRelativeP95Spread": 1
+  },
+  "workloads": {
+    "no-runtime": {
+      "fixture": "no-runtime.md",
+      "fixtureSha256": "53068378d5707429795aaba82f864de5064f139364ec35490104e964bfb2d28b",
+      "finalBytes": 43589,
+      "byteBudget": {
+        "totalBytes": 43589,
+        "warningBytes": 131072,
+        "hardBytes": 196608,
+        "remainingToHardBytes": 153019,
+        "status": "pass"
+      },
+      "cells": {
+        "desktop": {
+          "viewport": {
+            "width": 1440,
+            "height": 1200
+          },
+          "usefulContent": {
+            "samplesMs": [
+              814.868242,
+              825.4443170000004,
+              816.1179900000006,
+              792.9135920000008,
+              717.0160919999998,
+              800.4489919999996,
+              887.8407189999998
+            ],
+            "count": 7,
+            "minMs": 717.0160919999998,
+            "maxMs": 887.8407189999998,
+            "p50Ms": 814.868242,
+            "p95Ms": 887.8407189999998,
+            "relativeP95Spread": 0.08955125901200577,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "keyboardAdditional": {
+            "samplesMs": [
+              245.751761,
+              293.46671100000003,
+              392.29269999999997,
+              136.22837499999878,
+              125.61736900000142,
+              187.02679999999964,
+              187.2084790000008
+            ],
+            "count": 7,
+            "minMs": 125.61736900000142,
+            "maxMs": 392.29269999999997,
+            "p50Ms": 187.2084790000008,
+            "p95Ms": 392.29269999999997,
+            "relativeP95Spread": 0.8203368839999966,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "budget": {
+            "usefulContent": {
+              "limitMs": 1500,
+              "p95Ms": 887.8407189999998,
+              "pass": true,
+              "reasons": []
+            },
+            "keyboardAdditional": {
+              "limitMs": 1000,
+              "p95Ms": 392.29269999999997,
+              "pass": true,
+              "reasons": []
+            },
+            "hardFailures": [],
+            "pass": true
+          },
+          "samples": [
+            {
+              "usefulContentMs": 814.868242,
+              "keyboardAdditionalMs": 245.751761,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 825.4443170000004,
+              "keyboardAdditionalMs": 293.46671100000003,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 816.1179900000006,
+              "keyboardAdditionalMs": 392.29269999999997,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 792.9135920000008,
+              "keyboardAdditionalMs": 136.22837499999878,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 717.0160919999998,
+              "keyboardAdditionalMs": 125.61736900000142,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 800.4489919999996,
+              "keyboardAdditionalMs": 187.02679999999964,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 887.8407189999998,
+              "keyboardAdditionalMs": 187.2084790000008,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            }
+          ],
+          "pass": true
+        },
+        "mobile": {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "usefulContent": {
+            "samplesMs": [
+              638.6008379999985,
+              900.2056139999986,
+              689.6672920000019,
+              1102.2203850000005,
+              808.7035920000017,
+              891.6322230000005,
+              807.8485670000009
+            ],
+            "count": 7,
+            "minMs": 638.6008379999985,
+            "maxMs": 1102.2203850000005,
+            "p50Ms": 808.7035920000017,
+            "p95Ms": 1102.2203850000005,
+            "relativeP95Spread": 0.36294730962441213,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "keyboardAdditional": {
+            "samplesMs": [
+              189.60168700000213,
+              114.82374100000015,
+              203.91782800000146,
+              224.68505500000174,
+              128.19467900000018,
+              139.24067800000194,
+              129.44597000000067
+            ],
+            "count": 7,
+            "minMs": 114.82374100000015,
+            "maxMs": 224.68505500000174,
+            "p50Ms": 139.24067800000194,
+            "p95Ms": 224.68505500000174,
+            "relativeP95Spread": 0.34177750799999923,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "budget": {
+            "usefulContent": {
+              "limitMs": 3000,
+              "p95Ms": 1102.2203850000005,
+              "pass": true,
+              "reasons": []
+            },
+            "keyboardAdditional": {
+              "limitMs": 2000,
+              "p95Ms": 224.68505500000174,
+              "pass": true,
+              "reasons": []
+            },
+            "hardFailures": [],
+            "pass": true
+          },
+          "samples": [
+            {
+              "usefulContentMs": 638.6008379999985,
+              "keyboardAdditionalMs": 189.60168700000213,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 900.2056139999986,
+              "keyboardAdditionalMs": 114.82374100000015,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 689.6672920000019,
+              "keyboardAdditionalMs": 203.91782800000146,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1102.2203850000005,
+              "keyboardAdditionalMs": 224.68505500000174,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 808.7035920000017,
+              "keyboardAdditionalMs": 128.19467900000018,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 891.6322230000005,
+              "keyboardAdditionalMs": 139.24067800000194,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 807.8485670000009,
+              "keyboardAdditionalMs": 129.44597000000067,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/no-runtime.html"
+              ],
+              "hardFailures": []
+            }
+          ],
+          "pass": true
+        }
+      }
+    },
+    "one-chart": {
+      "fixture": "one-chart.md",
+      "fixtureSha256": "9e2db7cd4b9ffd197baeb1eb539df779dadca192002769fedbe361e934192e26",
+      "finalBytes": 625792,
+      "byteBudget": {
+        "totalBytes": 625792,
+        "warningBytes": 1048576,
+        "hardBytes": 1572864,
+        "remainingToHardBytes": 947072,
+        "status": "pass"
+      },
+      "cells": {
+        "desktop": {
+          "viewport": {
+            "width": 1440,
+            "height": 1200
+          },
+          "usefulContent": {
+            "samplesMs": [
+              983.506097999998,
+              1090.2232360000053,
+              908.0568800000037,
+              1092.3162259999954,
+              1005.1924389999986,
+              892.5397840000005,
+              984.7074560000037
+            ],
+            "count": 7,
+            "minMs": 892.5397840000005,
+            "maxMs": 1092.3162259999954,
+            "p50Ms": 984.7074560000037,
+            "p95Ms": 1092.3162259999954,
+            "relativeP95Spread": 0.109279938264214,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "keyboardAdditional": {
+            "samplesMs": [
+              206.47585300000355,
+              194.0020250000016,
+              219.18885800000135,
+              207.2545639999953,
+              141.43628800000442,
+              130.62385400000494,
+              131.31818900000508
+            ],
+            "count": 7,
+            "minMs": 130.62385400000494,
+            "maxMs": 219.18885800000135,
+            "p50Ms": 194.0020250000016,
+            "p95Ms": 219.18885800000135,
+            "relativeP95Spread": 0.10074733199999901,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "budget": {
+            "usefulContent": {
+              "limitMs": 3000,
+              "p95Ms": 1092.3162259999954,
+              "pass": true,
+              "reasons": []
+            },
+            "keyboardAdditional": {
+              "limitMs": 1000,
+              "p95Ms": 219.18885800000135,
+              "pass": true,
+              "reasons": []
+            },
+            "hardFailures": [],
+            "pass": true
+          },
+          "samples": [
+            {
+              "usefulContentMs": 983.506097999998,
+              "keyboardAdditionalMs": 206.47585300000355,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1090.2232360000053,
+              "keyboardAdditionalMs": 194.0020250000016,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 908.0568800000037,
+              "keyboardAdditionalMs": 219.18885800000135,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1092.3162259999954,
+              "keyboardAdditionalMs": 207.2545639999953,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1005.1924389999986,
+              "keyboardAdditionalMs": 141.43628800000442,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 892.5397840000005,
+              "keyboardAdditionalMs": 130.62385400000494,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 984.7074560000037,
+              "keyboardAdditionalMs": 131.31818900000508,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            }
+          ],
+          "pass": true
+        },
+        "mobile": {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "usefulContent": {
+            "samplesMs": [
+              1015.6137519999975,
+              974.4916939999966,
+              1127.8989629999996,
+              989.0962230000005,
+              977.3424860000086,
+              916.0046670000011,
+              1005.9680030000018
+            ],
+            "count": 7,
+            "minMs": 916.0046670000011,
+            "maxMs": 1127.8989629999996,
+            "p50Ms": 989.0962230000005,
+            "p95Ms": 1127.8989629999996,
+            "relativeP95Spread": 0.14033289863245096,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "keyboardAdditional": {
+            "samplesMs": [
+              92.44454899999982,
+              131.50906399999803,
+              128.97129600000335,
+              110.32120299999951,
+              52.957697999998345,
+              132.6656890000013,
+              97.47543099999893
+            ],
+            "count": 7,
+            "minMs": 52.957697999998345,
+            "maxMs": 132.6656890000013,
+            "p50Ms": 110.32120299999951,
+            "p95Ms": 132.6656890000013,
+            "relativeP95Spread": 0.08937794400000712,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "budget": {
+            "usefulContent": {
+              "limitMs": 6000,
+              "p95Ms": 1127.8989629999996,
+              "pass": true,
+              "reasons": []
+            },
+            "keyboardAdditional": {
+              "limitMs": 2000,
+              "p95Ms": 132.6656890000013,
+              "pass": true,
+              "reasons": []
+            },
+            "hardFailures": [],
+            "pass": true
+          },
+          "samples": [
+            {
+              "usefulContentMs": 1015.6137519999975,
+              "keyboardAdditionalMs": 92.44454899999982,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 974.4916939999966,
+              "keyboardAdditionalMs": 131.50906399999803,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1127.8989629999996,
+              "keyboardAdditionalMs": 128.97129600000335,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 989.0962230000005,
+              "keyboardAdditionalMs": 110.32120299999951,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 977.3424860000086,
+              "keyboardAdditionalMs": 52.957697999998345,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 916.0046670000011,
+              "keyboardAdditionalMs": 132.6656890000013,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1005.9680030000018,
+              "keyboardAdditionalMs": 97.47543099999893,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/one-chart.html"
+              ],
+              "hardFailures": []
+            }
+          ],
+          "pass": true
+        }
+      }
+    },
+    "multi-runtime": {
+      "fixture": "multi-runtime.md",
+      "fixtureSha256": "bd9ed6d6f370ccc67fadb6b5d44b9a9c1d9c66107f4336de9be283d31b0e9b14",
+      "finalBytes": 5314981,
+      "byteBudget": {
+        "totalBytes": 5314981,
+        "warningBytes": 6291456,
+        "hardBytes": 8388608,
+        "remainingToHardBytes": 3073627,
+        "status": "pass"
+      },
+      "cells": {
+        "desktop": {
+          "viewport": {
+            "width": 1440,
+            "height": 1200
+          },
+          "usefulContent": {
+            "samplesMs": [
+              2074.0292920000065,
+              1844.337910999995,
+              1889.595503000004,
+              2028.8588239999954,
+              2024.3135059999913,
+              2117.014925999989,
+              2415.0596680000017
+            ],
+            "count": 7,
+            "minMs": 1844.337910999995,
+            "maxMs": 2415.0596680000017,
+            "p50Ms": 2028.8588239999954,
+            "p95Ms": 2415.0596680000017,
+            "relativeP95Spread": 0.19035372960972824,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "keyboardAdditional": {
+            "samplesMs": [
+              118.63073299999814,
+              62.772813000003225,
+              79.02929799999401,
+              109.12392199999886,
+              102.27991199999815,
+              90.20690099999774,
+              115.52422500000102
+            ],
+            "count": 7,
+            "minMs": 62.772813000003225,
+            "maxMs": 118.63073299999814,
+            "p50Ms": 102.27991199999815,
+            "p95Ms": 118.63073299999814,
+            "relativeP95Spread": 0.06540328399999998,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "budget": {
+            "usefulContent": {
+              "limitMs": 5000,
+              "p95Ms": 2415.0596680000017,
+              "pass": true,
+              "reasons": []
+            },
+            "keyboardAdditional": {
+              "limitMs": 1000,
+              "p95Ms": 118.63073299999814,
+              "pass": true,
+              "reasons": []
+            },
+            "hardFailures": [],
+            "pass": true
+          },
+          "samples": [
+            {
+              "usefulContentMs": 2074.0292920000065,
+              "keyboardAdditionalMs": 118.63073299999814,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1844.337910999995,
+              "keyboardAdditionalMs": 62.772813000003225,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1889.595503000004,
+              "keyboardAdditionalMs": 79.02929799999401,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 2028.8588239999954,
+              "keyboardAdditionalMs": 109.12392199999886,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 2024.3135059999913,
+              "keyboardAdditionalMs": 102.27991199999815,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 2117.014925999989,
+              "keyboardAdditionalMs": 90.20690099999774,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 2415.0596680000017,
+              "keyboardAdditionalMs": 115.52422500000102,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            }
+          ],
+          "pass": true
+        },
+        "mobile": {
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "usefulContent": {
+            "samplesMs": [
+              1753.5495789999986,
+              1702.8365150000027,
+              1957.293807000009,
+              1835.088533999995,
+              1627.9324819999892,
+              1839.1292200000025,
+              1804.0480559999996
+            ],
+            "count": 7,
+            "minMs": 1627.9324819999892,
+            "maxMs": 1957.293807000009,
+            "p50Ms": 1804.0480559999996,
+            "p95Ms": 1957.293807000009,
+            "relativeP95Spread": 0.08494549271586006,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "keyboardAdditional": {
+            "samplesMs": [
+              82.18647900001088,
+              61.83770999999251,
+              53.71479700000782,
+              88.01712000000407,
+              80.24913000001106,
+              51.205063000001246,
+              65.61028800001077
+            ],
+            "count": 7,
+            "minMs": 51.205063000001246,
+            "maxMs": 88.01712000000407,
+            "p50Ms": 65.61028800001077,
+            "p95Ms": 88.01712000000407,
+            "relativeP95Spread": 0.08962732799997321,
+            "disposition": "stable",
+            "reasons": []
+          },
+          "budget": {
+            "usefulContent": {
+              "limitMs": 10000,
+              "p95Ms": 1957.293807000009,
+              "pass": true,
+              "reasons": []
+            },
+            "keyboardAdditional": {
+              "limitMs": 2000,
+              "p95Ms": 88.01712000000407,
+              "pass": true,
+              "reasons": []
+            },
+            "hardFailures": [],
+            "pass": true
+          },
+          "samples": [
+            {
+              "usefulContentMs": 1753.5495789999986,
+              "keyboardAdditionalMs": 82.18647900001088,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1702.8365150000027,
+              "keyboardAdditionalMs": 61.83770999999251,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1957.293807000009,
+              "keyboardAdditionalMs": 53.71479700000782,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1835.088533999995,
+              "keyboardAdditionalMs": 88.01712000000407,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1627.9324819999892,
+              "keyboardAdditionalMs": 80.24913000001106,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1839.1292200000025,
+              "keyboardAdditionalMs": 51.205063000001246,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            },
+            {
+              "usefulContentMs": 1804.0480559999996,
+              "keyboardAdditionalMs": 65.61028800001077,
+              "ready": true,
+              "keyboardReady": true,
+              "browserLogs": [],
+              "requestUrls": [
+                "http://127.0.0.1:4173/multi-runtime.html"
+              ],
+              "hardFailures": []
+            }
+          ],
+          "pass": true
+        }
+      }
+    }
+  },
+  "pass": true
+}

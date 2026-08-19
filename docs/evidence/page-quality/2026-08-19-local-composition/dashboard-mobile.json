@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-19T03:37:22.960Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "fixture": "http://127.0.0.1:4173/dashboard.html",
+  "requested": {
+    "width": 390,
+    "height": 844,
+    "colorScheme": "dark",
+    "reducedMotion": true
+  },
+  "usefulContentMs": 955,
+  "ready": true,
+  "keyboard": {
+    "firstTab": {
+      "className": "skip-link",
+      "tag": "A",
+      "text": "Skip to main content"
+    }
+  },
+  "observations": {
+    "chartGeometry": [
+      {
+        "childHeight": 390,
+        "childWidth": 311,
+        "height": 390,
+        "markup": "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" version=\"1.1\" class=\"marks\" width=\"311\" height=\"390\" viewBox=\"0 0 311 390\" st",
+        "width": 311
+      }
+    ],
+    "clippedText": [],
+    "colorScheme": "dark",
+    "composition": "composition-dashboard",
+    "diagramGeometry": [],
+    "documentHorizontalOverflow": false,
+    "headings": [
+      "Deploy failures by service — last 7 days",
+      "Failures per day",
+      "By service"
+    ],
+    "interactive": {
+      "buttons": 1,
+      "radios": 0,
+      "ranges": 0
+    },
+    "layoutShift": 0,
+    "mainHorizontalOverflow": false,
+    "readyState": "complete",
+    "reducedMotion": true,
+    "renderErrors": [],
+    "sections": [
+      {
+        "classes": "section-card section-visual section-insight",
+        "heading": "Failures per day",
+        "utilization": 0.907,
+        "visualWidth": 311,
+        "width": 343
+      },
+      {
+        "classes": "section-card",
+        "heading": "By service",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 343
+      }
+    ],
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 701,
+      "width": 390
+    }
+  },
+  "accessibilityTree": [
+    {
+      "role": "RootWebArea",
+      "name": "Deploy failures by service — last 7 days"
+    },
+    {
+      "role": "banner",
+      "name": ""
+    },
+    {
+      "role": "main",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "Deploy failures by service — last 7 days"
+    },
+    {
+      "role": "button",
+      "name": "Theme: system. Activate to switch."
+    },
+    {
+      "role": "heading",
+      "name": "Failures per day"
+    },
+    {
+      "role": "figure",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "By service"
+    },
+    {
+      "role": "table",
+      "name": ""
+    }
+  ],
+  "browserLogs": [],
+  "requestUrls": [
+    "http://127.0.0.1:4173/dashboard.html"
+  ],
+  "externalHttpRequests": []
+}
