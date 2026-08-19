@@ -5,6 +5,7 @@ import {
   DIMENSIONS,
   HARD_GATES,
   manifestDigest,
+  prepareBlindedReview,
   summarizeBenchmarkRun,
   validateBenchmarkManifest,
   validateBenchmarkRun,
@@ -149,4 +150,26 @@ test("missing runs cannot be cherry-picked and label mappings must match exact g
   assert.ok(pair);
   pair["systemA"] = pair["systemA"] === "opencode" ? "claude" : "opencode";
   assert.match(validateBenchmarkRun(mismatched, manifest).join("\n"), /does not match its system, task, and run mapping/);
+});
+
+test("blinded review preparation is seed-bound, complete, and identity-free for reviewers", () => {
+  const input = completeRun();
+  input["runId"] = "opencode-claude-private-run";
+  input["pairs"] = [];
+  const first = prepareBlindedReview(input, manifest, Buffer.alloc(32, 7));
+  const repeated = prepareBlindedReview(input, manifest, Buffer.alloc(32, 7));
+  const changed = prepareBlindedReview(input, manifest, Buffer.alloc(32, 8));
+  assert.deepEqual(first, repeated);
+  assert.equal(first.reviewerPacket.pairs.length, 24);
+  assert.notDeepEqual(first.privateRun["pairs"], changed.privateRun["pairs"]);
+  assert.deepEqual(validateBenchmarkRun(first.privateRun, manifest), []);
+  const reviewerBytes = JSON.stringify(first.reviewerPacket);
+  assert.doesNotMatch(reviewerBytes, /opencode|claude|generationA|generationB|systemA|systemB/);
+  assert.match(reviewerBytes, /blinded:\/\/A001\/desktop/);
+  assert.throws(() => prepareBlindedReview(input, manifest, Buffer.alloc(31)), /at least 32 bytes/);
+  assert.throws(() => prepareBlindedReview(completeRun(), manifest, Buffer.alloc(32)), /never replaces/);
+
+  const missing = structuredClone(input);
+  missing["generations"] = (missing["generations"] as Record<string, unknown>[]).slice(1);
+  assert.throws(() => prepareBlindedReview(missing, manifest, Buffer.alloc(32)), /missing benchmark generation/);
 });

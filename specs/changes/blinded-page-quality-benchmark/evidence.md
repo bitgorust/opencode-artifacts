@@ -5,7 +5,9 @@
 - Validation: the equal-or-better claim requires 24 unselected outputs per system and at least
   three eligible blinded reviewers across all eight task families.
 - Verification: aggregation, hard-gate, threshold, denominator, blinding, and mutation tests pass;
-  the dated status reports zero authorized Claude runs, zero comparison OpenCode runs, and zero reviewers.
+  seed-bound preparation refuses short seeds, existing mappings, incomplete matrices, and output
+  overwrite while emitting a separate identity-free reviewer packet. The dated status reports
+  zero authorized Claude runs, zero comparison OpenCode runs, and zero reviewers.
 - Result: incomplete; equal-or-better remains disabled without substituting generated judgments.
 - Evidence: [@test](test/page-quality-benchmark.test.ts) [@manual](docs/evidence/page-quality/2026-08-19-benchmark-status.md)
 

@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 
 export const SYSTEMS = ["opencode", "claude"] as const;
 export const DIMENSIONS = [
@@ -229,6 +229,159 @@ export function validateBenchmarkRun(value: unknown, manifest: unknown): string[
     }
   }
   return errors;
+}
+
+export interface BlindedReviewPacket {
+  schemaVersion: 1;
+  runId: string;
+  corpusId: "page-quality-v1";
+  manifestSha256: string;
+  dimensions: readonly Dimension[];
+  scoring: {
+    minimum: 1;
+    maximum: 5;
+    overall: readonly ["a", "equivalent", "b"];
+  };
+  pairs: Array<{
+    id: string;
+    taskId: string;
+    runIndex: number;
+    labelA: string;
+    labelB: string;
+    resources: {
+      a: { desktop: string; mobile: string; interaction: string };
+      b: { desktop: string; mobile: string; interaction: string };
+    };
+    scoreTemplate: {
+      a: Record<Dimension, null>;
+      b: Record<Dimension, null>;
+      overall: null;
+      reason: null;
+    };
+  }>;
+}
+
+export interface PreparedBlindedReview {
+  privateRun: Record<string, unknown>;
+  reviewerPacket: BlindedReviewPacket;
+}
+
+function nullScores(): Record<Dimension, null> {
+  return Object.fromEntries(DIMENSIONS.map((dimension) => [dimension, null])) as Record<Dimension, null>;
+}
+
+function completeGenerationMatrix(
+  value: Record<string, unknown>,
+  manifest: unknown,
+): Map<string, Record<string, unknown>> {
+  const generations = Array.isArray(value["generations"])
+    ? value["generations"].filter(isRecord)
+    : [];
+  const byKey = new Map<string, Record<string, unknown>>();
+  for (const generation of generations) {
+    const key = `${generation["system"]}:${generation["taskId"]}:${generation["runIndex"]}`;
+    if (byKey.has(key)) throw new Error(`duplicate benchmark generation ${key}`);
+    byKey.set(key, generation);
+  }
+  const expected = new Set<string>();
+  for (const taskId of manifestTaskIds(manifest)) for (const system of SYSTEMS) {
+    for (let runIndex = 1; runIndex <= 3; runIndex++) expected.add(`${system}:${taskId}:${runIndex}`);
+  }
+  for (const key of expected) if (!byKey.has(key)) throw new Error(`missing benchmark generation ${key}`);
+  for (const key of byKey.keys()) if (!expected.has(key)) throw new Error(`unexpected benchmark generation ${key}`);
+  return byKey;
+}
+
+export function prepareBlindedReview(
+  value: unknown,
+  manifest: unknown,
+  seed: Uint8Array,
+): PreparedBlindedReview {
+  const errors = validateBenchmarkRun(value, manifest);
+  if (errors.length > 0) throw new Error(errors.join("\n"));
+  if (!isRecord(value)) throw new Error("validated benchmark run was lost");
+  if (seed.byteLength < 32) throw new Error("blinding seed must contain at least 32 bytes");
+  if (!Array.isArray(value["pairs"]) || value["pairs"].length !== 0) {
+    throw new Error("blinding preparation requires an unpaired run and never replaces an existing mapping");
+  }
+  const authorization = value["authorization"];
+  if (!isRecord(authorization) || authorization["status"] !== "approved") {
+    throw new Error("blinding preparation requires approved account, settings, and retention authority");
+  }
+  const generations = completeGenerationMatrix(value, manifest);
+  const pairs: Record<string, unknown>[] = [];
+  const reviewerPairs: BlindedReviewPacket["pairs"] = [];
+  let ordinal = 0;
+  for (const taskId of manifestTaskIds(manifest)) for (let runIndex = 1; runIndex <= 3; runIndex++) {
+    ordinal++;
+    const opencode = generations.get(`opencode:${taskId}:${runIndex}`);
+    const claude = generations.get(`claude:${taskId}:${runIndex}`);
+    if (!opencode || !claude) throw new Error(`benchmark generation matrix changed for ${taskId}/${runIndex}`);
+    const randomizationInput = canonicalJson({
+      corpusId: value["corpusId"],
+      manifestSha256: value["manifestSha256"],
+      runId: value["runId"],
+      taskId,
+      runIndex,
+      opencode: opencode["id"],
+      claude: claude["id"],
+    });
+    const randomization = createHmac("sha256", seed).update(randomizationInput).digest();
+    const openCodeIsA = (randomization[0] ?? 0) < 128;
+    const generationA = openCodeIsA ? opencode : claude;
+    const generationB = openCodeIsA ? claude : opencode;
+    const labelA = `A${String(ordinal).padStart(3, "0")}`;
+    const labelB = `B${String(ordinal).padStart(3, "0")}`;
+    const id = `${taskId}-${runIndex}`;
+    pairs.push({
+      id,
+      taskId,
+      runIndex,
+      labelA,
+      labelB,
+      generationA: generationA["id"],
+      generationB: generationB["id"],
+      systemA: generationA["system"],
+      systemB: generationB["system"],
+      randomizationSha256: randomization.toString("hex"),
+      scores: [],
+    });
+    reviewerPairs.push({
+      id,
+      taskId,
+      runIndex,
+      labelA,
+      labelB,
+      resources: {
+        a: {
+          desktop: `blinded://${labelA}/desktop`,
+          mobile: `blinded://${labelA}/mobile`,
+          interaction: `blinded://${labelA}/interaction`,
+        },
+        b: {
+          desktop: `blinded://${labelB}/desktop`,
+          mobile: `blinded://${labelB}/mobile`,
+          interaction: `blinded://${labelB}/interaction`,
+        },
+      },
+      scoreTemplate: { a: nullScores(), b: nullScores(), overall: null, reason: null },
+    });
+  }
+  const privateRun = structuredClone(value);
+  privateRun["pairs"] = pairs;
+  const reviewerRunId = `review-${createHmac("sha256", seed).update(`reviewer-packet:${String(value["runId"])}`).digest("hex").slice(0, 16)}`;
+  return {
+    privateRun,
+    reviewerPacket: {
+      schemaVersion: 1,
+      runId: reviewerRunId,
+      corpusId: "page-quality-v1",
+      manifestSha256: String(value["manifestSha256"]),
+      dimensions: DIMENSIONS,
+      scoring: { minimum: 1, maximum: 5, overall: ["a", "equivalent", "b"] },
+      pairs: reviewerPairs,
+    },
+  };
 }
 
 function median(values: number[]): number | null {

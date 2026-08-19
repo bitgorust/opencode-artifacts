@@ -166,6 +166,9 @@ defect for the normalized fixture.
 That local result is regression evidence, not a same-input comparison. Authorized current
 Claude generations, their account/settings/retention protocol, all 24 unselected pairs, and at
 least three independent reviewer distributions remain absent. Official visual material stays
-link-only and no synthetic test score enters the benchmark denominator.
+link-only and no synthetic test score enters the benchmark denominator. The candidate-bound
+[external-evidence execution kit](evidence/page-quality/goal-5-external-evidence-kit-2026-08-19.md)
+defines the non-secret authorization record, independent corpus review, seed-bound blinded
+packet preparation, reviewer scoring, screen-reader run, study, and support-browser handoff.
 
 Current verdict: **equal-or-better page quality is a target, not yet a verified capability.**

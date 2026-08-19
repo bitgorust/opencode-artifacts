@@ -2,6 +2,9 @@
 
 Status: approved protocol; participant baseline not yet run
 
+The candidate-bound owner/recruitment handoff is ordered in the Goal 5
+[external-evidence execution kit](../evidence/page-quality/goal-5-external-evidence-kit-2026-08-19.md).
+
 This directory owns the versioned create/revise/review/share corpus and the Phase 0 protocols
 for `OUT-02`, `OUT-03`, `OUT-05`, and `UX-01`. It does not contain participant identities or
 claim a result before a consented study is complete.
