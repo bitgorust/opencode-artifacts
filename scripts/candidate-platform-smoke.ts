@@ -111,6 +111,7 @@ function run(command: string, args: string[], cwd: string, env?: NodeJS.ProcessE
     encoding: "utf8",
     maxBuffer: 16 * 1024 * 1024,
     windowsHide: true,
+    shell: process.platform === "win32" && command.toLowerCase().endsWith(".cmd"),
   });
   if (result.error) throw result.error;
   if (result.status !== 0) {
@@ -159,8 +160,13 @@ export async function runCandidatePlatformSmoke(
 
     const fixture = resolve(repositoryRoot, "benchmarks/renderer/v1/no-runtime.md");
     const htmlPath = join(work, "portable.html");
-    const cli = join(installRoot, "node_modules", "opencode-artifacts", "dist", "cli.js");
-    run(process.execPath, [cli, "render", fixture, "-o", htmlPath], work);
+    const cli = join(
+      installRoot,
+      "node_modules",
+      ".bin",
+      process.platform === "win32" ? "opencode-artifacts.cmd" : "opencode-artifacts",
+    );
+    run(cli, ["render", fixture, "-o", htmlPath], work);
 
     const beforeRemoval = await readFile(htmlPath);
     assertPortableHtml(beforeRemoval.toString("utf8"));

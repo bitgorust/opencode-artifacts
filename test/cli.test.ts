@@ -1,15 +1,38 @@
 import { execFile } from "node:child_process";
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import { ArtifactLifecycleStore } from "../src/artifact-lifecycle.ts";
+import { cliInvocationMatchesModule } from "../src/cli.ts";
 
 const run = promisify(execFile);
 const CLI = join(process.cwd(), "src", "cli.ts");
 const TOKEN = "ghp_0123456789abcdefABCDEF0123456789";
+
+test("CLI entrypoint detection resolves an installed-bin symlink", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "cli-entrypoint-"));
+  try {
+    const packageDir = join(dir, "package");
+    const binDir = join(dir, "node_modules", ".bin");
+    const modulePath = join(packageDir, "cli.js");
+    const binPath = process.platform === "win32"
+      ? join(binDir, "package", "cli.js")
+      : join(binDir, "opencode-artifacts");
+    await mkdir(packageDir);
+    await mkdir(binDir, { recursive: true });
+    await writeFile(modulePath, "// entrypoint\n");
+    if (process.platform === "win32") await symlink(packageDir, join(binDir, "package"), "junction");
+    else await symlink(modulePath, binPath, "file");
+    assert.equal(cliInvocationMatchesModule(binPath, pathToFileURL(modulePath).href), true);
+    assert.equal(cliInvocationMatchesModule(join(binDir, "missing"), pathToFileURL(modulePath).href), false);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
 
 test("render scans a title override for sensitive content", async () => {
   const dir = await mkdtemp(join(tmpdir(), "cli-title-"));
