@@ -130,19 +130,21 @@ export async function runCandidatePlatformSmoke(
   repositoryRoot: string,
   outputPath: string,
   expectedSha256?: string,
+  existingCandidate?: { tarballPath: string; packJsonPath: string },
 ): Promise<CandidatePlatformEvidence> {
   const work = await mkdtemp(join(tmpdir(), "opencode-platform-smoke-"));
   const npm = process.platform === "win32" ? "npm.cmd" : "npm";
   try {
     const cache = join(work, "npm-cache");
-    const packOutput = run(
-      npm,
-      ["pack", "--json", "--pack-destination", work],
-      repositoryRoot,
-      { NPM_CONFIG_CACHE: cache },
-    );
-    const pack = parsePackEntry(packOutput);
-    const tarball = join(work, pack.filename);
+    const pack = existingCandidate === undefined
+      ? parsePackEntry(run(
+        npm,
+        ["pack", "--json", "--pack-destination", work],
+        repositoryRoot,
+        { NPM_CONFIG_CACHE: cache },
+      ))
+      : parsePackEntry(await readFile(existingCandidate.packJsonPath, "utf8"));
+    const tarball = existingCandidate?.tarballPath ?? join(work, pack.filename);
     const tarballBytes = await readFile(tarball);
     const candidateSha256 = sha256(tarballBytes);
     if (expectedSha256 !== undefined && candidateSha256 !== expectedSha256) {
@@ -221,7 +223,30 @@ export async function runCandidatePlatformSmoke(
 const invokedPath = process.argv[1] ? resolve(process.argv[1]) : "";
 if (invokedPath === resolve(fileURLToPath(import.meta.url))) {
   const output = argument("--output");
-  if (!output) throw new Error("Usage: node scripts/candidate-platform-smoke.ts --output <evidence.json> [--expected-sha256 <digest>]");
-  const evidence = await runCandidatePlatformSmoke(process.cwd(), resolve(output), argument("--expected-sha256"));
+  const tarball = argument("--tarball");
+  const packJson = argument("--pack-json");
+  const candidateDirectory = argument("--candidate-dir");
+  if (!output || (tarball === undefined) !== (packJson === undefined) ||
+      (candidateDirectory !== undefined && tarball !== undefined)) {
+    throw new Error("Usage: node scripts/candidate-platform-smoke.ts --output <evidence.json> [--expected-sha256 <digest>] [--candidate-dir <downloaded-artifact> | --tarball <candidate.tgz> --pack-json <pack.json>]");
+  }
+  let existingCandidate: { tarballPath: string; packJsonPath: string } | undefined;
+  if (candidateDirectory !== undefined) {
+    const directory = resolve(candidateDirectory);
+    const downloadedPackJson = join(directory, "release-evidence", "pack.json");
+    const downloadedPack = parsePackEntry(await readFile(downloadedPackJson, "utf8"));
+    existingCandidate = {
+      tarballPath: join(directory, downloadedPack.filename),
+      packJsonPath: downloadedPackJson,
+    };
+  } else if (tarball !== undefined && packJson !== undefined) {
+    existingCandidate = { tarballPath: resolve(tarball), packJsonPath: resolve(packJson) };
+  }
+  const evidence = await runCandidatePlatformSmoke(
+    process.cwd(),
+    resolve(output),
+    argument("--expected-sha256"),
+    existingCandidate,
+  );
   console.log(JSON.stringify(evidence, null, 2));
 }

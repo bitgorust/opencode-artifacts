@@ -42,6 +42,7 @@ jobs:
 
   portable-platforms:
     name: portable-platform-${{ matrix.os }}
+    needs: verify
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -56,8 +57,12 @@ jobs:
       - run: npm install -g npm@latest
       - run: npm ci
       - run: npm run build
+      - uses: actions/download-artifact@v4
+        with:
+          name: exact-candidate-evidence
+          path: candidate-input
       - name: Clean packed install and portable-output smoke
-        run: node scripts/candidate-platform-smoke.ts --output platform-evidence/${{ runner.os }}.json
+        run: node scripts/candidate-platform-smoke.ts --output platform-evidence/${{ runner.os }}.json --candidate-dir candidate-input
       - uses: actions/upload-artifact@v4
         with:
           name: portable-platform-${{ runner.os }}-${{ runner.arch }}
