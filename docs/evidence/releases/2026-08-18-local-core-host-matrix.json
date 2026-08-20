@@ -1,0 +1,765 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-18T16:21:22.360Z",
+  "candidate": {
+    "filename": "opencode-artifacts-0.15.0.tgz",
+    "sha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+    "packageVersion": "0.15.0"
+  },
+  "compatibility": {
+    "currentStable": "1.18.18",
+    "oldestTested": "1.18.18",
+    "executedVersions": [
+      "1.18.18"
+    ],
+    "deduplicated": true,
+    "broaderRangeProven": false,
+    "v2BetaExcluded": true
+  },
+  "environment": {
+    "node": "v24.19.0",
+    "platform": "linux",
+    "architecture": "x64",
+    "cleanRoots": [
+      "config",
+      "data",
+      "cache",
+      "state"
+    ],
+    "providerInference": false
+  },
+  "install": {
+    "package": {
+      "command": [
+        "npm",
+        "install",
+        "--prefix",
+        "/tmp/opencode-host-matrix-FqauE1/package",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund",
+        "/tmp/goal5-candidate/opencode-artifacts-0.15.0.tgz"
+      ],
+      "exitCode": 0,
+      "output": "(node:247879) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\nadded 207 packages in 19s\n"
+    },
+    "currentResolution": {
+      "command": [
+        "npm",
+        "view",
+        "opencode-ai",
+        "version",
+        "--json"
+      ],
+      "exitCode": 0,
+      "output": "\"1.18.18\"\n"
+    },
+    "hosts": [
+      {
+        "version": "1.18.18",
+        "command": {
+          "command": [
+            "npm",
+            "install",
+            "--prefix",
+            "/tmp/opencode-host-matrix-FqauE1/host-1-18-18",
+            "--no-audit",
+            "--no-fund",
+            "opencode-ai@1.18.18"
+          ],
+          "exitCode": 0,
+          "output": "(node:248039) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.\n(Use `node --trace-deprecation ...` to show where the warning was created)\n\nadded 5 packages in 16s\n"
+        }
+      }
+    ],
+    "cliPlugins": [
+      {
+        "version": "1.18.18",
+        "command": {
+          "command": [
+            "/tmp/opencode-host-matrix-FqauE1/host-1-18-18/node_modules/.bin/opencode",
+            "plugin",
+            "file:///tmp/opencode-host-matrix-FqauE1/package/node_modules/opencode-artifacts"
+          ],
+          "exitCode": 0,
+          "output": "\u001b[0m\n┌  Install plugin file:///tmp/opencode-host-matrix-FqauE1/package/node_modules/opencode-artifacts\n\u001b[?25l│\n◇  Plugin package ready\n\u001b[?25h\u001b[?25l│\n◇  Detected server target\n\u001b[?25h\u001b[?25l│\n◒  Updating plugin config\u001b[999D\u001b[J◇  Plugin config updated\n\u001b[?25h│\n●  Added to /tmp/opencode-host-matrix-FqauE1/cli-project-1-18-18/.opencode/opencode.json\n│\n◆  Installed file:///tmp/opencode-host-matrix-FqauE1/package/node_modules/opencode-artifacts\n│\n●  Scope: local (/tmp/opencode-host-matrix-FqauE1/cli-project-1-18-18/.opencode)\n│\n└  Done\n\n"
+        }
+      }
+    ]
+  },
+  "routes": [
+    {
+      "route": "cli-install",
+      "hostVersion": "1.18.18",
+      "health": {
+        "healthy": true,
+        "version": "1.18.18"
+      },
+      "toolIds": [
+        "invalid",
+        "question",
+        "bash",
+        "read",
+        "glob",
+        "grep",
+        "edit",
+        "write",
+        "task",
+        "webfetch",
+        "todowrite",
+        "websearch",
+        "skill",
+        "apply_patch",
+        "artifact_publish",
+        "artifact_lifecycle",
+        "artifact_db",
+        "artifact_state",
+        "artifact_comments"
+      ],
+      "tools": [
+        {
+          "id": "artifact_publish",
+          "description": "Render a Markdown document into a single self-contained interactive HTML artifact under .opencode/artifacts/ and return its path. The Markdown may carry frontmatter (title:, icon:) and fenced chart spec blocks (```vega-lite, ```vega, ```echarts). Use it for dashboards, PR walkthroughs, incident timelines, comparisons - anything easier to see as a page than to read as terminal text. Republish with the same title to update the page in place; pass version:true to keep numbered history.",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "markdown": {
+                "description": "Full Markdown source of the artifact page",
+                "type": "string"
+              },
+              "title": {
+                "description": "Title override; defaults to frontmatter title",
+                "type": "string"
+              },
+              "open": {
+                "description": "Open the artifact in the system browser",
+                "type": "boolean"
+              },
+              "version": {
+                "description": "Also keep a numbered version file next to the stable path",
+                "type": "boolean"
+              },
+              "format": {
+                "description": "'html' embeds the input as raw trusted HTML instead of rendering Markdown",
+                "type": "string",
+                "enum": [
+                  "markdown",
+                  "html"
+                ]
+              },
+              "expectedHash": {
+                "description": "Hash from a previous publish result; publishing fails with a conflict if the artifact changed since",
+                "type": "string"
+              },
+              "artifact": {
+                "description": "Exact artifact ID, active slug, contained path, or registered URL for an update",
+                "type": "string"
+              },
+              "expectedRevision": {
+                "description": "Expected schema-2 head revision for an update",
+                "type": "number"
+              },
+              "force": {
+                "description": "Publish even when the sensitive-content scan finds credential-looking strings",
+                "type": "boolean"
+              },
+              "dataSources": {
+                "description": "Named read-only shell commands the served page may poll via opencodeArtifacts.data(name) (raw-HTML pages)",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "command": {
+                      "type": "string"
+                    },
+                    "args": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "command"
+                  ]
+                }
+              },
+              "deploy": {
+                "description": "Also push the artifact to a hosted site (requires repo or workerName)",
+                "type": "boolean"
+              },
+              "repo": {
+                "description": "GitHub Pages target as owner/name; created public if missing",
+                "type": "string"
+              },
+              "target": {
+                "description": "Deploy target; defaults to github when repo is set",
+                "type": "string",
+                "enum": [
+                  "github",
+                  "cloudflare"
+                ]
+              },
+              "workerName": {
+                "description": "Cloudflare Worker name (target cloudflare)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "markdown"
+            ]
+          }
+        },
+        {
+          "id": "artifact_lifecycle",
+          "description": "List, inspect, read, reopen, restore, archive/unarchive, export, or import schema-2 artifacts by exact identity/reference. Archive is recoverable and requires a preview-bound permission confirmation.",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "op": {
+                "type": "string",
+                "enum": [
+                  "list",
+                  "status",
+                  "read",
+                  "reopen",
+                  "restore",
+                  "archive-preview",
+                  "archive-confirm",
+                  "unarchive",
+                  "export",
+                  "import"
+                ]
+              },
+              "artifact": {
+                "description": "Exact artifact reference or opaque ID",
+                "type": "string"
+              },
+              "revision": {
+                "description": "Revision to read or restore",
+                "type": "number"
+              },
+              "expectedRevision": {
+                "description": "Expected current head for restore",
+                "type": "number"
+              },
+              "token": {
+                "description": "One-use archive confirmation token",
+                "type": "string"
+              },
+              "slug": {
+                "description": "Explicit non-conflicting slug for unarchive",
+                "type": "string"
+              },
+              "path": {
+                "description": "Export destination or import bundle directory",
+                "type": "string"
+              }
+            },
+            "required": [
+              "op"
+            ]
+          }
+        },
+        {
+          "id": "artifact_db",
+          "description": "Read or write an artifact's shared mini-database (collections of JSON documents, stored under .opencode/artifacts/.db/). Mirrors what the served page can do through the opencodeArtifacts.db bridge.",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string"
+              },
+              "collection": {
+                "type": "string"
+              },
+              "op": {
+                "type": "string",
+                "enum": [
+                  "get",
+                  "list",
+                  "set",
+                  "delete"
+                ]
+              },
+              "id": {
+                "description": "Document id (required for get/set/delete)",
+                "type": "string"
+              },
+              "doc": {
+                "description": "Document body for set"
+              },
+              "q": {
+                "description": "Equality filter for list, as field:value",
+                "type": "string"
+              },
+              "expectedRevision": {
+                "description": "Current collection revision for set/delete",
+                "type": "number"
+              },
+              "expectedDocumentHash": {
+                "description": "Current document SHA-256 for update/delete",
+                "type": "string"
+              },
+              "createOnly": {
+                "description": "Require the document ID to be absent",
+                "type": "boolean"
+              },
+              "operationId": {
+                "description": "UUID retained across retries of one mutation",
+                "type": "string"
+              }
+            },
+            "required": [
+              "slug",
+              "collection",
+              "op"
+            ]
+          }
+        },
+        {
+          "id": "artifact_state",
+          "description": "Read the saved decision/state of an artifact published in this worktree (answers a reader gave on the served page, e.g. workshop decisions).",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "slug": {
+                "description": "Artifact slug (the filename without .html)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "slug"
+            ]
+          }
+        },
+        {
+          "id": "artifact_comments",
+          "description": "Read comment threads a reader left on a served artifact page, or resolve a thread after acting on it. Pass digest: true for a compact triage view (unresolved first, oldest unresolved at top).",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "slug": {
+                "description": "Artifact slug (the filename without .html)",
+                "type": "string"
+              },
+              "resolveId": {
+                "description": "Thread id to mark resolved after you have acted on it",
+                "type": "string"
+              },
+              "digest": {
+                "description": "Return a compact triage digest instead of raw threads",
+                "type": "boolean"
+              },
+              "expectedRevision": {
+                "description": "Current comment-store revision required with resolveId",
+                "type": "number"
+              },
+              "expectedHash": {
+                "description": "Current comment-store hash required with resolveId",
+                "type": "string"
+              },
+              "operationId": {
+                "description": "UUID retained across retries of one resolve mutation",
+                "type": "string"
+              }
+            },
+            "required": [
+              "slug"
+            ]
+          }
+        }
+      ],
+      "logs": "Warning: OPENCODE_SERVER_PASSWORD is not set; server is unsecured.\ntimestamp=2026-08-18T16:19:28.228Z level=INFO run=72f8c6ab message=loading path=/tmp/opencode-host-matrix-FqauE1/cli-env-1-18-18/config/opencode/config.json\ntimestamp=2026-08-18T16:19:28.271Z level=INFO run=72f8c6ab message=loading path=/tmp/opencode-host-matrix-FqauE1/cli-env-1-18-18/config/opencode/opencode.json\ntimestamp=2026-08-18T16:19:28.285Z level=INFO run=72f8c6ab message=loading path=/tmp/opencode-host-matrix-FqauE1/cli-env-1-18-18/config/opencode/opencode.jsonc\nopencode server listening on http://127.0.0.1:4096\ntimestamp=2026-08-18T16:19:28.976Z level=INFO run=72f8c6ab message=\"creating instance\" directory=/tmp/opencode-host-matrix-FqauE1/cli-project-1-18-18\ntimestamp=2026-08-18T16:19:28.979Z level=INFO run=72f8c6ab message=fromDirectory directory=/tmp/opencode-host-matrix-FqauE1/cli-project-1-18-18\ntimestamp=2026-08-18T16:19:29.038Z level=INFO run=72f8c6ab message=bootstrapping directory=/tmp/opencode-host-matrix-FqauE1/cli-project-1-18-18\ntimestamp=2026-08-18T16:19:29.070Z level=INFO run=72f8c6ab message=loading path=/tmp/opencode-host-matrix-FqauE1/cli-env-1-18-18/config/opencode/config.json\ntimestamp=2026-08-18T16:19:29.087Z level=INFO run=72f8c6ab message=loading path=/tmp/opencode-host-matrix-FqauE1/cli-env-1-18-18/config/opencode/opencode.json\ntimestamp=2026-08-18T16:19:29.102Z level=INFO run=72f8c6ab message=loading path=/tmp/opencode-host-matrix-FqauE1/cli-env-1-18-18/config/opencode/opencode.jsonc\ntimestamp=2026-08-18T16:19:29.319Z level=INFO run=72f8c6ab message=loading path=/tmp/opencode-host-matrix-FqauE1/cli-project-1-18-18/.opencode/opencode.json\ntimestamp=2026-08-18T16:19:29.364Z level=INFO run=72f8c6ab message=loading path=/tmp/opencode-host-matrix-FqauE1/cli-project-1-18-18/.opencode/opencode.jsonc\ntimestamp=2026-08-18T16:20:48.636Z level=INFO run=72f8c6ab message=\"all LSPs are disabled\"\ntimestamp=2026-08-18T16:20:48.640Z level=INFO run=72f8c6ab message=\"all formatters are disabled\"\ntimestamp=2026-08-18T16:20:48.640Z level=INFO run=72f8c6ab message=init\ntimestamp=2026-08-18T16:20:48.673Z level=INFO run=72f8c6ab message=\"shell tool using shell\" shell=/bin/bash\n",
+      "config": {
+        "plugin": [
+          "file:///tmp/opencode-host-matrix-FqauE1/package/node_modules/opencode-artifacts"
+        ]
+      },
+      "effectiveCommand": {
+        "artifact-reopen": {
+          "template": "Call artifact_lifecycle with op \"reopen\" and artifact \"$ARGUMENTS\". Require one exact active ID, slug, contained path, or registered URL; do not guess.",
+          "description": "Reopen an exact artifact reference"
+        }
+      }
+    },
+    {
+      "route": "config-array",
+      "hostVersion": "1.18.18",
+      "health": {
+        "healthy": true,
+        "version": "1.18.18"
+      },
+      "toolIds": [
+        "invalid",
+        "question",
+        "bash",
+        "read",
+        "glob",
+        "grep",
+        "edit",
+        "write",
+        "task",
+        "webfetch",
+        "todowrite",
+        "websearch",
+        "skill",
+        "apply_patch",
+        "artifact_publish",
+        "artifact_lifecycle",
+        "artifact_db",
+        "artifact_state",
+        "artifact_comments"
+      ],
+      "tools": [
+        {
+          "id": "artifact_publish",
+          "description": "Render a Markdown document into a single self-contained interactive HTML artifact under .opencode/artifacts/ and return its path. The Markdown may carry frontmatter (title:, icon:) and fenced chart spec blocks (```vega-lite, ```vega, ```echarts). Use it for dashboards, PR walkthroughs, incident timelines, comparisons - anything easier to see as a page than to read as terminal text. Republish with the same title to update the page in place; pass version:true to keep numbered history.",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "markdown": {
+                "description": "Full Markdown source of the artifact page",
+                "type": "string"
+              },
+              "title": {
+                "description": "Title override; defaults to frontmatter title",
+                "type": "string"
+              },
+              "open": {
+                "description": "Open the artifact in the system browser",
+                "type": "boolean"
+              },
+              "version": {
+                "description": "Also keep a numbered version file next to the stable path",
+                "type": "boolean"
+              },
+              "format": {
+                "description": "'html' embeds the input as raw trusted HTML instead of rendering Markdown",
+                "type": "string",
+                "enum": [
+                  "markdown",
+                  "html"
+                ]
+              },
+              "expectedHash": {
+                "description": "Hash from a previous publish result; publishing fails with a conflict if the artifact changed since",
+                "type": "string"
+              },
+              "artifact": {
+                "description": "Exact artifact ID, active slug, contained path, or registered URL for an update",
+                "type": "string"
+              },
+              "expectedRevision": {
+                "description": "Expected schema-2 head revision for an update",
+                "type": "number"
+              },
+              "force": {
+                "description": "Publish even when the sensitive-content scan finds credential-looking strings",
+                "type": "boolean"
+              },
+              "dataSources": {
+                "description": "Named read-only shell commands the served page may poll via opencodeArtifacts.data(name) (raw-HTML pages)",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "command": {
+                      "type": "string"
+                    },
+                    "args": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "command"
+                  ]
+                }
+              },
+              "deploy": {
+                "description": "Also push the artifact to a hosted site (requires repo or workerName)",
+                "type": "boolean"
+              },
+              "repo": {
+                "description": "GitHub Pages target as owner/name; created public if missing",
+                "type": "string"
+              },
+              "target": {
+                "description": "Deploy target; defaults to github when repo is set",
+                "type": "string",
+                "enum": [
+                  "github",
+                  "cloudflare"
+                ]
+              },
+              "workerName": {
+                "description": "Cloudflare Worker name (target cloudflare)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "markdown"
+            ]
+          }
+        },
+        {
+          "id": "artifact_lifecycle",
+          "description": "List, inspect, read, reopen, restore, archive/unarchive, export, or import schema-2 artifacts by exact identity/reference. Archive is recoverable and requires a preview-bound permission confirmation.",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "op": {
+                "type": "string",
+                "enum": [
+                  "list",
+                  "status",
+                  "read",
+                  "reopen",
+                  "restore",
+                  "archive-preview",
+                  "archive-confirm",
+                  "unarchive",
+                  "export",
+                  "import"
+                ]
+              },
+              "artifact": {
+                "description": "Exact artifact reference or opaque ID",
+                "type": "string"
+              },
+              "revision": {
+                "description": "Revision to read or restore",
+                "type": "number"
+              },
+              "expectedRevision": {
+                "description": "Expected current head for restore",
+                "type": "number"
+              },
+              "token": {
+                "description": "One-use archive confirmation token",
+                "type": "string"
+              },
+              "slug": {
+                "description": "Explicit non-conflicting slug for unarchive",
+                "type": "string"
+              },
+              "path": {
+                "description": "Export destination or import bundle directory",
+                "type": "string"
+              }
+            },
+            "required": [
+              "op"
+            ]
+          }
+        },
+        {
+          "id": "artifact_db",
+          "description": "Read or write an artifact's shared mini-database (collections of JSON documents, stored under .opencode/artifacts/.db/). Mirrors what the served page can do through the opencodeArtifacts.db bridge.",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string"
+              },
+              "collection": {
+                "type": "string"
+              },
+              "op": {
+                "type": "string",
+                "enum": [
+                  "get",
+                  "list",
+                  "set",
+                  "delete"
+                ]
+              },
+              "id": {
+                "description": "Document id (required for get/set/delete)",
+                "type": "string"
+              },
+              "doc": {
+                "description": "Document body for set"
+              },
+              "q": {
+                "description": "Equality filter for list, as field:value",
+                "type": "string"
+              },
+              "expectedRevision": {
+                "description": "Current collection revision for set/delete",
+                "type": "number"
+              },
+              "expectedDocumentHash": {
+                "description": "Current document SHA-256 for update/delete",
+                "type": "string"
+              },
+              "createOnly": {
+                "description": "Require the document ID to be absent",
+                "type": "boolean"
+              },
+              "operationId": {
+                "description": "UUID retained across retries of one mutation",
+                "type": "string"
+              }
+            },
+            "required": [
+              "slug",
+              "collection",
+              "op"
+            ]
+          }
+        },
+        {
+          "id": "artifact_state",
+          "description": "Read the saved decision/state of an artifact published in this worktree (answers a reader gave on the served page, e.g. workshop decisions).",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "slug": {
+                "description": "Artifact slug (the filename without .html)",
+                "type": "string"
+              }
+            },
+            "required": [
+              "slug"
+            ]
+          }
+        },
+        {
+          "id": "artifact_comments",
+          "description": "Read comment threads a reader left on a served artifact page, or resolve a thread after acting on it. Pass digest: true for a compact triage view (unresolved first, oldest unresolved at top).",
+          "parameters": {
+            "$schema": "https://json-schema.org/draft/2020-12/schema",
+            "type": "object",
+            "properties": {
+              "slug": {
+                "description": "Artifact slug (the filename without .html)",
+                "type": "string"
+              },
+              "resolveId": {
+                "description": "Thread id to mark resolved after you have acted on it",
+                "type": "string"
+              },
+              "digest": {
+                "description": "Return a compact triage digest instead of raw threads",
+                "type": "boolean"
+              },
+              "expectedRevision": {
+                "description": "Current comment-store revision required with resolveId",
+                "type": "number"
+              },
+              "expectedHash": {
+                "description": "Current comment-store hash required with resolveId",
+                "type": "string"
+              },
+              "operationId": {
+                "description": "UUID retained across retries of one resolve mutation",
+                "type": "string"
+              }
+            },
+            "required": [
+              "slug"
+            ]
+          }
+        }
+      ],
+      "logs": "Warning: OPENCODE_SERVER_PASSWORD is not set; server is unsecured.\ntimestamp=2026-08-18T16:20:51.528Z level=INFO run=16865c83 message=loading path=/tmp/opencode-host-matrix-FqauE1/config-env-1-18-18/config/opencode/config.json\ntimestamp=2026-08-18T16:20:51.600Z level=INFO run=16865c83 message=loading path=/tmp/opencode-host-matrix-FqauE1/config-env-1-18-18/config/opencode/opencode.json\ntimestamp=2026-08-18T16:20:51.604Z level=INFO run=16865c83 message=loading path=/tmp/opencode-host-matrix-FqauE1/config-env-1-18-18/config/opencode/opencode.jsonc\nopencode server listening on http://127.0.0.1:4096\ntimestamp=2026-08-18T16:20:52.185Z level=INFO run=16865c83 message=\"creating instance\" directory=/tmp/opencode-host-matrix-FqauE1/config-project-1-18-18\ntimestamp=2026-08-18T16:20:52.188Z level=INFO run=16865c83 message=fromDirectory directory=/tmp/opencode-host-matrix-FqauE1/config-project-1-18-18\ntimestamp=2026-08-18T16:20:52.341Z level=INFO run=16865c83 message=bootstrapping directory=/tmp/opencode-host-matrix-FqauE1/config-project-1-18-18\ntimestamp=2026-08-18T16:20:52.372Z level=INFO run=16865c83 message=loading path=/tmp/opencode-host-matrix-FqauE1/config-env-1-18-18/config/opencode/config.json\ntimestamp=2026-08-18T16:20:52.388Z level=INFO run=16865c83 message=loading path=/tmp/opencode-host-matrix-FqauE1/config-env-1-18-18/config/opencode/opencode.json\ntimestamp=2026-08-18T16:20:52.403Z level=INFO run=16865c83 message=loading path=/tmp/opencode-host-matrix-FqauE1/config-env-1-18-18/config/opencode/opencode.jsonc\ntimestamp=2026-08-18T16:21:15.479Z level=INFO run=16865c83 message=\"all LSPs are disabled\"\ntimestamp=2026-08-18T16:21:15.484Z level=INFO run=16865c83 message=\"all formatters are disabled\"\ntimestamp=2026-08-18T16:21:15.484Z level=INFO run=16865c83 message=init\ntimestamp=2026-08-18T16:21:15.517Z level=INFO run=16865c83 message=\"shell tool using shell\" shell=/bin/bash\n",
+      "config": {
+        "plugin": [
+          "file:///tmp/opencode-host-matrix-FqauE1/package/node_modules/opencode-artifacts"
+        ],
+        "permission": {
+          "*": "allow",
+          "artifact_publish": "ask",
+          "artifact_datasource": "ask",
+          "artifact_deploy": "deny",
+          "artifact_audience": "deny"
+        }
+      },
+      "effectivePermission": {
+        "*": "allow",
+        "artifact_publish": "ask",
+        "artifact_datasource": "ask",
+        "artifact_deploy": "deny",
+        "artifact_audience": "deny"
+      },
+      "effectiveCommand": {
+        "artifact-reopen": {
+          "template": "Call artifact_lifecycle with op \"reopen\" and artifact \"$ARGUMENTS\". Require one exact active ID, slug, contained path, or registered URL; do not guess.",
+          "description": "Reopen an exact artifact reference"
+        }
+      }
+    }
+  ],
+  "smoke": {
+    "tool": "artifact_lifecycle",
+    "operation": "list",
+    "result": "{\n  \"schemaVersion\": 1,\n  \"artifacts\": []\n}",
+    "filesystemUnchanged": true,
+    "executionBoundary": "exact-packed-module"
+  },
+  "skill": {
+    "install": {
+      "command": [
+        "/home/ubuntu/.npm/_npx/387698761821791d/node_modules/node/bin/node",
+        "/tmp/opencode-host-matrix-FqauE1/package/node_modules/opencode-artifacts/dist/cli.js",
+        "skill",
+        "install",
+        "--project"
+      ],
+      "exitCode": 0,
+      "output": "{\n  \"schemaVersion\": 1,\n  \"status\": \"installed\",\n  \"destination\": \"/tmp/opencode-host-matrix-FqauE1/skill-project/.opencode/skills/artifact-pages\",\n  \"files\": [\n    \"SKILL.md\",\n    \"reference/components.md\",\n    \"reference/visuals.md\"\n  ],\n  \"digest\": \"8ba7e0716799b90c5c576eb9c28ff26574de3c1c2c86ff60906761551d208e03\",\n  \"removal\": \"Remove manually only after review: /tmp/opencode-host-matrix-FqauE1/skill-project/.opencode/skills/artifact-pages\"\n}\n"
+    },
+    "destination": "/tmp/opencode-host-matrix-FqauE1/skill-project/.opencode/skills/artifact-pages",
+    "sourcePackageRemoved": true,
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "1f8a6377b312d4f7b3759d897e4901cdbc8c82aeb39c60e788913db3e961a117",
+        "bytes": 6454
+      },
+      {
+        "path": "reference/components.md",
+        "sha256": "b5f88df20e10709947c76a87724b2d922489b854c7da99d8bcb8cb383b2b598d",
+        "bytes": 5389
+      },
+      {
+        "path": "reference/visuals.md",
+        "sha256": "0228e8d7f496da912e9ba1102bcccb9a82584c1b1ae84f5a9d5734e4a8dd1b99",
+        "bytes": 2280
+      }
+    ],
+    "hosts": [
+      {
+        "hostVersion": "1.18.18",
+        "name": "artifact-pages",
+        "description": "Publish session output as interactive artifact pages via the artifact_publish tool (opencode-artifacts plugin). Use proactively whenever a deliverable has an audience — reports, plans, PR walkthroughs, dashboards, incident timelines, comparisons, checklists — or whenever output is easier to see as a page than to read as terminal text. Covers when to publish, page naming, and the comment loop; component schemas live in reference/components.md.",
+        "location": "/tmp/opencode-host-matrix-FqauE1/skill-project/.opencode/skills/artifact-pages/SKILL.md",
+        "contentSha256": "86dcbaa3b04513cdc08cb60f715419acf1147f7d52cfddc3759f81b7c77589af",
+        "contentBytes": 5961,
+        "logs": "Warning: OPENCODE_SERVER_PASSWORD is not set; server is unsecured.\ntimestamp=2026-08-18T16:21:20.652Z level=INFO run=68dfb329 message=loading path=/tmp/opencode-host-matrix-FqauE1/skill-env-1-18-18/config/opencode/config.json\ntimestamp=2026-08-18T16:21:20.872Z level=INFO run=68dfb329 message=loading path=/tmp/opencode-host-matrix-FqauE1/skill-env-1-18-18/config/opencode/opencode.json\ntimestamp=2026-08-18T16:21:20.874Z level=INFO run=68dfb329 message=loading path=/tmp/opencode-host-matrix-FqauE1/skill-env-1-18-18/config/opencode/opencode.jsonc\nopencode server listening on http://127.0.0.1:4096\ntimestamp=2026-08-18T16:21:21.435Z level=INFO run=68dfb329 message=\"creating instance\" directory=/tmp/opencode-host-matrix-FqauE1/skill-project\ntimestamp=2026-08-18T16:21:21.437Z level=INFO run=68dfb329 message=fromDirectory directory=/tmp/opencode-host-matrix-FqauE1/skill-project\ntimestamp=2026-08-18T16:21:21.487Z level=INFO run=68dfb329 message=bootstrapping directory=/tmp/opencode-host-matrix-FqauE1/skill-project\ntimestamp=2026-08-18T16:21:21.521Z level=INFO run=68dfb329 message=loading path=/tmp/opencode-host-matrix-FqauE1/skill-env-1-18-18/config/opencode/config.json\ntimestamp=2026-08-18T16:21:21.535Z level=INFO run=68dfb329 message=loading path=/tmp/opencode-host-matrix-FqauE1/skill-env-1-18-18/config/opencode/opencode.json\ntimestamp=2026-08-18T16:21:21.536Z level=INFO run=68dfb329 message=loading path=/tmp/opencode-host-matrix-FqauE1/skill-env-1-18-18/config/opencode/opencode.jsonc\ntimestamp=2026-08-18T16:21:21.994Z level=INFO run=68dfb329 message=loading path=/tmp/opencode-host-matrix-FqauE1/skill-project/.opencode/opencode.json\ntimestamp=2026-08-18T16:21:21.995Z level=INFO run=68dfb329 message=loading path=/tmp/opencode-host-matrix-FqauE1/skill-project/.opencode/opencode.jsonc\ntimestamp=2026-08-18T16:21:22.152Z level=INFO run=68dfb329 message=\"all LSPs are disabled\"\ntimestamp=2026-08-18T16:21:22.156Z level=INFO run=68dfb329 message=\"all formatters are disabled\"\ntimestamp=2026-08-18T16:21:22.156Z level=INFO run=68dfb329 message=init\ntimestamp=2026-08-18T16:21:22.258Z level=INFO run=68dfb329 message=init count=2\n"
+      }
+    ]
+  },
+  "result": "pass"
+}

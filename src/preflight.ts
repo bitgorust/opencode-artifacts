@@ -4,7 +4,7 @@ import { resolvePortableAssets, AssetPreflightError, type PortableAssets } from 
 import { validateChartSpec } from "./render.ts";
 import { headingSlugify } from "./text.ts";
 import { canonicalLocale, validTimeZone } from "./locale.ts";
-import { parseDocument } from "./markdown.ts";
+import { COMPOSITION_KINDS, parseDocument } from "./markdown.ts";
 import { loadProjectDesignTokens, resolveDesignTokens, type ResolvedDesignTokens } from "./design-tokens.ts";
 
 export type DiagnosticSeverity = "error" | "warning";
@@ -34,7 +34,7 @@ export interface PreflightResult {
 }
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?/;
-const KNOWN_FRONTMATTER = new Set(["title", "icon", "description", "theme", "source", "font", "lang", "dir", "locale", "timezone"]);
+const KNOWN_FRONTMATTER = new Set(["title", "icon", "description", "theme", "source", "font", "lang", "dir", "locale", "timezone", "composition"]);
 const THEMES = new Set(["default", "report", "ops", "editorial"]);
 const CHART_KINDS = new Set(["vega-lite", "vega", "echarts"]);
 const ALERT_KINDS = new Set(["NOTE", "TIP", "IMPORTANT", "WARNING", "CAUTION"]);
@@ -72,6 +72,7 @@ function frontmatterDiagnostics(markdown: string): AuthoringDiagnostic[] {
     if (key === "dir" && parsed[2].trim() !== "ltr" && parsed[2].trim() !== "rtl") output.push(diagnostic("direction-invalid", "error", "frontmatter", index + 2, "dir must be ltr or rtl", "choose the document's logical direction"));
     if (key === "locale" && canonicalLocale(parsed[2].trim()) === undefined) output.push(diagnostic("locale-invalid", "error", "frontmatter", index + 2, "locale is not a valid BCP 47 locale", "use a locale such as en-US, de-DE, or ar-EG"));
     if (key === "timezone" && !validTimeZone(parsed[2].trim())) output.push(diagnostic("timezone-invalid", "error", "frontmatter", index + 2, "timezone is not a valid IANA time zone", "use a zone such as UTC, Europe/Berlin, or Asia/Tokyo"));
+    if (key === "composition" && !COMPOSITION_KINDS.has(parsed[2].trim())) output.push(diagnostic("composition-invalid", "error", "frontmatter", index + 2, "composition is not allowlisted", "use standard, narrative, dashboard, split, dense, quiet, or full"));
   }
   return output;
 }

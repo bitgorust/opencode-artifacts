@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "blinded-page-quality-benchmark",
+  "title": "Run the blinded page-quality benchmark",
+  "lane": "standard",
+  "status": "approved",
+  "affectedRequirements": [
+    "RENDER-12",
+    "QUAL-07"
+  ],
+  "currentSpecs": [
+    "specs/current/portable-renderer.spec.md"
+  ],
+  "currentSpecsUpdated": false,
+  "approval": {
+    "by": "aaron.zeng",
+    "at": "2026-08-18T15:22:56Z"
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-18",
+  "archivedAt": null
+}

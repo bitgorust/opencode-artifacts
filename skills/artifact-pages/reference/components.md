@@ -4,7 +4,9 @@ The `artifact_publish` tool takes `markdown`. Frontmatter (`---` fences) sets `t
 `icon:` (emoji favicon), `description:` (gallery subtitle), `lang:` (BCP 47), `dir:`
 (`ltr|rtl`), `locale:` (Intl locale), and `timezone:` (IANA zone). Locale defaults to
 `en-US`, time zone to `UTC`, and direction is inferred from the language when omitted. `##`
-sections become white cards on the page. Republish with the same title to update in place; `version: true` keeps
+sections become cards on the page. Optional `composition:` is one of `standard`, `narrative`,
+`dashboard`, `split`, `dense`, `quiet`, or `full`; it changes bounded layout only and never
+reading order. Republish with the same title to update in place; `version: true` keeps
 numbered history; `open: true` opens the browser; `expectedHash` guards against overwriting
 unseen changes; `force: true` overrides the credential scan.
 
@@ -23,6 +25,7 @@ unseen changes; `force: true` overrides the credential scan.
 | ```` ```mermaid ```` | first line `%% summary: meaningful equivalent`, then raw Mermaid | diagrams: graph/sequence/ER/... |
 | ```` ```decisions ```` | `{title?, questions: [{id, question, options: [{id, label, note?}]}]}` | workshop rows; answers read back via `artifact_state` |
 | ```` ```table ```` | `{caption, columns: [{key, label, type?: num\|date\|datetime}], rows: [{...}]}` | captioned sortable/filterable tables; dates require zoned ISO values |
+| ```` ```frame ```` | `{kind: mockup\|media\|code, title, caption, content, annotations?: string[]}`; content max 8 KiB | bounded mockup/media/code framing with a text equivalent |
 
 ## Data honesty (non-negotiable)
 

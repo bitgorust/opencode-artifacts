@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-19T03:37:26.935Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "fixture": "http://127.0.0.1:4173/incident.html",
+  "requested": {
+    "width": 1440,
+    "height": 900,
+    "colorScheme": "light",
+    "reducedMotion": false
+  },
+  "usefulContentMs": 1316,
+  "ready": true,
+  "keyboard": {
+    "firstTab": {
+      "className": "skip-link",
+      "tag": "A",
+      "text": "Skip to main content"
+    }
+  },
+  "observations": {
+    "chartGeometry": [
+      {
+        "childHeight": 560,
+        "childWidth": 864,
+        "height": 560,
+        "markup": "<div style=\"position: relative; width: 864px; height: 560px; padding: 0px; margin: 0px; border-width: 0px;\"><canvas data-zr-dom-id=\"zr_0.0\" width=\"864\" height=\"",
+        "width": 864
+      }
+    ],
+    "clippedText": [],
+    "colorScheme": "light",
+    "composition": "composition-narrative",
+    "diagramGeometry": [],
+    "documentHorizontalOverflow": false,
+    "headings": [
+      "Incident 4172 — Checkout latency spike",
+      "Timeline",
+      "Error rate by minute",
+      "What we tested"
+    ],
+    "interactive": {
+      "buttons": 1,
+      "radios": 0,
+      "ranges": 0
+    },
+    "layoutShift": 0,
+    "mainHorizontalOverflow": false,
+    "readyState": "complete",
+    "reducedMotion": false,
+    "renderErrors": [],
+    "sections": [
+      {
+        "classes": "section-card",
+        "heading": "Timeline",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 920
+      },
+      {
+        "classes": "section-card section-visual section-insight",
+        "heading": "Error rate by minute",
+        "utilization": 0.939,
+        "visualWidth": 864,
+        "width": 920
+      },
+      {
+        "classes": "section-card",
+        "heading": "What we tested",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 920
+      }
+    ],
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 757,
+      "width": 1440
+    }
+  },
+  "accessibilityTree": [
+    {
+      "role": "RootWebArea",
+      "name": "Incident 4172 — Checkout latency spike"
+    },
+    {
+      "role": "banner",
+      "name": ""
+    },
+    {
+      "role": "main",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "Incident 4172 — Checkout latency spike"
+    },
+    {
+      "role": "button",
+      "name": "Theme: system. Activate to switch."
+    },
+    {
+      "role": "heading",
+      "name": "Timeline"
+    },
+    {
+      "role": "heading",
+      "name": "Error rate by minute"
+    },
+    {
+      "role": "figure",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "What we tested"
+    },
+    {
+      "role": "image",
+      "name": "Server errors spike from 4 to 63 per minute at 14:05, then recover to 3 by 14:30."
+    }
+  ],
+  "browserLogs": [],
+  "requestUrls": [
+    "http://127.0.0.1:4173/incident.html"
+  ],
+  "externalHttpRequests": []
+}

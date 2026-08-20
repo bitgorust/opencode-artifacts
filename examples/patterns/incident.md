@@ -1,6 +1,8 @@
 ---
 title: Incident 4172 — Checkout latency spike
 icon: 🚨
+composition: narrative
+source: Synthetic incident log, captured 2026-08-18
 ---
 
 ```stats

@@ -14,9 +14,10 @@
 - `COMPAT-01`: Node 24 is the support floor. Target coverage is Ubuntu 24.04 LTS, current and
   previous macOS, Windows 11 native/WSL, current and oldest-supported stable OpenCode 1.x,
   latest-two desktop Chromium/Firefox/Safari and mobile Android Chrome/iOS Safari where
-  available. An exact Ubuntu/Node/OpenCode/single-Chromium packed-candidate observation is
+  available. An exact Ubuntu/Node/OpenCode/single-Chromium packed-candidate observation and
+  exact-shared-tarball command-line observations on one Linux, macOS, and Windows CI runner are
   tested but incomplete. There are zero supported complete cells; all target cells are
-  unverified. Public preview may expose that state but cannot promote the observation or claim
+  unverified. Public preview may expose that state but cannot promote those observations or claim
   support; certification still requires the target matrix. A goal-specific implementation
   gate may treat an unavailable cell as optional only after an explicit human decision and
   only when the cell remains unverified, platform-dependent behavior remains opt-in or

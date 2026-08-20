@@ -12,7 +12,8 @@ export type ComponentKind =
   | "copy"
   | "mermaid"
   | "decisions"
-  | "table";
+  | "table"
+  | "frame";
 
 export const COMPONENT_KINDS: ReadonlySet<string> = new Set([
   "stats",
@@ -26,6 +27,7 @@ export const COMPONENT_KINDS: ReadonlySet<string> = new Set([
   "mermaid",
   "decisions",
   "table",
+  "frame",
 ]);
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
@@ -146,6 +148,24 @@ export function validateComponent(kind: ComponentKind, source: string): Componen
   }
   const item = asRecord(value);
   if (!item) return issue(`${kind}-shape`, "expected a JSON object", "provide the documented object schema");
+  if (kind === "frame") {
+    const frameKind = str(item, "kind");
+    const issues: ComponentIssue[] = [];
+    if (frameKind !== "mockup" && frameKind !== "media" && frameKind !== "code") {
+      issues.push(...issue("frame-kind", "kind is not allowlisted", "use mockup, media, or code"));
+    }
+    if (!str(item, "title")) issues.push(...issue("frame-title", "title is required", "add a concise frame title"));
+    if (!str(item, "caption")) issues.push(...issue("frame-caption", "caption is required", "add a meaningful text equivalent"));
+    if (typeof item["content"] !== "string") issues.push(...issue("frame-content", "content must be text", "add bounded text content"));
+    const annotations = item["annotations"];
+    if (annotations !== undefined && (!Array.isArray(annotations) || annotations.some((note) => typeof note !== "string"))) {
+      issues.push(...issue("frame-annotations", "annotations must be strings", "replace non-string annotations"));
+    }
+    if (typeof item["content"] === "string" && Buffer.byteLength(item["content"], "utf8") > 8 * 1024) {
+      issues.push(...issue("frame-content-size", "content exceeds 8 KiB", "shorten the framed excerpt"));
+    }
+    return issues;
+  }
   if (kind === "callout") {
     const tone = str(item, "tone");
     return tone !== undefined && !ITEM_TONES.includes(tone as typeof ITEM_TONES[number]) ? issue("callout-tone", "tone is not allowlisted", "use good, bad, warn, info, or neutral") : [];
@@ -316,6 +336,25 @@ function renderCallout(spec: unknown): string {
     title !== undefined ? `<div class="callout-title">${escapeHtmlText(title)}</div>` : "",
     body !== undefined ? `<div class="callout-body">${escapeHtmlText(body)}</div>` : "",
     "</div>",
+  ].join("");
+}
+
+function renderFrame(spec: unknown): string {
+  const item = asRecord(spec);
+  if (!item) return errorBox("frame", "expected a JSON object");
+  const kind = str(item, "kind") ?? "media";
+  const title = str(item, "title") ?? "Framed content";
+  const caption = str(item, "caption") ?? "Framed content";
+  const content = str(item, "content") ?? "";
+  const annotations = Array.isArray(item["annotations"]) ? item["annotations"] : [];
+  const notes = annotations.length === 0 ? "" : `<ol class="frame-annotations">${annotations.map((note) => `<li>${escapeHtmlText(String(note))}</li>`).join("")}</ol>`;
+  return [
+    `<figure class="visual-frame frame-${kind}">`,
+    `<div class="frame-surface"><div class="frame-bar"><span aria-hidden="true">● ● ●</span><strong>${escapeHtmlText(title)}</strong></div>`,
+    `<pre class="frame-content">${escapeHtmlText(content)}</pre></div>`,
+    notes,
+    `<figcaption>${escapeHtmlText(caption)}</figcaption>`,
+    "</figure>",
   ].join("");
 }
 
@@ -514,5 +553,7 @@ export function renderComponent(kind: ComponentKind, json: string, id?: string, 
       return renderDecisions(spec);
     case "table":
       return renderTable(spec, context, id);
+    case "frame":
+      return renderFrame(spec);
   }
 }

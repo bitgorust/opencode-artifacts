@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-18T15:58:42.560Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "fixture": "http://127.0.0.1:43115/system-explainer.html",
+  "requested": {
+    "width": 390,
+    "height": 844,
+    "colorScheme": "dark",
+    "reducedMotion": true
+  },
+  "usefulContentMs": 925,
+  "ready": true,
+  "keyboard": {
+    "firstTab": {
+      "className": "skip-link",
+      "tag": "A",
+      "text": "Skip to main content"
+    },
+    "table": {
+      "direction": "ascending",
+      "label": "Boundary"
+    }
+  },
+  "observations": {
+    "chartGeometry": [],
+    "clippedText": [],
+    "colorScheme": "dark",
+    "composition": "composition-full",
+    "diagramGeometry": [
+      {
+        "height": 229.703125,
+        "parentWidth": 311,
+        "style": "max-width: 2118.2734375px;",
+        "viewBox": "-8 -8 479.9375 398",
+        "width": 276.984375,
+        "widthAttribute": "100%"
+      }
+    ],
+    "documentHorizontalOverflow": false,
+    "headings": [
+      "Artifact publication — trust-boundary explainer",
+      "Data flow and boundaries",
+      "What crosses each boundary",
+      "Offline viewer frame"
+    ],
+    "interactive": {
+      "buttons": 4,
+      "radios": 0,
+      "ranges": 0
+    },
+    "layoutShift": 0,
+    "mainHorizontalOverflow": false,
+    "readyState": "complete",
+    "reducedMotion": true,
+    "renderErrors": [],
+    "sections": [
+      {
+        "classes": "section-card section-visual",
+        "heading": "Data flow and boundaries",
+        "utilization": 0.907,
+        "visualWidth": 311,
+        "width": 343
+      },
+      {
+        "classes": "section-card section-data",
+        "heading": "What crosses each boundary",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 343
+      },
+      {
+        "classes": "section-card section-visual section-insight",
+        "heading": "Offline viewer frame",
+        "utilization": 0.907,
+        "visualWidth": 311,
+        "width": 343
+      }
+    ],
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 701,
+      "width": 390
+    }
+  },
+  "accessibilityTree": [
+    {
+      "role": "RootWebArea",
+      "name": "Artifact publication — trust-boundary explainer"
+    },
+    {
+      "role": "banner",
+      "name": ""
+    },
+    {
+      "role": "main",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "Artifact publication — trust-boundary explainer"
+    },
+    {
+      "role": "button",
+      "name": "Theme: system. Activate to switch."
+    },
+    {
+      "role": "heading",
+      "name": "Data flow and boundaries"
+    },
+    {
+      "role": "figure",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "What crosses each boundary"
+    },
+    {
+      "role": "status",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "Offline viewer frame"
+    },
+    {
+      "role": "figure",
+      "name": ""
+    },
+    {
+      "role": "image",
+      "name": "Markdown and declared local assets pass through bounded preflight before a permission decision; approved content is committed as an immutable revision and rendered into offline HTML that performs no view-time requests."
+    },
+    {
+      "role": "table",
+      "name": "Publication boundary inventory"
+    },
+    {
+      "role": "caption",
+      "name": ""
+    },
+    {
+      "role": "button",
+      "name": "Sort by Boundary"
+    },
+    {
+      "role": "button",
+      "name": "Sort by Allowed data"
+    },
+    {
+      "role": "button",
+      "name": "Sort by Authority added"
+    }
+  ],
+  "browserLogs": [],
+  "requestUrls": [
+    "http://127.0.0.1:43115/system-explainer.html"
+  ],
+  "externalHttpRequests": []
+}

@@ -161,3 +161,26 @@ test("summary output redacts participant IDs and answer text", () => {
   assert.doesNotMatch(summary, /p-123456/);
   assert.doesNotMatch(summary, /synthetic fixture purpose/);
 });
+
+test("every claimed install cell needs its own eligible first-time README-only pass", () => {
+  const records = [
+    record(1, { platformId: "ubuntu-chromium" }),
+    { ...record(2, { platformId: "macos-safari" }), firstTimeUser: false },
+  ];
+  const summary = summarizeJourneyStudy(study(records, ["ubuntu-chromium", "macos-safari"]), corpus);
+  assert.equal(summary.firstUse.status, "incomplete");
+  assert.deepEqual(summary.firstUse.missingPlatformIds, ["macos-safari"]);
+  assert.equal(summary.firstUse.passingRuns, 1);
+});
+
+test("the comprehension threshold is exact and does not round eight of nine up", () => {
+  const nine = Array.from({ length: 9 }, (_, index) => record(index + 1, { pass: index !== 8 }));
+  let summary = summarizeJourneyStudy(study(nine), corpus);
+  assert.equal(summary.comprehension.status, "incomplete");
+  assert.equal(summary.comprehension.eligibleParticipants, 9);
+
+  const ten = [...nine, record(10, { pass: false })];
+  summary = summarizeJourneyStudy(study(ten), corpus);
+  assert.equal(summary.comprehension.status, "fail");
+  assert.equal(summary.comprehension.passRate, 0.8);
+});

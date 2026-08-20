@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "recordId": "local-core-pending",
+  "level": "local-artifact-core",
+  "decision": "pending",
+  "candidate": {
+    "status": "unfrozen",
+    "commit": null,
+    "version": null,
+    "tarball": null,
+    "sha256": null,
+    "sri": null,
+    "corpusVersions": null
+  },
+  "requirements": [
+    { "id": "code-tests", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "package-host", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "browser-accessibility", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "migrations", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "security-privacy", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "performance", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "support-matrix", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "page-quality", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "first-use", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "comprehension", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "audit-license-sbom", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "integrity-provenance", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "claims-rollback", "status": "pending", "applicabilityReason": null, "evidence": [] }
+  ],
+  "signoffs": [
+    { "role": "release", "status": "pending", "by": null, "at": null },
+    { "role": "security", "status": "pending", "by": null, "at": null },
+    { "role": "support", "status": "pending", "by": null, "at": null }
+  ],
+  "blockers": [
+    "Authorized current Claude same-input runs and retention disposition are absent.",
+    "Three independent benchmark reviewers are absent.",
+    "Representative-user first-use and comprehension records are absent.",
+    "The exact claimed support matrix is incomplete."
+  ],
+  "claims": {
+    "certification": false,
+    "equalOrBetter": false,
+    "supportedPlatformIds": []
+  },
+  "providerMutationCount": 0
+}

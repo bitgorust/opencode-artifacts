@@ -95,6 +95,7 @@ test("component preflight and inline fallback share validation", () => {
     ["mermaid", "", "mermaid-empty"],
     ["decisions", '{"questions":[{"id":"q","question":"Q","options":[{}]}]}', "decisions-option"],
     ["table", '{"caption":"Values","columns":[{"key":"x","label":"X"},{"key":"x","label":"Y"}],"rows":[]}', "table-key"],
+    ["frame", '{"kind":"unknown"}', "frame-kind"],
   ];
   for (const [kind, source, code] of cases) {
     assert.equal(validateComponent(kind, source)[0]?.code, code);

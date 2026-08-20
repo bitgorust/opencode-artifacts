@@ -1,4 +1,5 @@
 node_modules/
+.goal5-private/
 docs/evidence/journeys/raw/
 dist/
 *.tgz

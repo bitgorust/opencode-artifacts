@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-18T15:57:13.548Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "fixture": "http://127.0.0.1:43115/compare.html",
+  "requested": {
+    "width": 390,
+    "height": 844,
+    "colorScheme": "dark",
+    "reducedMotion": true
+  },
+  "usefulContentMs": 233,
+  "ready": true,
+  "keyboard": {
+    "firstTab": {
+      "className": "skip-link",
+      "tag": "A",
+      "text": "Skip to main content"
+    }
+  },
+  "observations": {
+    "chartGeometry": [],
+    "clippedText": [],
+    "colorScheme": "dark",
+    "composition": "composition-split",
+    "diagramGeometry": [],
+    "documentHorizontalOverflow": false,
+    "headings": [
+      "Settings panel — four layout directions",
+      "Recommendation"
+    ],
+    "interactive": {
+      "buttons": 1,
+      "radios": 0,
+      "ranges": 0
+    },
+    "layoutShift": 0,
+    "mainHorizontalOverflow": false,
+    "readyState": "complete",
+    "reducedMotion": true,
+    "renderErrors": [],
+    "sections": [
+      {
+        "classes": "section-card",
+        "heading": "Recommendation",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 343
+      }
+    ],
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 701,
+      "width": 390
+    }
+  },
+  "accessibilityTree": [
+    {
+      "role": "RootWebArea",
+      "name": "Settings panel — four layout directions"
+    },
+    {
+      "role": "banner",
+      "name": ""
+    },
+    {
+      "role": "main",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "Settings panel — four layout directions"
+    },
+    {
+      "role": "button",
+      "name": "Theme: system. Activate to switch."
+    },
+    {
+      "role": "heading",
+      "name": "Recommendation"
+    }
+  ],
+  "browserLogs": [],
+  "requestUrls": [
+    "http://127.0.0.1:43115/compare.html"
+  ],
+  "externalHttpRequests": []
+}

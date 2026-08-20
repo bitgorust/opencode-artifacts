@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-18T15:57:04.408Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "fixture": "http://127.0.0.1:43115/pr-walkthrough.html",
+  "requested": {
+    "width": 390,
+    "height": 844,
+    "colorScheme": "dark",
+    "reducedMotion": true
+  },
+  "usefulContentMs": 448,
+  "ready": true,
+  "keyboard": {
+    "firstTab": {
+      "className": "skip-link",
+      "tag": "A",
+      "text": "Skip to main content"
+    },
+    "copy": "Copied"
+  },
+  "observations": {
+    "chartGeometry": [],
+    "clippedText": [],
+    "colorScheme": "dark",
+    "composition": "composition-split",
+    "diagramGeometry": [],
+    "documentHorizontalOverflow": false,
+    "headings": [
+      "PR #412 walkthrough — cache TTL config",
+      "The change",
+      "Verdict"
+    ],
+    "interactive": {
+      "buttons": 2,
+      "radios": 0,
+      "ranges": 0
+    },
+    "layoutShift": 0,
+    "mainHorizontalOverflow": false,
+    "readyState": "complete",
+    "reducedMotion": true,
+    "renderErrors": [],
+    "sections": [
+      {
+        "classes": "section-card",
+        "heading": "The change",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 343
+      },
+      {
+        "classes": "section-card",
+        "heading": "Verdict",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 343
+      }
+    ],
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 701,
+      "width": 390
+    }
+  },
+  "accessibilityTree": [
+    {
+      "role": "RootWebArea",
+      "name": "PR #412 walkthrough — cache TTL config"
+    },
+    {
+      "role": "banner",
+      "name": ""
+    },
+    {
+      "role": "main",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "PR #412 walkthrough — cache TTL config"
+    },
+    {
+      "role": "button",
+      "name": "Theme: system. Activate to switch."
+    },
+    {
+      "role": "heading",
+      "name": "The change"
+    },
+    {
+      "role": "heading",
+      "name": "Verdict"
+    },
+    {
+      "role": "button",
+      "name": "Copy review verdict"
+    }
+  ],
+  "browserLogs": [],
+  "requestUrls": [
+    "http://127.0.0.1:43115/pr-walkthrough.html"
+  ],
+  "externalHttpRequests": []
+}

@@ -87,9 +87,14 @@ Component JSON schemas have exactly one home: `skills/artifact-pages/reference/c
 rationale; never copy schema tables into it.
 
 Available fences: `stats`, `timeline`, `findings`, `compare`, `callout`, `progress`, `diff`,
-`copy`, `mermaid`, `decisions`, `table`; chart fences `vega-lite` / `vega` / `echarts`;
+`copy`, `mermaid`, `decisions`, `table`, `frame`; chart fences `vega-lite` / `vega` / `echarts`;
 interactive controls via vega-lite `params.bind` and echarts `dataZoom` (verified live in
 browser QA); free-form interactivity stays in raw-HTML mode (`format: "html"`).
+
+Frontmatter `composition:` selects one bounded layout grammar: `standard`, `narrative`,
+`dashboard`, `split`, `dense`, `quiet`, or `full`. These modes change visual scale, section
+grouping, and density while retaining source/DOM order. Invalid values refuse publication.
+At narrow widths every multi-column mode becomes the same logical single-column sequence.
 
 ### Data honesty rules (from Claude Code's dashboard/dataviz skills)
 

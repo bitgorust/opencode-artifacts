@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "local-artifact-core-release",
+  "title": "Certify the local artifact core release",
+  "lane": "high-risk",
+  "status": "approved",
+  "affectedRequirements": [
+    "OUT-04",
+    "COMPAT-01",
+    "DIST-03",
+    "DIST-04",
+    "QUAL-08"
+  ],
+  "currentSpecs": [
+    "specs/current/contract-integrity.spec.md",
+    "specs/current/governance-policy.spec.md",
+    "specs/current/journey-evidence.spec.md",
+    "specs/current/opencode-integration.spec.md",
+    "specs/current/portable-renderer.spec.md"
+  ],
+  "currentSpecsUpdated": false,
+  "approval": {
+    "by": "aaron.zeng",
+    "at": "2026-08-18T15:22:56Z"
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-18",
+  "archivedAt": null
+}

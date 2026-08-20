@@ -23,6 +23,7 @@ export const OPENCODE_PERMISSION_POLICY = {
   artifact_deploy: "deny",
   artifact_audience: "deny",
 } as const;
+export const OPENCODE_HOST_INSTALL_FLAGS = ["--ignore-scripts", "--no-audit", "--no-fund"] as const;
 
 interface CommandResult {
   command: string[];
@@ -76,7 +77,7 @@ export interface MatrixEvidence {
   install: {
     package: CommandResult;
     currentResolution: CommandResult;
-    hosts: Array<{ version: string; command: CommandResult }>;
+    hosts: Array<{ version: string; command: CommandResult; postinstall: CommandResult }>;
     cliPlugins: Array<{ version: string; command: CommandResult }>;
   };
   routes: ServerResult[];
@@ -123,6 +124,18 @@ export function exactStableMatrix(currentStable: string, oldestTested: string): 
 } {
   const versions = [...new Set([currentStable, oldestTested])];
   return { versions, deduplicated: versions.length === 1 };
+}
+
+export function stableVersionFromNpm(value: unknown): string {
+  const version = typeof value === "string"
+    ? value
+    : Array.isArray(value) && value.length === 1 && typeof value[0] === "string"
+      ? value[0]
+      : undefined;
+  if (version === undefined || !/^\d+\.\d+\.\d+$/.test(version)) {
+    throw new Error("npm must resolve exactly one stable OpenCode version");
+  }
+  return version;
 }
 
 export function parseServerUrl(output: string): string | undefined {
@@ -436,16 +449,13 @@ export async function runMatrix(tarballInput: string, outputInput: string): Prom
     await mkdir(packageRoot, { recursive: true });
     const packageInstall = await runCommand("npm", ["install", "--prefix", packageRoot, "--ignore-scripts", "--no-audit", "--no-fund", tarball], { cwd: work });
     const currentResolution = await runCommand("npm", ["view", "opencode-ai", "version", "--json"], { cwd: work });
-    const currentStable = JSON.parse(currentResolution.output.trim()) as unknown;
-    if (typeof currentStable !== "string" || !/^\d+\.\d+\.\d+$/.test(currentStable)) {
-      throw new Error(`npm resolved a non-stable OpenCode version: ${currentResolution.output}`);
-    }
+    const currentStable = stableVersionFromNpm(JSON.parse(currentResolution.output.trim()) as unknown);
     const pluginDirectory = join(packageRoot, "node_modules", "opencode-artifacts");
     const manifest = JSON.parse(await readFile(join(pluginDirectory, "package.json"), "utf8")) as { version?: unknown };
     if (typeof manifest.version !== "string") throw new Error("packed package version is missing");
     const pluginUrl = pathToFileURL(pluginDirectory).href;
     const matrix = exactStableMatrix(currentStable, OLDEST_TESTED_OPENCODE_VERSION);
-    const hosts: Array<{ version: string; command: CommandResult }> = [];
+    const hosts: Array<{ version: string; command: CommandResult; postinstall: CommandResult }> = [];
     const hostBinaries: Array<{ version: string; binary: string }> = [];
     const cliPlugins: Array<{ version: string; command: CommandResult }> = [];
     const routes: ServerResult[] = [];
@@ -455,8 +465,10 @@ export async function runMatrix(tarballInput: string, outputInput: string): Prom
       const cliProject = join(work, `cli-project-${versionKey}`);
       const configProject = join(work, `config-project-${versionKey}`);
       await Promise.all([hostRoot, cliProject, configProject].map((path) => mkdir(path, { recursive: true })));
-      const hostInstall = await runCommand("npm", ["install", "--prefix", hostRoot, "--no-audit", "--no-fund", `opencode-ai@${version}`], { cwd: work });
-      hosts.push({ version, command: hostInstall });
+      const hostInstall = await runCommand("npm", ["install", "--prefix", hostRoot, ...OPENCODE_HOST_INSTALL_FLAGS, `opencode-ai@${version}`], { cwd: work });
+      const hostPackage = join(hostRoot, "node_modules", "opencode-ai");
+      const hostPostinstall = await runCommand(process.execPath, ["postinstall.mjs"], { cwd: hostPackage });
+      hosts.push({ version, command: hostInstall, postinstall: hostPostinstall });
       const hostBinary = join(hostRoot, "node_modules", ".bin", process.platform === "win32" ? "opencode.cmd" : "opencode");
       hostBinaries.push({ version, binary: hostBinary });
       const cliEnvRoot = join(work, `cli-env-${versionKey}`);

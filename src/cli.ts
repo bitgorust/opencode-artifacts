@@ -1,7 +1,8 @@
 #!/usr/bin/env node
+import { realpathSync } from "node:fs";
 import { lstat, mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { renderArtifact, renderRawHtml } from "./render.ts";
 import type { PortableAssets } from "./assets.ts";
 import type { ResolvedDesignTokens } from "./design-tokens.ts";
@@ -506,7 +507,15 @@ export async function main(argv: string[]): Promise<void> {
   }
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+export function cliInvocationMatchesModule(argumentPath: string, moduleUrl = import.meta.url): boolean {
+  try {
+    return realpathSync(resolve(argumentPath)) === realpathSync(fileURLToPath(moduleUrl));
+  } catch {
+    return moduleUrl === pathToFileURL(resolve(argumentPath)).href;
+  }
+}
+
+if (process.argv[1] && cliInvocationMatchesModule(process.argv[1])) {
   main(process.argv.slice(2)).catch((err: unknown) => {
     console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);

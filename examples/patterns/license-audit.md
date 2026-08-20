@@ -3,6 +3,7 @@ title: Dependency license audit
 icon: ⚖️
 description: Every production dependency and its license, copyleft flagged
 source: package-lock.json, 2026-08-15
+composition: dense
 ---
 
 ```stats

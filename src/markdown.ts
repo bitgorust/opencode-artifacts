@@ -13,7 +13,11 @@ export interface Frontmatter {
   dir?: string;
   locale?: string;
   timezone?: string;
+  composition?: CompositionKind;
 }
+
+export type CompositionKind = "standard" | "narrative" | "dashboard" | "split" | "dense" | "quiet" | "full";
+export const COMPOSITION_KINDS: ReadonlySet<string> = new Set(["standard", "narrative", "dashboard", "split", "dense", "quiet", "full"]);
 
 export type ChartKind = "vega-lite" | "vega" | "echarts";
 const CHART_KINDS: ReadonlySet<string> = new Set(["vega-lite", "vega", "echarts"]);
@@ -72,6 +76,7 @@ function parseFrontmatter(source: string, warnings: string[]): { meta: Frontmatt
     else if (key === "dir") meta.dir = value;
     else if (key === "locale") meta.locale = value;
     else if (key === "timezone") meta.timezone = value;
+    else if (key === "composition" && COMPOSITION_KINDS.has(value)) meta.composition = value as CompositionKind;
     else warnings.push(`frontmatter key ignored: ${key}`);
   }
   return { meta, body: source.slice(match[0].length), lineOffset: (match[0].match(/\n/g) ?? []).length };

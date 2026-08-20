@@ -1,5 +1,5 @@
 import { compile as compileVegaLite } from "vega-lite";
-import { parseDocument, type ChartSpec, type Frontmatter } from "./markdown.ts";
+import { parseDocument, type ChartSpec, type CompositionKind, type Frontmatter } from "./markdown.ts";
 import { renderComponent } from "./components.ts";
 import { runtimeBundle, type RuntimeName } from "./runtime.ts";
 import { escapeHtmlText, headingSlugify } from "./text.ts";
@@ -82,12 +82,26 @@ html{overflow-wrap:anywhere}body{margin:0;background:var(--page-bg);color:var(--
 .skip-link{position:fixed;z-index:100;inset-block-start:.5rem;inset-inline-start:.5rem;padding:.55rem .8rem;background:var(--card-bg);color:var(--ink);border:2px solid var(--accent);border-radius:8px;transform:translateY(-160%)}
 .skip-link:focus{transform:none}
 .artifact-header{display:flex;align-items:center;gap:.6rem;padding:.9rem 1.5rem;background:var(--card-bg);border-bottom:1px solid var(--line)}
-.theme-toggle{margin-inline-start:auto;min-height:2rem;background:none;border:1px solid var(--line);border-radius:999px;padding:.25rem .8rem;font-size:.75rem;font-weight:600;color:var(--ink-2);cursor:pointer}
+.theme-toggle{flex:none;white-space:nowrap;margin-inline-start:auto;min-height:2rem;background:none;border:1px solid var(--line);border-radius:999px;padding:.25rem .8rem;font-size:.75rem;font-weight:600;color:var(--ink-2);cursor:pointer}
 .theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
-.artifact-header h1{font-size:1.1rem;margin:0;letter-spacing:-.01em}
+.artifact-header h1{min-width:0;font-size:1.1rem;margin:0;letter-spacing:-.01em}
 .artifact-icon{font-size:1.25rem}
 .artifact-body{max-width:1080px;margin:0 auto;padding:var(--body-pad) var(--body-pad) var(--body-pad-bottom)}
 .artifact-body>*:first-child{margin-top:0}
+.artifact-intro{margin:0 0 var(--section-gap)}
+.artifact-intro>p:first-child{max-width:64ch;font-size:clamp(1rem,1.7vw,1.2rem);line-height:1.55;color:var(--ink-2)}
+.composition-narrative{max-width:920px}.composition-narrative .section-card:first-of-type{padding-block:clamp(1.5rem,4vw,3rem)}
+.composition-narrative .section-card:first-of-type h2{font-size:clamp(1.6rem,3vw,2.35rem);max-width:22ch}
+.composition-dashboard,.composition-full{max-width:1240px}.composition-dashboard{--section-gap:1rem}
+.composition-split{max-width:1240px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--section-gap)}
+.composition-split .artifact-intro{grid-column:1/-1;margin:0}.composition-split .section-card{margin:0;min-width:0}
+.composition-split .section-visual,.composition-split .section-data{grid-column:1/-1}
+.composition-split .section-card:last-child:nth-of-type(odd){grid-column:1/-1}
+.composition-dense{max-width:1240px;--section-gap:.75rem;--section-pad-y:1rem;--section-pad-x:1.15rem;--table-font-size:.8rem}
+.composition-quiet{max-width:820px;--section-gap:2rem}.composition-quiet .section-card{box-shadow:none;border-block-start:1px solid var(--line);border-radius:0;padding-inline:0}
+.composition-full{max-width:1440px}.composition-full .section-visual{padding-inline:clamp(1rem,3vw,3rem)}
+.section-visual .chart-frame,.section-visual .diagram-frame{width:100%}.section-visual .chart{height:clamp(320px,42vw,560px)}
+.section-insight{background:var(--card-info-bg)}
 .artifact-footer{max-width:1080px;margin:0 auto;padding:1rem 1.5rem 2rem;font-size:.8rem;color:var(--ink-3)}
 .artifact-footer a{color:inherit}
 .section-card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:var(--section-pad-y) var(--section-pad-x);margin:var(--section-gap) 0}
@@ -100,8 +114,10 @@ p{margin:.6rem 0}
 pre{background:var(--code-bg);padding:.75rem 1rem;overflow:auto;border-radius:10px}
 code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.9em}
 p code,li code,td code{background:var(--code-bg);padding:.1em .35em;border-radius:5px}
-.chart-frame,.diagram-frame{margin:1rem 0}.chart{margin:0;min-height:320px;max-width:100%;overflow:hidden}
+.chart-frame,.diagram-frame{margin:1rem 0}.chart{display:block;width:100%;margin:0;min-height:320px;max-width:100%;overflow:hidden}
 .chart-summary,.diagram-summary{margin:.5rem 0 0;color:var(--ink-2);font-size:.88rem}
+.diagram-frame svg{display:block;width:auto!important;max-width:100%!important;max-height:560px;height:auto!important;margin-inline:auto}
+.visual-frame{display:grid;grid-template-columns:minmax(0,1fr) minmax(12rem,.32fr);gap:1rem;margin:1rem 0;align-items:start}.frame-surface{min-width:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}.frame-bar{display:flex;gap:.75rem;align-items:center;padding:.55rem .8rem;border-bottom:1px solid var(--line);background:var(--card-bg);font-size:.8rem}.frame-bar span{color:var(--ink-3);letter-spacing:.15em}.frame-content{min-height:12rem;margin:0;border-radius:0;white-space:pre-wrap}.frame-annotations{margin:0;padding-inline-start:1.6rem;border-inline-start:2px solid var(--accent)}.frame-annotations li{margin:0 0 .75rem}.visual-frame figcaption{grid-column:1/-1;color:var(--ink-2);font-size:.88rem}.frame-media .frame-content{font-family:var(--artifact-font);font-size:1rem;display:flex;align-items:center;justify-content:center;text-align:center}.frame-code .frame-content{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .chart-error{padding:.75rem 1rem;border:1px solid var(--bad);border-radius:10px;color:var(--bad);background:var(--bad-bg);margin:1rem 0}
 table{border-collapse:collapse;width:100%;margin:1rem 0;font-size:.92rem}
 th{text-align:start;background:var(--code-bg);font-weight:600}
@@ -171,7 +187,7 @@ li.task input{margin-inline-end:.45rem;accent-color:var(--accent)}
 .copy-btn{background:var(--accent);color:var(--accent-ink);border:none;border-radius:8px;padding:.45rem 1rem;font-size:.85rem;font-weight:600;cursor:pointer}
 .copy-btn:hover{filter:brightness(1.08)}
 .copy-note{font-size:.8rem;color:var(--good)}
-pre.mermaid{background:var(--card-bg);border:1px solid var(--line);border-radius:10px;padding:1rem;text-align:center}
+pre.mermaid{display:grid;place-items:center;min-height:clamp(240px,42vw,560px);background:var(--card-bg);border:1px solid var(--line);border-radius:10px;padding:1rem;text-align:center}
 .section-card pre.mermaid{background:var(--page-bg)}
 .decisions{margin:1.25rem 0}
 .decisions-title{font-weight:700;font-size:1.05rem;margin-bottom:.75rem}
@@ -234,7 +250,7 @@ th[data-dir="desc"] .th-sort::after{content:"↓";opacity:1;color:var(--accent)}
 .card .icon{font-size:1.6rem}
 .gallery-empty{color:var(--ink-3);text-align:center;padding:3rem 0}
 :focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-@media (max-width:600px){.artifact-header{padding:.75rem 1rem}.artifact-body{--body-pad:1rem;--body-pad-bottom:2rem}.section-card{--section-pad-y:1rem;--section-pad-x:1rem}.tl-item{gap:.55rem}.tl-time{width:3.6rem}.comments-dock,.comment-form{inset-inline:1rem;width:auto}.stat-grid,.compare-grid{grid-template-columns:1fr}}
+@media (max-width:600px){.artifact-header{padding:.75rem 1rem}.artifact-body{--body-pad:1rem;--body-pad-bottom:2rem}.section-card{--section-pad-y:1rem;--section-pad-x:1rem}.tl-item{gap:.55rem}.tl-time{width:3.6rem}.comments-dock,.comment-form{inset-inline:1rem;width:auto}.stat-grid,.compare-grid{grid-template-columns:1fr}.composition-split{display:block}.composition-split .section-card{margin:var(--section-gap) 0}.section-visual .chart{height:clamp(280px,100vw,420px)}.visual-frame{grid-template-columns:1fr}.frame-annotations{border-inline-start:0!important;border-block-start:1px solid var(--line);padding-inline-start:0!important;padding-block-start:.75rem}}
 @media (max-width:700px){.comments-dock{position:static;margin:1rem;max-width:none;width:auto}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 @page{margin:15mm}@media print{body{background:#fff;color:#000}.skip-link,.theme-toggle,.copy-btn,.copy-note,.table-filter,.comments-dock,.comment-pop,.comment-launcher,.comment-form{display:none!important}.section-card,.stat,.variant,.card,.finding,.callout{box-shadow:none!important;break-inside:avoid;border:1px solid #bbb}.chart-frame,.diagram-frame,.table-wrap{break-inside:avoid}.table-scroll{overflow:visible}.data-table{font-size:9pt}a{color:inherit;text-decoration:underline}}`;
@@ -321,7 +337,21 @@ const BOOT = `(function () {
   if (window.mermaid && mermaidEls.length > 0) {
     var dark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
     window.mermaid.initialize({ startOnLoad: false, theme: dark ? "dark" : "neutral" });
-    Promise.resolve(window.mermaid.run({ nodes: mermaidEls })).catch(function (err) {
+    Promise.resolve(window.mermaid.run({ nodes: mermaidEls })).then(function () {
+      mermaidEls.forEach(function (el) {
+        var svg = el.querySelector("svg");
+        if (!svg || typeof svg.getBBox !== "function") return;
+        try {
+          var bounds = svg.getBBox();
+          var pad = 16;
+          if (bounds.width > 0 && bounds.height > 0) {
+            svg.setAttribute("viewBox", [bounds.x - pad, bounds.y - pad, bounds.width + pad * 2, bounds.height + pad * 2].join(" "));
+            svg.setAttribute("width", "100%");
+            svg.removeAttribute("height");
+          }
+        } catch (_) {}
+      });
+    }).catch(function (err) {
       mermaidEls.forEach(function (el) {
         if (el.querySelector("svg")) return;
         el.textContent = "";
@@ -741,12 +771,21 @@ function enhanceBodyHtml(html: string): string {
   return out;
 }
 
-function wrapSections(html: string): string {
+function wrapSections(html: string, composition?: CompositionKind): string {
   const chunks = html.split(/(?=<h2\b)/);
   if (chunks.length < 2) return html;
   const [intro, ...sections] = chunks;
-  const wrapped = sections.map((chunk) => `<section class="section-card">${chunk}</section>`);
-  return [intro, ...wrapped].join("\n");
+  const wrapped = sections.map((chunk) => {
+    const classes = ["section-card"];
+    if (/class="(?:chart-frame|diagram-frame|visual-frame)/.test(chunk)) classes.push("section-visual");
+    if (chunk.includes('class="table-wrap"')) classes.push("section-data");
+    if (chunk.includes('class="callout')) classes.push("section-insight");
+    return `<section class="${classes.join(" ")}">${chunk}</section>`;
+  });
+  const leading = composition !== undefined && composition !== "standard" && intro.trim() !== ""
+    ? `<div class="artifact-intro">${intro}</div>`
+    : intro;
+  return [leading, ...wrapped].join("\n");
 }
 
 export function emojiFaviconDataUri(icon: string): string {
@@ -761,6 +800,7 @@ export function validateChartSpec(chart: ChartSpec): ResolvedChart & { code?: st
     const record = typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
       ? parsed as Record<string, unknown>
       : undefined;
+    if (record === undefined) return { kind, code: `${chart.kind}-invalid`, error: "chart spec must be an object" };
     const description = record?.["description"];
     if (typeof description !== "string" || description.trim().length < 8) {
       return { kind, code: "chart-summary-missing", error: "chart needs a meaningful text description" };
@@ -768,7 +808,13 @@ export function validateChartSpec(chart: ChartSpec): ResolvedChart & { code?: st
     const summary = description.trim();
     if (kind === "echarts") return { kind, spec: parsed, summary };
     if (chart.kind === "vega-lite") {
-      const compiled = compileVegaLite(parsed as Parameters<typeof compileVegaLite>[0]);
+      const responsive = {
+        ...record,
+        width: record["width"] ?? "container",
+        height: record["height"] ?? "container",
+        autosize: record["autosize"] ?? { type: "fit", contains: "padding" },
+      };
+      const compiled = compileVegaLite(responsive as Parameters<typeof compileVegaLite>[0]);
       return { kind, spec: compiled.spec, summary };
     }
     return { kind, spec: parsed, summary };
@@ -796,6 +842,7 @@ interface AssembleInput {
   assetCss?: string;
   designTokens?: ResolvedDesignTokens;
   locale: LocaleContext;
+  composition?: CompositionKind;
 }
 
 function assemblePage(input: AssembleInput): string {
@@ -839,7 +886,7 @@ function assemblePage(input: AssembleInput): string {
     "<body>",
     '<a class="skip-link" href="#artifact-main">Skip to main content</a>',
     `<header class="artifact-header"><span class="artifact-icon" aria-hidden="true">${escapeHtmlText(input.icon)}</span><h1>${escapeHtmlText(input.title)}</h1></header>`,
-    `<main id="artifact-main" class="artifact-body" tabindex="-1">${input.bodyHtml}</main>`,
+    `<main id="artifact-main" class="artifact-body${input.composition === undefined || input.composition === "standard" ? "" : ` composition-${input.composition}`}" tabindex="-1">${input.bodyHtml}</main>`,
     FOOTER_PLACEHOLDER,
   ];
 
@@ -895,7 +942,7 @@ export function renderArtifact(markdown: string, options: RenderOptions = {}): R
     const accessible = `<figure class="chart-frame"><div class="chart" data-chart-index="${index}" role="img" aria-labelledby="${summaryId}"></div><figcaption id="${summaryId}" class="chart-summary">${escapeHtmlText(chart.summary)}</figcaption></figure>`;
     bodyHtml = bodyHtml.replace(placeholder, accessible);
   });
-  bodyHtml = wrapSections(enhanceBodyHtml(bodyHtml));
+  bodyHtml = wrapSections(enhanceBodyHtml(bodyHtml), doc.meta.composition);
 
   const html = assemblePage({
     title: doc.meta.title ?? "Artifact",
@@ -912,6 +959,7 @@ export function renderArtifact(markdown: string, options: RenderOptions = {}): R
       : `@font-face{font-family:"Artifact Project";src:url(${options.assets.font.dataUri}) format("${fontFormat(options.assets.font.mime)}");font-display:swap}:root{--artifact-font:"Artifact Project",system-ui,-apple-system,"Segoe UI",sans-serif;--artifact-heading-font:var(--artifact-font)}`,
     designTokens,
     locale,
+    composition: doc.meta.composition,
   });
   return { html, meta: doc.meta, chartCount: doc.charts.length };
 }

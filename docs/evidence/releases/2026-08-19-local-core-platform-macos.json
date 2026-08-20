@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-19T03:32:34.462Z",
+  "result": "pass",
+  "environment": {
+    "platform": "darwin",
+    "release": "25.5.0",
+    "architecture": "arm64",
+    "node": "v24.18.0",
+    "runnerOs": "macOS",
+    "runnerArchitecture": "ARM64",
+    "runnerImageOs": "macos26",
+    "runnerImageVersion": "20260728.0273.1"
+  },
+  "candidate": {
+    "filename": "opencode-artifacts-0.15.0.tgz",
+    "integrity": "sha512-X9IgvKCHvs1Q5QegNWoBcdId/tIkqlrF0dNSlfSPCCj2Lehrfbl+j4HF2QSVHUNtGFRpGMw6OhDYHLKKARDXfQ==",
+    "shasum": "9dbcd2f6d05e5984c698c97ec9524f0f21a237ef",
+    "size": 126504,
+    "unpackedSize": 543313,
+    "entryCount": 69,
+    "sha256": "6d5d4df63bb2300f438a572fc0af4741b793489bbd630b55070c04987c67badd"
+  },
+  "install": {
+    "source": "exact-local-tarball",
+    "lifecycleScripts": false,
+    "repositorySourceImported": false
+  },
+  "portableOutput": {
+    "sourceFixture": "benchmarks/renderer/v1/no-runtime.md",
+    "bytes": 43589,
+    "sha256": "ada851484b51bae5fe495c0d4d33f72ca3fcdd3faa6cee06c9d25347c72418e4",
+    "strictOfflineCsp": true,
+    "packageTreeRemovedBeforeReopen": true,
+    "byteIdenticalAfterRemoval": true
+  },
+  "claimBoundary": {
+    "technicalObservationOnly": true,
+    "supportedPlatform": false,
+    "browserCoverage": false,
+    "representativeUserEvidence": false
+  }
+}

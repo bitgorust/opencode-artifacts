@@ -1,0 +1,278 @@
+{
+  "schemaVersion": 1,
+  "benchmark": "renderer-cli-v1",
+  "capturedAt": "2026-08-19T03:31:22.814Z",
+  "configPath": "benchmarks/renderer/v1/budgets.json",
+  "configSha256": "bf6961cdb235d513d4e604659bba19cd4fa4f8bbf059998552c5e65cb7a2b90e",
+  "percentileMethod": "nearest-rank",
+  "dependencyInstall": {
+    "includedInTiming": false,
+    "measured": false,
+    "durationMs": null,
+    "reason": "dependencies were preinstalled before the timed harness"
+  },
+  "excludedSetup": [
+    "dependency installation",
+    "TypeScript build",
+    "fixture discovery",
+    "report serialization"
+  ],
+  "environment": {
+    "profile": "renderer-linux-container-v1",
+    "platform": "linux",
+    "arch": "x64",
+    "nodeMajor": 24,
+    "cpuQuotaCores": 2,
+    "memoryLimitBytes": 4294967296,
+    "nodeVersion": "v24.19.0",
+    "cpuModel": "AMD EPYC Processor (with IBPB)",
+    "visibleLogicalCpus": 10,
+    "hostVisibleMemoryBytes": 37831692288,
+    "cgroupCpuMax": "200000 100000",
+    "cgroupMemoryMax": "4294967296"
+  },
+  "expectedEnvironment": {
+    "profile": "renderer-linux-container-v1",
+    "platform": "linux",
+    "arch": "x64",
+    "nodeMajor": 24,
+    "cpuQuotaCores": 2,
+    "memoryLimitBytes": 4294967296
+  },
+  "environmentComparison": {
+    "comparable": true,
+    "mismatches": []
+  },
+  "sampling": {
+    "cliSamples": 12,
+    "browserSamples": 7,
+    "minimumSamples": 5,
+    "noiseFloorMs": 250,
+    "maxRelativeP95Spread": 1
+  },
+  "workloads": {
+    "no-runtime": {
+      "fixture": "no-runtime.md",
+      "fixtureSha256": "53068378d5707429795aaba82f864de5064f139364ec35490104e964bfb2d28b",
+      "sourceBytes": 655,
+      "coldSampleMs": 705.972562,
+      "allSamples": {
+        "samplesMs": [
+          705.972562,
+          711.004126,
+          658.905677,
+          736.834527,
+          814.037327,
+          678.599977,
+          727.815364,
+          717.366399,
+          700.89916,
+          751.414901,
+          808.634222,
+          841.01106
+        ],
+        "count": 12,
+        "minMs": 658.905677,
+        "maxMs": 841.01106,
+        "p50Ms": 717.366399,
+        "p95Ms": 841.01106,
+        "relativeP95Spread": 0.1723591475323617,
+        "disposition": "stable",
+        "reasons": []
+      },
+      "warmSamples": {
+        "samplesMs": [
+          711.004126,
+          658.905677,
+          736.834527,
+          814.037327,
+          678.599977,
+          727.815364,
+          717.366399,
+          700.89916,
+          751.414901,
+          808.634222,
+          841.01106
+        ],
+        "count": 11,
+        "minMs": 658.905677,
+        "maxMs": 841.01106,
+        "p50Ms": 727.815364,
+        "p95Ms": 841.01106,
+        "relativeP95Spread": 0.15552803856446207,
+        "disposition": "stable",
+        "reasons": []
+      },
+      "timeBudget": {
+        "limitMs": 2000,
+        "p95Ms": 841.01106,
+        "pass": true,
+        "reasons": []
+      },
+      "bytes": {
+        "finalBytes": 43589,
+        "runtimeBytes": 0,
+        "assetBytes": 0,
+        "shellAndContentBytes": 43589,
+        "outputSha256": "ada851484b51bae5fe495c0d4d33f72ca3fcdd3faa6cee06c9d25347c72418e4",
+        "budget": {
+          "totalBytes": 43589,
+          "warningBytes": 131072,
+          "hardBytes": 196608,
+          "remainingToHardBytes": 153019,
+          "status": "pass"
+        }
+      },
+      "pass": true
+    },
+    "one-chart": {
+      "fixture": "one-chart.md",
+      "fixtureSha256": "9e2db7cd4b9ffd197baeb1eb539df779dadca192002769fedbe361e934192e26",
+      "sourceBytes": 664,
+      "coldSampleMs": 770.679741,
+      "allSamples": {
+        "samplesMs": [
+          770.679741,
+          779.531452,
+          785.314665,
+          747.546784,
+          794.803203,
+          839.491337,
+          716.260938,
+          807.993265,
+          724.687316,
+          746.482942,
+          735.555965,
+          759.237563
+        ],
+        "count": 12,
+        "minMs": 716.260938,
+        "maxMs": 839.491337,
+        "p50Ms": 759.237563,
+        "p95Ms": 839.491337,
+        "relativeP95Spread": 0.10570311311111989,
+        "disposition": "stable",
+        "reasons": []
+      },
+      "warmSamples": {
+        "samplesMs": [
+          779.531452,
+          785.314665,
+          747.546784,
+          794.803203,
+          839.491337,
+          716.260938,
+          807.993265,
+          724.687316,
+          746.482942,
+          735.555965,
+          759.237563
+        ],
+        "count": 11,
+        "minMs": 716.260938,
+        "maxMs": 839.491337,
+        "p50Ms": 759.237563,
+        "p95Ms": 839.491337,
+        "relativeP95Spread": 0.10570311311111989,
+        "disposition": "stable",
+        "reasons": []
+      },
+      "timeBudget": {
+        "limitMs": 5000,
+        "p95Ms": 839.491337,
+        "pass": true,
+        "reasons": []
+      },
+      "bytes": {
+        "finalBytes": 625792,
+        "runtimeBytes": 581244,
+        "assetBytes": 0,
+        "shellAndContentBytes": 44548,
+        "outputSha256": "1d2e1462a17504db7be231759b04dcc36a92dd171333c43247f3fa718e72bfce",
+        "budget": {
+          "totalBytes": 625792,
+          "warningBytes": 1048576,
+          "hardBytes": 1572864,
+          "remainingToHardBytes": 947072,
+          "status": "pass"
+        }
+      },
+      "pass": true
+    },
+    "multi-runtime": {
+      "fixture": "multi-runtime.md",
+      "fixtureSha256": "bd9ed6d6f370ccc67fadb6b5d44b9a9c1d9c66107f4336de9be283d31b0e9b14",
+      "sourceBytes": 1120,
+      "coldSampleMs": 933.558896,
+      "allSamples": {
+        "samplesMs": [
+          933.558896,
+          855.67667,
+          854.782784,
+          873.968357,
+          899.392954,
+          1002.595461,
+          846.008819,
+          984.282634,
+          891.419368,
+          946.232175,
+          1286.465401,
+          940.580466
+        ],
+        "count": 12,
+        "minMs": 846.008819,
+        "maxMs": 1286.465401,
+        "p50Ms": 899.392954,
+        "p95Ms": 1286.465401,
+        "relativeP95Spread": 0.4303707798449129,
+        "disposition": "stable",
+        "reasons": []
+      },
+      "warmSamples": {
+        "samplesMs": [
+          855.67667,
+          854.782784,
+          873.968357,
+          899.392954,
+          1002.595461,
+          846.008819,
+          984.282634,
+          891.419368,
+          946.232175,
+          1286.465401,
+          940.580466
+        ],
+        "count": 11,
+        "minMs": 846.008819,
+        "maxMs": 1286.465401,
+        "p50Ms": 899.392954,
+        "p95Ms": 1286.465401,
+        "relativeP95Spread": 0.4303707798449129,
+        "disposition": "stable",
+        "reasons": []
+      },
+      "timeBudget": {
+        "limitMs": 5000,
+        "p95Ms": 1286.465401,
+        "pass": true,
+        "reasons": []
+      },
+      "bytes": {
+        "finalBytes": 5314981,
+        "runtimeBytes": 5269229,
+        "assetBytes": 0,
+        "shellAndContentBytes": 45752,
+        "outputSha256": "82cae547e5005e9c3fdaa4dec385e1b62f155203550b668bcdab6316a87bf665",
+        "budget": {
+          "totalBytes": 5314981,
+          "warningBytes": 6291456,
+          "hardBytes": 8388608,
+          "remainingToHardBytes": 3073627,
+          "status": "pass"
+        }
+      },
+      "pass": true
+    }
+  },
+  "pass": true
+}

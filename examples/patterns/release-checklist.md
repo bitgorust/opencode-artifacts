@@ -1,6 +1,8 @@
 ---
 title: Release 2.14 checklist
 icon: ✅
+composition: quiet
+source: Synthetic release plan, captured 2026-08-18
 ---
 
 ```progress

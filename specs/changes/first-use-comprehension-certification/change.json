@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "first-use-comprehension-certification",
+  "title": "Certify first-use comprehension",
+  "lane": "standard",
+  "status": "approved",
+  "affectedRequirements": [
+    "OUT-02",
+    "OUT-03",
+    "OUT-05",
+    "COMPAT-01",
+    "QUAL-08"
+  ],
+  "currentSpecs": [
+    "specs/current/journey-evidence.spec.md",
+    "specs/current/governance-policy.spec.md"
+  ],
+  "currentSpecsUpdated": false,
+  "approval": {
+    "by": "aaron.zeng",
+    "at": "2026-08-18T15:22:56Z"
+  },
+  "withdrawal": {
+    "by": "",
+    "at": "",
+    "reason": ""
+  },
+  "createdAt": "2026-08-18",
+  "archivedAt": null
+}

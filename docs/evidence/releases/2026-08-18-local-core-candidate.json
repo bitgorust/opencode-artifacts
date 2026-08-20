@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "recordId": "local-core-2026-08-18-candidate",
+  "level": "local-artifact-core",
+  "decision": "pending",
+  "candidate": {
+    "status": "frozen",
+    "commit": "84f866ed742eeb08ba668115342ef0e5896dead7",
+    "version": "0.15.0",
+    "tarball": "opencode-artifacts-0.15.0.tgz",
+    "sha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+    "sri": "sha512-ErzQBzSxNz/nuxsTfwi5uozrJvK5joo7c6SyHeWz9THM49ETSY5PajdrxdfXq0J86lGAK4HdahCKyEo1gPIjKA==",
+    "corpusVersions": { "pageQuality": "page-quality-v1", "journey": 1 }
+  },
+  "requirements": [
+    {
+      "id": "code-tests", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
+        "owner": "GitHub Actions run 32161443356", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Install, build, 255 tests, structural assertions, and exact-candidate evidence generation.",
+        "environment": "GitHub ubuntu-latest, Node 24, npm latest"
+      }]
+    },
+    {
+      "id": "package-host",
+      "status": "pass",
+      "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-host-matrix.json",
+        "date": "2026-08-18",
+        "owner": "Goal 5 local evidence run",
+        "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Clean temporary install, stable OpenCode discovery, tool schemas, read-only packed smoke, and skill discovery.",
+        "environment": "Linux x64, Node 24, OpenCode stable 1.18.18"
+      }]
+    },
+    {
+      "id": "browser-accessibility", "status": "pending", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/page-quality/2026-08-18-local-composition.md", "date": "2026-08-18",
+        "owner": "Goal 5 automated browser run", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Sixteen Chromium desktop/mobile/mode cells; manual screen-reader review remains missing.",
+        "environment": "Linux x64, Chromium 151"
+      }]
+    },
+    {
+      "id": "migrations", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
+        "owner": "GitHub Actions run 32161443356", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Schema, lifecycle, migration, rollback, fault-boundary, and transaction tests in the complete suite.",
+        "environment": "GitHub ubuntu-latest, Node 24"
+      }]
+    },
+    {
+      "id": "security-privacy", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
+        "owner": "GitHub Actions run 32161443356", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Adversarial renderer, path, permission, secret-scan, CSP, governance, and privacy-policy checks.",
+        "environment": "GitHub ubuntu-latest, Node 24"
+      }]
+    },
+    {
+      "id": "performance", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-performance.md", "date": "2026-08-18",
+        "owner": "Goal 5 constrained benchmark run", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Three renderer workloads, 36 CLI samples, 42 fresh-profile browser samples, time and byte budgets.",
+        "environment": "Linux x64, Node 24.19.0, Chromium 151, 2 cores, 4 GiB"
+      }]
+    },
+    {
+      "id": "support-matrix", "status": "pending", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-19-local-core-platform-linux.json", "date": "2026-08-19",
+        "owner": "Goal 5 clean packed-platform smoke", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Linux clean tarball install, installed CLI render, strict offline CSP, package-tree removal, and byte-identical reopen. Browser, representative-user, and support claims are excluded.",
+        "environment": "Linux 6.8.0-137-generic x64, Node 24.19.0"
+      }]
+    },
+    { "id": "page-quality", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "first-use", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    { "id": "comprehension", "status": "pending", "applicabilityReason": null, "evidence": [] },
+    {
+      "id": "audit-license-sbom", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
+        "owner": "GitHub Actions run 32161443356", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Zero-vulnerability audit, 217-entry license inventory/dispositions, 211-component CycloneDX SBOM, dependency signatures and attestations.",
+        "environment": "GitHub ubuntu-latest, Node 24, npm latest"
+      }]
+    },
+    {
+      "id": "integrity-provenance", "status": "pending", "applicabilityReason": null,
+      "evidence": [
+        {
+          "path": "docs/evidence/releases/2026-08-18-local-core-ci.md", "date": "2026-08-18",
+          "owner": "GitHub Actions run 32161443356", "result": "pass",
+          "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+          "scope": "Reproducible pack digest and CI in-toto subject; no registry publication/signature/readback for this candidate.",
+          "environment": "GitHub ubuntu-latest, Node 24, npm latest"
+        },
+        {
+          "path": "docs/evidence/releases/2026-08-18-local-core-consumer-verification.md", "date": "2026-08-18",
+          "owner": "Goal 5 consumer-verification run", "result": "pass",
+          "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+          "scope": "Two byte-identical packs, SHA-256, npm shasum, SRI, archive shape, and offline verification procedure; registry readback remains absent.",
+          "environment": "Linux x64, Node 24.19.0, two isolated npm caches"
+        }
+      ]
+    },
+    {
+      "id": "claims-rollback", "status": "pass", "applicabilityReason": null,
+      "evidence": [{
+        "path": "docs/evidence/releases/2026-08-18-local-core-claims.md", "date": "2026-08-18",
+        "owner": "Goal 5 claim and rollback audit", "result": "pass",
+        "candidateSha256": "f6d5d5dcdd74ac31522ec9a98acfb38a04c1a4a038c09e65d85d7f4813342bf2",
+        "scope": "Exact packaged/public claim surfaces, fail-closed certification, pre-release refusal, and zero-mutation rollback procedure.",
+        "environment": "Frozen candidate archive and repository policy surfaces"
+      }]
+    }
+  ],
+  "signoffs": [
+    { "role": "release", "status": "pending", "by": null, "at": null },
+    { "role": "security", "status": "pending", "by": null, "at": null },
+    { "role": "support", "status": "pending", "by": null, "at": null }
+  ],
+  "blockers": [
+    "Manual screen-reader review of the new composition behavior is absent.",
+    "Authorized current Claude same-input runs and retention disposition are absent.",
+    "Three independent benchmark reviewers are absent.",
+    "Representative-user first-use and comprehension records are absent.",
+    "The exact claimed support matrix is incomplete.",
+    "Accountable release, security, and support sign-offs are absent."
+  ],
+  "claims": {
+    "certification": false,
+    "equalOrBetter": false,
+    "supportedPlatformIds": []
+  },
+  "providerMutationCount": 0
+}

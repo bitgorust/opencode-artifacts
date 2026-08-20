@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-19T03:38:03.943Z",
+  "browser": "Chromium 151 via selenium/standalone-chromium",
+  "fixture": "http://127.0.0.1:4173/findings-table.html",
+  "requested": {
+    "width": 390,
+    "height": 844,
+    "colorScheme": "dark",
+    "reducedMotion": true
+  },
+  "usefulContentMs": 1072,
+  "ready": true,
+  "keyboard": {
+    "firstTab": {
+      "className": "skip-link",
+      "tag": "A",
+      "text": "Skip to main content"
+    },
+    "table": {
+      "direction": "ascending",
+      "label": "Package"
+    }
+  },
+  "observations": {
+    "chartGeometry": [],
+    "clippedText": [],
+    "colorScheme": "dark",
+    "composition": "composition-dense",
+    "diagramGeometry": [],
+    "documentHorizontalOverflow": false,
+    "headings": [
+      "Dependency license audit",
+      "Copyleft findings",
+      "All production dependencies"
+    ],
+    "interactive": {
+      "buttons": 6,
+      "radios": 0,
+      "ranges": 0
+    },
+    "layoutShift": 0,
+    "mainHorizontalOverflow": false,
+    "readyState": "complete",
+    "reducedMotion": true,
+    "renderErrors": [],
+    "sections": [
+      {
+        "classes": "section-card",
+        "heading": "Copyleft findings",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 343
+      },
+      {
+        "classes": "section-card section-data",
+        "heading": "All production dependencies",
+        "utilization": null,
+        "visualWidth": null,
+        "width": 343
+      }
+    ],
+    "viewport": {
+      "devicePixelRatio": 1,
+      "height": 701,
+      "width": 390
+    }
+  },
+  "accessibilityTree": [
+    {
+      "role": "RootWebArea",
+      "name": "Dependency license audit"
+    },
+    {
+      "role": "banner",
+      "name": ""
+    },
+    {
+      "role": "main",
+      "name": ""
+    },
+    {
+      "role": "heading",
+      "name": "Dependency license audit"
+    },
+    {
+      "role": "button",
+      "name": "Theme: system. Activate to switch."
+    },
+    {
+      "role": "heading",
+      "name": "Copyleft findings"
+    },
+    {
+      "role": "heading",
+      "name": "All production dependencies"
+    },
+    {
+      "role": "status",
+      "name": ""
+    },
+    {
+      "role": "table",
+      "name": "npm ls --omit=dev"
+    },
+    {
+      "role": "caption",
+      "name": ""
+    },
+    {
+      "role": "button",
+      "name": "Sort by Package"
+    },
+    {
+      "role": "button",
+      "name": "Sort by Version"
+    },
+    {
+      "role": "button",
+      "name": "Sort by License"
+    },
+    {
+      "role": "button",
+      "name": "Sort by Deps"
+    },
+    {
+      "role": "button",
+      "name": "Sort by Size KB"
+    }
+  ],
+  "browserLogs": [],
+  "requestUrls": [
+    "http://127.0.0.1:4173/findings-table.html"
+  ],
+  "externalHttpRequests": []
+}

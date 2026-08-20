@@ -47,7 +47,7 @@ Evidence from the repository and clean local host probes:
 | Stable OpenCode plugin registration | Shipped | [Local host probe](evidence/opencode-host-verification.md): clean OpenCode processes loaded this checkout and the published 0.14.3 package and returned all four artifact tools |
 | Claude reference audit | Verified with auth boundary | [Claude host probe](evidence/claude-code-host-verification.md): current official Artifact references were audited and native 2.1.233 was installed/inspected; claude.ai publishing remains untested because the host is not signed in |
 | Markdown/declarative rendering | Shipped | component, Markdown, render, CSP, and browser evidence suites |
-| Equal-or-better page quality | Unverified | pattern screenshots exist, but there is no authenticated same-input Claude corpus or blinded benchmark; the current dashboard also exposes fixed-size chart/dead-space composition gaps |
+| Equal-or-better page quality | Unverified | the refrozen local renderer track passes all 16 responsive composition cells, but there is no authorized same-input Claude corpus or blinded reviewer benchmark |
 | Offline self-contained page | Shipped | conditional inlined runtimes, strict on-disk CSP, 15 MiB final-write cap |
 | Local gallery/live preview | Shipped | manifest/gallery tests and `serve` SSE tests |
 | Identity and immutable lifecycle | Partial | slug is title-derived; history is opt-in; lock is process-local; writes are not one crash-safe transaction |
@@ -213,9 +213,10 @@ OpenCode meets or exceeds Claude's median in every rubric dimension while scorin
 Status: **Goal 3's Phase 2 correctness track passed on 2026-08-18**. The portable asset,
 declarative preflight, bounded design-token, accessibility/internationalization, and renderer
 performance packets are archived with offline browser, keyboard/mobile-width, manual
-screen-reader, byte-boundary, and percentile evidence. Phase 2 as a whole remains incomplete:
-the corpus expansion and comparative-quality work in items 8–12, including authorized Claude
-runs and independent reviewers, belongs to Goal 5 and retains its external-input blockers.
+screen-reader, byte-boundary, and percentile evidence. Goal 5's refrozen candidate now passes
+the eight-task local responsive-composition track, resolving the prior fixed-size/dead-space
+defect. Phase 2 as a whole remains incomplete: independent corpus review, a fresh composition
+screen-reader run, authorized Claude runs, and independent benchmark reviewers remain external inputs.
 
 ## Phase 3 — Native OpenCode lifecycle
 
