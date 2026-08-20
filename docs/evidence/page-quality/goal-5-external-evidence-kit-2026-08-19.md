@@ -17,7 +17,9 @@ amended, reapproved where required, and the affected evidence is rerun.
 ## 1. Account and retention authorization
 
 Authenticate interactively on the VPS; never paste credentials into chat, git, a command-line
-argument, or an evidence file. Confirm authorization with these non-secret fields:
+argument, or an evidence file. Keep raw comparison material in the repository-local,
+gitignored `.goal5-private/` directory with directory mode `0700` and file mode `0600`; do not
+use an unignored `private/` directory. Confirm authorization with these non-secret fields:
 
 ```text
 authorizedBy: <accountable actor>
@@ -35,12 +37,12 @@ of at least 32 random bytes:
 
 ```sh
 npm run quality:benchmark -- prepare \
-  private/generation-run.json private/blinding-seed \
-  private/paired-run.json private/reviewer-packet.json
+  .goal5-private/generation-run.json .goal5-private/blinding-seed \
+  .goal5-private/paired-run.json .goal5-private/reviewer-packet.json
 ```
 
-The command refuses existing outputs. `paired-run.json` contains the private system mapping;
-only `reviewer-packet.json` may go to reviewers. Its 24 A/B pairs contain neutral
+The command refuses existing outputs. `.goal5-private/paired-run.json` contains the private
+system mapping; only `reviewer-packet.json` may go to reviewers. Its 24 A/B pairs contain neutral
 `blinded://...` resource names and empty score forms. The coordinator stages the corresponding
 desktop, mobile, and interaction resources under those neutral names without exposing source
 paths, generation IDs, the seed, or the private mapping.
@@ -82,7 +84,7 @@ rounded, copied between reviewers, or omitted. The coordinator merges scores int
 paired run, validates it, and retains the complete distribution:
 
 ```sh
-npm run quality:benchmark -- private/paired-run-with-scores.json
+npm run quality:benchmark -- .goal5-private/paired-run-with-scores.json
 ```
 
 ## 4. Goal 5 manual screen-reader checklist
@@ -133,9 +135,9 @@ not the command line:
 
 ```sh
 WEBDRIVER_ENDPOINT='<private endpoint>' \
-WEBDRIVER_CAPABILITIES_FILE='private/provider-capabilities.json' \
+WEBDRIVER_CAPABILITIES_FILE='.goal5-private/provider-capabilities.json' \
 node scripts/support-browser-smoke.ts \
-  --url '<VPS page URL>' --report private/result.json --screenshot private/result.png \
+  --url '<VPS page URL>' --report .goal5-private/result.json --screenshot .goal5-private/result.png \
   --browser firefox --browser-version '<exact version>' --platform '<exact platform>' \
   --width 1440 --height 900
 ```
